@@ -18,7 +18,13 @@
             <small>{{ site.tagline }}</small>
           </h3>
         </div>   
-        <div class="container">
+      </div>
+
+      <div class="container content">
+         {{ content }}
+         {% include comments.html %}
+      </div>
+      <div class="container">
           <script>
              (function() {
                var cx = '011930802763043798704:lhyxiny47iq';
@@ -32,13 +38,7 @@
              })();
           </script>
           <gcse:search></gcse:search>
-        </div>  
-      </div>
-
-      <div class="container content">
-         {{ content }}
-         {% include comments.html %}
-      </div>
+       </div>  
     </div>
 
     <label for="sidebar-checkbox" class="sidebar-toggle"></label>
