@@ -17,7 +17,7 @@ url:                 http://ghuiber.github.io
 baseurl:             /
 paginate:            5
 github:                     
-  repo:              ghuiber/ghuiber.github.io
+  repo:              https://github.com/ghuiber/ghuiber.github.io
 
 # About/contact
 author:
