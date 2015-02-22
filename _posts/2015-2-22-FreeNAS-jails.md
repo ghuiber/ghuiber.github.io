@@ -4,7 +4,7 @@ title: More about FreeNAS jails
 tags:
 - FreeNAS
 ---
-My first attempt to upload a large tarball to Glacier was a success, as described [here](http://ghuiber.github.io/FreeNAS-to-Glacier/), but subsequent ones failed. The reason, I suspect, is that the FreeNAS server is headless. I get shell access to its jails in a browser tab from one of the Mac clients. If I launch a slow upload and I close the browser or the client goes to sleep while the upload is in progress, the shell session terminates and the upload is aborted.
+My first attempt to upload a large tarball to Glacier was a success, as described [here](http://ghuiber.github.io/2015/2/22/FreeNAS-to-Glacier/), but subsequent ones failed. The reason, I suspect, is that the FreeNAS server is headless. I get shell access to its jails in a browser tab from one of the Mac clients. If I launch a slow upload and I close the browser or the client goes to sleep while the upload is in progress, the shell session terminates and the upload is aborted.
 
 The solution seems to be to run these shell sessions in [`tmux`](http://tmux.sourceforge.net/). I have completed a second upload -- pics2012.tgz, weighing in at 1.4G -- in a `tmux` session that persisted through two browser shutdowns and one client sleep session, returning to work as expected with `tmux attach` every time. 
 
