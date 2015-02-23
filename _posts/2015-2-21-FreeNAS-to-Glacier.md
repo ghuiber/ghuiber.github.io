@@ -26,9 +26,15 @@ There you have it. As of this writing, that 2G upload is in progress, off the `a
 ### The next day
 
 The upload completed and the `iPhotoGabi` vault now shows two items and a total size of 2.04GiB. One of the two items may be a small pdf I uploaded just for testing. To get a listing of what exactly is in a vault is a two-step process: first you initiate an inventory retrieval job, then you wait. When the retrieval job completes you can collect the output. You know that the job completed when status in the response to 
-`$ aws glacier --account-id='-' --vault-name='iPhotoGabi' list-jobs` changes from `InProgress` to `Succeeded`. 
 
-That response contains one line per job, and in each line there is a very long alphanumeric string which is the unique job ID. That's the one to pass in the command 
+```
+$ aws glacier --account-id='-' --vault-name='iPhotoGabi' list-jobs
+``` 
+
+changes from `InProgress` to `Succeeded`. 
+
+That response contains one line per job, and in each line there is a very long alphanumeric string which is the unique job ID. That's the one to pass in the command
+ 
 ```
 $ aws glacier --account-id='-' --vault-name='iPhotoGabi' --job-id="longstringhere" get-job-output output.json
 ```
@@ -38,6 +44,7 @@ The file `output.json` in the working directory contains a JSON object that list
 The directions for this are on [Reddit](http://www.reddit.com/r/aws/comments/2ujfoh/any_tools_for_generating_a_list_filetxtcsv_or/).
 
 Before this retrieval job completes there's not much I can do, but using the syntax in the examples on that same Reddit thread, I can at least describe my vault:
+
 ```
 $ aws glacier --account-id='-' --vault-name='iPhotoGabi' describe-vault
 ```
