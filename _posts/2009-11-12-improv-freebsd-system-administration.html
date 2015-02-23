@@ -1,0 +1,26 @@
+---
+layout: post
+title: Improv FreeBSD system administration
+date: 2009-11-12 11:34:37.000000000 -05:00
+categories:
+- FreeBSD
+tags:
+- portaudit
+- portupgrade
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/3QdJE8
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>One drawback of a system that's giving you very little trouble is that between bouts of fixing whatever does occasionally go wrong you forget what you're supposed to do. We should all be this lucky, but it's still an annoyance.</p>
+<p>FreeBSD, for example, will sometimes turn up a damaged package or two in response to <code>#portaudit</code>. The procedure for that, according to the <a href="http://www.freebsd.org/doc/en/books/handbook/ports-using.html">relevant chunk</a> of the FreeBSD Handbook is that you <em>only need</em> <code>#portsnap extract</code> when you run <code>#portsnap fetch</code> <em>for the first time</em>. After that, you already have a ports tree on your system, and all you need is <code>#portsnap update</code>.</p>
+<p>Had I remembered that, I wouldn't be sitting here writing this post while my ports tree is rebuilding itself for no good reason. On the same topic (of things to remember): according to the same FreeBSD Handbook, I should run <code>#pkgdb -F</code> once in a while, pretty much before every <code>#portupgrade</code>. An overview of what that does is <a href="http://www.math.colostate.edu/~reinholz/freebsd/pkgdb_F.html">here</a>.</p>

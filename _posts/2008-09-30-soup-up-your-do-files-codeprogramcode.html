@@ -1,0 +1,63 @@
+---
+layout: post
+title: 'Soup up your do-files: program'
+date: 2008-09-30 12:25:51.000000000 -04:00
+categories:
+- Stata
+tags:
+- do-files
+- program
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/c0xvz2
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Most Stata commands are programs written in Stata's ado-file language; they are saved as .ado files that you are free to browse. For example, on my Windows XP machine the guts of the simple <code>describe</code> command are here: C:\Program Files\Stata10\ado\base\d\describe.ado.</p>
+<p>Stata will let you write your own ado-files and treat them as first-class citizens of your Stata install. But: (1) Stata is a very accomplished piece of software right out of the box, (2) it is updated scrupulously and as often as needed and (3) there are already thousands of user-created commands tried and true and ready to <code>net install</code>. So, it rarely warrants that sort of effort. Though this general assurance might not deter you from giving it a try, chances are that you're not an ado-file writer. You use do-files instead.</p>
+<p>Do-files can get unwieldy with complicated projects. Yet the more complicated the job, the more useful your do-files are, because they organize your work and maintain your paper-trail. There is no reproducible research without do-files. This is so important that the fact that you can work with Stata interactively is sometimes argued to be too much of a good thing.</p>
+<p>So you need do-files and you don't want them to be too big. One way to make that compromise is to use hierarchical do-files. A very short master do-file calls the others, each of which is just a list of commands that could have just as well been all in one file. Your master do-file might look something like this:</p>
+<p><code>clear<br />
+set more off<br />
+pause on<br />
+</code><code><br />
+cd c:/data/myproject<br />
+do collect_data.do   // insheets data from source text files<br />
+do estimate_model.do // runs my clever ML routine<br />
+do write_report.do   // that's right, from Stata to LaTeX<br />
+</code></p>
+<p>This would do the job, and inline comments as shown above can add intuitive appeal beyond what you get from simply using good do-file names. But if you need to run a do-file inside a loop, there is a certain cost to reading every single line of Stata code every time it needs to be executed. It would be nice if you could read it in once, and invoke it as needed. That's the use of <code>program</code>.</p>
+<p>Usually, do-files are just text files full of Stata commands. Stata reads, interprets and executes these commands one by one. But any do-file can be turned into a program with three extra lines as follows:</p>
+<p><code>capture program drop myProgram // this is optional, but you want it<br />
+program define myProgram<br />
+</code><code><br />
+[...] // your old do-file goes here<br />
+</code><code><br />
+end<br />
+</code></p>
+<p>This doesn't mean that all do-files should get the <code>program</code> treatment. But suppose that you have a do-file called clean_my_data.do and you use it for preparing 20 source files in the same way -- generate new variables, turn dates from yy/mm/dd into Stata's elapsed time format, etc. Without these three extra lines, your master do-file would call it like so:</p>
+<p><code>forvalues i=1/20 {<br />
+drop _all<br />
+use mysourcefile`i'<br />
+do clean_my_data.do<br />
+}<br />
+</code></p>
+<p>That's fine, but it will be a bit slow. Every line in clean_my_data.do is read afresh in every cycle, output to screen, then executed, its result is output to screen, and so on. Declaring this do-file as a <code>program</code> allows Stata to read it once, keep it in mind, and execute it as many times as needed. You will, of course, choose some descriptive name for your program, say cleanMyData. Your master do-file will look like this:</p>
+<p><code>do clean_my_data.do // Stata reads and memorizes your do-file<br />
+</code><code><br />
+forvalues i=1/20 {<br />
+drop _all<br />
+use mysourcefile`i'<br />
+cleanMyData                       // Stata executes the commands inside your do-file<br />
+}<br />
+</code></p>
+<p>There is another advantage to declaring do-files as programs: clean logs. If you have Stata read the commands first and run them all at the same time from memory, then your logs will only contain the output of those commands, not the commands themselves. That will keep them small and readable.</p>
+<p>The drawback is that programs are sticky: Stata memorizes them until it is either explicitly told to forget them, or is shut down. In the same instance of Stata you might possibly run two very different do-files that call two different programs declared at different times in the past under the same name. If in this instance of Stata you only read in one of them, it will be executed twice: once in its proper context, and another time in a totally wrong one. Stata will think that that's what you mean to do.</p>
+<p>The <code>capture prog drop myProgram</code> line might help a bit. Obviously you can also <code>capture prog drop _all</code>, with the caveat that this might drop programs that you don't want dropped. Use a blend of the two variants as circumstances warrant. Stata can live with either. The best thing to do, of course, is to use very descriptive names for programs. They usually have the side effect of being specific, which will avoid such ambiguity in the first place.</p>

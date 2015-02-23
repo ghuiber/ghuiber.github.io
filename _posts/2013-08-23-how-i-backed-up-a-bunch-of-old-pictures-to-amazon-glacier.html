@@ -1,0 +1,39 @@
+---
+layout: post
+title: How I backed up a bunch of old pictures to Amazon Glacier
+date: 2013-08-23 09:53:55.000000000 -04:00
+categories:
+- Python
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>This is from a home server that runs Fedora 14, to which I have ssh access from my MacBook Pro.</p>
+<p>1. I <code>git clone</code>'d <a href="https://github.com/uskudnik/amazon-glacier-cmd-interface">this</a>.</p>
+<p>2. Then, as super-user, I called </p>
+<pre><code>
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O - | python
+</code></pre>
+<p>as instructed <a href="https://pypi.python.org/pypi/setuptools/1.0#unix-based-systems-including-mac-os-x">here</a>, to install the <code>setuptools</code> module.</p>
+<p>3. Then, also as super-user, I called </p>
+<pre><code>
+python setup.py install
+</code></pre>
+<p>4. At this point, it was time to fill out the .glacier-cmd configuration file, as shown in the <a href="https://github.com/uskudnik/amazon-glacier-cmd-interface">README.md</a>.</p>
+<p>5. Bookkeeping using Amazon SimpleDB requires setting up an Amazon SimpleDB domain (= database) first. You cannot do this through the AWS Management Console. </p>
+<p>6. So I googled, and found official directions <a href="http://docs.aws.amazon.com/AmazonSimpleDB/latest/GettingStartedGuide/Welcome.html">here</a>.</p>
+<p>7. Unfortunately, my Chrome wouldn't render properly the SimpleDB Scratchpad web app. That caused some unnecessary confusion. The solution was to just run Scratchpad in Safari.</p>
+<p>8. Your computer has folders and files. Amazon Glacier has vaults and archives. One archive = one upload. This can be an individual file, but it's more practical to bundle individual files into tarballs first, so one archive = one tarball.</p>
+<p>9. I'm in business: two large tarballs uploaded and showing up in my SimpleDB domain that keeps tabs on this particular vault, one on the way. </p>
+<p>It looks like everything works, but I can't be sure until Amazon Glacier gets around to producing an inventory (this happens about once a day, it seems). I can then check SHA sums between what's on Glacier and what I thought I sent there. Next I will upload something small, then download it the next day.</p>
+<p>Glacier is the digital equivalent of self-storage. You put stuff there that you don't really want anymore; you think you might, but you don't. It's a problem that comes with ease of acquiring such stuff in the first place. I don't think there's a big self-storage industry in Zambia, and I'm sure that storing old photos wasn't much of a problem back when you had to take them on film and you only had 32 frames in a roll. </p>
+<p>I have no idea why we bother with digital self-storage. I guess simply deleting old pictures and a bunch of music we no longer listen to makes us feel like jerks. It's a total trap.</p>

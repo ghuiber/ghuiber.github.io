@@ -1,0 +1,50 @@
+---
+layout: post
+title: Gems from the User's Guide
+date: 2009-01-09 20:34:45.000000000 -05:00
+categories:
+- Stata
+tags:
+- program
+- rclass
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/9AaA2s
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>A little over a year into my Stata 10 license, I can see some usage patterns over the two feet's worth of Stata documentation: Data Management and Programming are pretty well worn, the rest not so much. User's Guide,  [U], has been among the least popular, which is a pity, because chapter 18, Programming Stata, is supremely useful. Here's a tidbit:</p>
+<p>If you write code using formally defined programs, as I suggested in my <a href="index.php?p=446">previous post</a>, then you may have already run into the problem of making your programs pass each other various results. One way is to have the programs store their results as global macros, which then are available to any subsequent programs within the same Stata instance. This is inelegant and risky, because your globals might stick around longer than you want them (OK, they won't survive shutting Stata down and restarting it, if you care to do that all the time).</p>
+<p>The other way of enabling programs to use each other's results is <code>rclass</code>. Defining your program this way enables it to return <code>r()</code> results, which are then available to subsequent programs, no globals needed. An example is below:<br />
+<code><br />
+// my first program defines the answer<br />
+capture prog drop theAnswer<br />
+program define theAnswer, rclass<br />
+</code><code><br />
+return scalar myanswer=42<br />
+</code><code><br />
+end<br />
+</code><code><br />
+// my second program calls the first<br />
+// and uses its r() result.<br />
+capture prog drop theAnswerIs<br />
+program define theAnswerIs<br />
+</code><code><br />
+theAnswer<br />
+local answer=r(myanswer)<br />
+di "The answer is `answer'."<br />
+</code><code><br />
+end<br />
+</code><br />
+Now call the second program in Stata:<br />
+<code><br />
+theAnswerIs<br />
+</code><br />
+Congratulations. You now have the answer to the <a href="http://en.wikipedia.org/wiki/The_Answer_to_Life,_the_Universe,_and_Everything#Answer_to_Life.2C_the_Universe.2C_and_Everything_.2842.29">Ultimate Question</a>.</p>

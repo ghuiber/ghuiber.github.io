@@ -1,0 +1,90 @@
+---
+layout: post
+title: How many zeroes in that Poisson?
+date: 2012-01-26 23:11:06.000000000 -05:00
+categories:
+- Stata
+tags:
+- count
+- Poisson
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: failed
+  twitter_failure_code: '401'
+  twitter_failure_reason: Invalid / expired Token
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I have a data set, and some of the variables there are counts of a given event.</p>
+<p>Four count outcomes, the easiest thing to do is a Poisson regression, but before you do that, it's worth asking if what you see there really is close enough to a Poisson process. </p>
+<p>You could check whether the variance is more or less equal to the mean, but with real-life data you can bet that there will be a difference between the two, and you'll be left scratching your head as to whether it's too big for Poisson, or just about right to pass the smell test.</p>
+<p>Another thing you can do is check whether the count variable shows the right number of zeroes. In a Poisson distribution, the marginal probability of a zero outcome is exp(-mean). If the proportion of zeroes that you see is a lot higher than this value, and it usually is when you're looking at counts of rare events, then you will have to consider a zero-inflated poisson or a finite-mixture model, as discussed with wonderful clarity in chapter 17 of <a href="http://www.stata-press.com/books/musr.html" title="Microeconometrics using Stata" target="_blank">Microeconometrics using Stata</a> by Cameron and Trivedi.</p>
+<p>That brings me to the immediate cause for this post. I thought I'd code up a quick program to check those zeroes for a given data set and count variable, and I did this:</p>
+<pre><code>
+capture prog drop checkZifPoisson
+program checkZifPoisson
+
+version 12
+
+args y dataset
+
+local f _col(60) %5.2fc
+
+di ""
+useData `dataset' // nevermind how this is coded up
+di ""
+di "Checking `dataset':"
+qui {
+   count
+   local den r(N)
+   replace `y'=0 if missing(`y')
+   count if `y'==0
+   local num r(N)
+   sum `y'
+   local zpois exp(-`r(mean)')
+   local zobs `num'/`den'
+}
+di "Share of `y'=0 in a Poisson process: " `f' `zpois'
+di "Share of `y'=0 observed: " `f' `zobs' 
+
+end
+</code></pre>
+<p>Then I ran the thing, and it kept turning up a share of 1.0, that is 100% zeroes observed, no matter the data set or the variable of interest y. You know why? Because <code>local den r(N)</code> will evaluate to r(N), and that will be filled in by the last command that returns such a thing before <code>`den'</code> is invoked. That command is <code>sum `y'</code>. The same thing happens to <code>`num'</code>. So I took the ratio of the same number. The returned values from the calls to <code>count</code> that I had made right before defining both <code>local num</code> and <code>local den</code> were quietly obliterated. Isn't that a sneaky bug? The correct code is below:</p>
+<pre><code>
+capture prog drop checkZifPoisson
+program checkZifPoisson
+
+version 12
+
+args y dataset
+
+local f _col(60) %5.2fc
+
+di ""
+useData `dataset' // nevermind how this is coded up
+di ""
+di "Checking `dataset':"
+qui {
+   count
+   local den `r(N)'
+   replace `y'=0 if missing(`y')
+   count if `y'==0
+   local num `r(N)'
+   sum `y'
+   local zpois exp(-`r(mean)')
+   local zobs `num'/`den'
+}
+di "Share of `y'=0 in a Poisson process: " `f' `zpois'
+di "Share of `y'=0 observed: " `f' `zobs' 
+
+end
+</code></pre>
+<p>Now <code>`den'</code> stores the actual value returned by the <code>count</code> before it was defined as <code>local den `r(N)'</code>, as intended. Mind your apostrophes, is all I'm saying.</p>
+<p>Erratum: actually, that's not all that I should have said. As Nick Cox observes in the comments below, you should mind your equal signs too.</p>

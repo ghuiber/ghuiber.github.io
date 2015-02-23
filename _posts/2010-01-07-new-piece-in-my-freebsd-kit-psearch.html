@@ -1,0 +1,25 @@
+---
+layout: post
+title: 'New piece in my FreeBSD kit: psearch'
+date: 2010-01-07 14:58:02.000000000 -05:00
+categories:
+- FreeBSD
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/7u67dV
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>On December 11, 2009 <code>portaudit</code> turned up a problem in a package called libtool-2.2.6a_1. So, as usual, I figured I'd go to whatever port that is, and do a <code>portupgrade</code>. Unfortunately, <code>whereis libtool</code> turned up no such port. What's the rookie accidental admin to do?</p>
+<p>Take good notes, for one. While dabbling in an unrelated topic -- I was investigating how to enable wake-on-LAN for this machine -- I found <a href="http://forums.freebsd.org/showthread.php?t=6664">a reference</a> to a command I never knew existed: <code>psearch</code>. It's a port and I didn't have it installed, but <code>whereis psearch</code> led me to it quickly enough, and then it was just a matter of <code>make install clean</code>. Now, back to the portaudit problem: <code>psearch libtool</code> found the buggy port immediately: devel/libtool22.</p>
+<p>I wasn't sure that this quick note was worth a post, so I left it in the drafts folder. But today's <code>portaudit</code> revealed multiple vulnerabilities in php5. Fixing that is in progress. Meanwhile I thought I'd post this thing after all, so I'll have a quick way to jog my memory next time I go looking for a well-hidden port.</p>
+<p>One annoying thing is that I'm still unclear on when to use portupgrade -r, portupgrade -R, or portupgrade -rR. My default is the latter because I find it comforting that these recursive upgrades take care of all sorts of dependencies for me, both up and down stream. But man does it take a long time. That Pentium III is showing its age. It'd be good if I could safely cut some corners. So, dear readers, please comment away. I am curious.</p>

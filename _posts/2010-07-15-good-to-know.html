@@ -1,0 +1,24 @@
+---
+layout: post
+title: Good to know
+date: 2010-07-15 13:46:38.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/cgRhnO
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The user-written commands you download to your ado/plus directory are updated once in a while on that RepEc server they come from. So, after you <code>findit</code> and then <code>net install</code> it, your imported command might need to be refreshed occasionally. That is what <code>adoupdate, update</code> does.</p>
+<p>I was reminded of this when I tried to run <code>freduse</code> today. Actually, the problem that reminded me of it -- a "not found" error message thrown when the command invoked the Mata function  _fredifinparse() -- didn't go away, but "adoupdate, update" is still a good thing to do. What did fix _fredifinparse() is described <a href="http://vhaguiar.wordpress.com/2010/02/07/stata-tip-importing-stock-info-from-yahoo-finance-and-fed-macroeconomic-data/">here</a>.</p>

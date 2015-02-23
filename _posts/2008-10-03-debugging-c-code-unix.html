@@ -1,0 +1,43 @@
+---
+layout: post
+title: Debugging C++ code (UNIX)
+date: 2008-10-03 23:16:15.000000000 -04:00
+categories:
+- C++
+tags:
+- C++
+- GNU debugger
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/d7TuTS
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>This assumes you're inside a UNIX terminal window (e.g., PuTTY session to remote UNIX box).</p>
+<p>Compile a .cpp source file in the GNU debugger:</p>
+<p><code>g++ -g -Wall -o mysourcefile.out mysourcefile.cpp</code></p>
+<p>Before starting gdb, make sure you're in the same directory as the executable just compiled above. Then call gdb:</p>
+<p><code>add GNU</code></p>
+<p>Then start the gdb debugger:</p>
+<p><code>gdb mysourcefile.out</code></p>
+<p>Things you can do here:</p>
+<p>1) Set a breakpoint at a given function (e.g., main):</p>
+<p><code>break main</code></p>
+<p>2) Set a breakpoint at a given line (e.g., line 12):</p>
+<p><code>break mysourcefile.cpp:12</code></p>
+<p>3) Set a watch point at a given expression:</p>
+<p><code>watch x&gt;y</code></p>
+<p>4) Find the type of that expression:</p>
+<p><code>whatis x&gt;y</code></p>
+<p>5) OK, that was trivial, clearly it's boolean. More usefully, you can find its value so far (true or false in the GNU C++ compiler, 1 or 0 in others, I guess) with</p>
+<p><code>print x&gt;y</code></p>
+<p>6) Step into the program (execute a certain number of lines after the debugger stopped at your breakpoint):</p>
+<p><code>step &lt;number of lines&gt;</code></p>
+<p>If you set a break point, <code>run</code> will execute the code up to then, at which point you can choose <code>next</code> to move on to the next line, or <code>continue</code>, for the thing to run until it exits normally or an error is found.</p>

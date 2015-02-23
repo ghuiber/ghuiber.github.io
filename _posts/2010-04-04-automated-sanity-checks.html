@@ -1,0 +1,65 @@
+---
+layout: post
+title: Automated sanity checks
+date: 2010-04-04 01:30:27.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/cVaZYh
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I am reading <a href="http://stata-press.com/books/isp.html">An Introduction to Stata Programming</a>, by Christopher Baum.</p>
+<p>He suggests, in Chapter 5.2, a nice do-file method to validate your data: you use pairs of <code>list</code> and <code>assert</code>. For example, suppose you know that a variable v should have no missing values. If it indeed does not, then <code>assert !missing(v)</code> should run without error. If it does, you want to know where they are: <code>list if missing(v)</code>. Reversing the order of these two lines in a do-file will cause Stata to exit with an error, which alerts you that there are problems with your data, but not before it shows you where the problems are:<br />
+<code>
+<pre>sysuse auto, clear
+list if missing(make)
+assert !missing(make)
+list if missing(rep78)
+assert !missing(rep78)</pre>
+<p></code><br />
+This is neat because you can always edit this do-file with a new pair of list/assert lines as needed. But, as the author mentions, sometimes a <code>summarize</code> is plenty helpful too, especially if you remember that it accepts a list of variables as an argument. You could do this for example:<br />
+<code>
+<pre>sysuse auto, clear
+sum make rep78</pre>
+<p></code><br />
+Wait. That didn't work too well, because <code>summarize</code> tells you nothing about make: it treats string variables as missing. You would know that that was indeed the case if before <code>sum</code> you would have requested <code>describe</code>.</p>
+<p>So, I guess, before you do any kind of data validation, <code>describe</code> is a good first step; you might also like <code>codebook</code>; I don't. I find it too wordy. But it does do the job of giving you information about the whole data set.</p>
+<p>One alternative to wordy output when you have a specific question regarding more than one variable is to use little custom programs for data checks. On such example is countIfMissing, shown in my previous post. Another, inspired by Christopher Baum's use of <code>summarize</code> might be sumIfNumeric:<br />
+<code>
+<pre>capture prog drop sumIfNumeric
+program sumIfNumeric
+
+unab fullset: _all
+local numset
+foreach varble in `fullset' {
+   capture confirm numeric variable `varble'
+   if _rc==0 {
+      local numset `numset' `varble'
+   }
+}
+local check: list sizeof numset
+if `check'&gt;0 {
+   sum `numset'
+}
+else {
+   di "No numeric variables found in this dataset."
+}
+
+end</pre>
+<p></code><br />
+This might be useful when your data set comes with a bunch of variables -- some numeric, some string. Though <code>describe</code> will tell them apart easily enough, you may not care to list them explicitly. The usage is straightforward:<br />
+<code>
+<pre>sysuse auto, clear
+sumIfNumeric</pre>
+<p></code></p>

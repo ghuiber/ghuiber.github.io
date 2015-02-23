@@ -1,0 +1,39 @@
+---
+layout: post
+title: Abstraction with macros
+date: 2008-09-28 19:18:03.000000000 -04:00
+categories:
+- Stata
+tags:
+- abstraction
+- macros
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/dsnYAd
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>When professional programmers talk about abstraction they mean writing code that is not too context-specific. The goal of abstraction is platform-independent code. That has become synonymous with "runs on both UNIX and Windows" but platform need not mean operating system. PHP, for example, has a database abstraction layer called PEAR::DB whose job is to allow your code to work with different database engines without any modification, because its commands are 'abstracted away' from any given engine. That is useful when your code must work with both MySQL and PostgreSQL, for example.</p>
+<p>Stata can do something similar. What you aim to abstract from when writing do-files is not necessarily any given operating system, though you can do that too. Rather, abstraction should ensure that your code is not a literal translation of how you think about the job. Your most specific ideas at the beginning of a project are the most likely to change before the job is done. Writing flexible code that can accommodate such changes is a lot more convenient than cutting out and retyping big swaths of your masterpiece as you go along. Macros, local and global, can help.</p>
+<p>One obvious use for macros is file path abstraction. You may well start a project with a simple structure -- such as "c:/my project/" with subfolders "data" and "code". But what if you move it to a new letter drive? What if along the way your data and code need to be re-organized in different sub-folders?</p>
+<p>Declaring your file paths once, at the top of the do-file, as macros such as</p>
+<p><code>local sourcefiles "c:/my project/data/source/"</code></p>
+<p>will enable you to call your sourcefile in the same way throughout the rest of the do-file:</p>
+<p><code>use "`sourcefiles'mysource", clear</code></p>
+<p>The obvious advantage to this is that all the file path declarations are in one place, and each appears just once. Should you have to change any of them, you can do so very quickly and 100% reliably, and that is not a metaphor. You only need one change, in one place. That's 100%.</p>
+<p>If you move from Windows to UNIX, you will simply change your macro's definition to something like this:</p>
+<p><code>local sourcefiles "/usr/home/yourusername/my project/data/source/"</code></p>
+<p>Everything else in your do-file can stay the same. That is true platform independence. File names, variable lists for sorting or merging, constants, all can be equally easily abstracted away with macros. You can even use macros to substitute inside commands, like so:</p>
+<p><code>local thisvar_is_ready "thisvar&gt;0 &amp; thisvar!=."<br />
+replace newvar=thatvar/thisvar if `thisvar_is_ready'<br />
+</code><br />
+Should your macros be global or local? The difference is one of scope. If you declare a global macro it stays live for the entire lifetime of your Stata instance, so global macros can be inadvertently carried over to do-files that they have nothing to do with. Local macros are local to the do-files where they are defined. They die when the execution of their home do-file stops, either at the end of the file or as the result of an error. For this reason the general advice is that you should not use a global macro when a local one will suffice.</p>
+<p>But the upshot of that advice is not that the cautious Stata user will never use global macros. If you organize your work in hierarchical do-files that call each other, then it makes sense to declare all your macros as globals in one place -- the master do-file that calls all others.</p>
+<p>I use a combination of global and local macros, as I judge the circumstances to warrant either type. I do not have a default preference. To ensure against carrying globals over to do-files where they do not belong, you could start your do-files with <code>capture macro drop _all</code>. That would be drastic, but all the more effective.</p>

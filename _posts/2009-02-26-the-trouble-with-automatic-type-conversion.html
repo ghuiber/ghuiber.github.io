@@ -1,0 +1,86 @@
+---
+layout: post
+title: The trouble with automatic type conversion
+date: 2009-02-26 02:32:42.000000000 -05:00
+categories:
+- Stata
+tags:
+- program
+- rclass
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/b82aV6
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Lately I have been writing a lot of modular Stata code, where bits and pieces of the job are done by separate programs, sometimes declared in different do-files (called in with <code>do</code>). You get programs to pass on things to each other by making them <code>rclass</code>. Now, r() results can be scalars as in <a href="http://enoriver.net/index.php/2009/01/09/gems-from-the-users-guide/">this example</a>, or locals. The latter are convenient because they can accommodate strings as easily as numbers, but they can trip you up.</p>
+<p>See, Stata locals are just strings that come with a reasonable kind of automatic type conversion designed to make your life easier: if your string consists of numbers only, it will be evaluated. For example, <code>local a=1</code> and <code>local a 1</code> have the same effect: <code>display `a'</code> will return 1, the number, in either case.</p>
+<p>But there is a subtle difference between an empty local with a name and a missing local. Stata, in a pinch, will identify either as a missing value, and that may work for you most of the time. But only the former can be called in a numeric expression that relies on automatic type conversion. The latter will give you a "missing name" error. Below is a simple example:<br />
+<code><br />
+capture prog drop myLocal<br />
+prog def myLocal, rclass<br />
+</code><code><br />
+local a<br />
+return local myresult `a'<br />
+</code><code><br />
+end<br />
+</code><code><br />
+myLocal<br />
+local a `r(myresult)' // note (1): this will work fine<br />
+</code><code><br />
+if `a'==. {<br />
+  di "local a is missing"<br />
+}<br />
+else {<br />
+  di `a'<br />
+}<br />
+</code><br />
+The code above will abort with the error message <code>"nothing found where name expected r(198);"</code>, but that error message won't come at the definition of <code>local a</code> commented with note (1). That definition will work as if everything were fine: it simply returns a missing value. It's when you're calling the subsequent if-condition that you run into trouble.</p>
+<p>The solution is to make sure that myLocal is returning what you mean it to. If you want it to return a missing numeric value, this is the way to go:<br />
+<code><br />
+capture prog drop myLocal<br />
+prog def myLocal, rclass<br />
+</code><code><br />
+local a=.<br />
+return local myresult `a'<br />
+</code><code><br />
+end<br />
+</code><code><br />
+myLocal<br />
+local a `r(myresult)'<br />
+</code><code><br />
+if `a'==. {<br />
+  di "local a is missing"<br />
+}<br />
+else {<br />
+  di `a'<br />
+}<br />
+</code><br />
+If instead you want to return a missing string, you need to make sure that your if-condition is a string condition:<br />
+<code><br />
+capture prog drop myLocal<br />
+prog def myLocal, rclass<br />
+</code><code><br />
+local a<br />
+return local myresult `a'<br />
+</code><code><br />
+end<br />
+</code><code><br />
+myLocal<br />
+local a `r(myresult)'<br />
+</code><code><br />
+if "`a'"=="" {<br />
+  di "local a is missing"<br />
+}<br />
+else {<br />
+  di `a'<br />
+}<br />
+</code><br />
+This is not as pointless as it looks. You seldom want programs to return a missing value as a result, of course. But a missing value can sometimes be a legitimate member of the set of possible results. When you run into one, you need a way to handle it.</p>

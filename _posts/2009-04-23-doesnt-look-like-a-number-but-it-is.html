@@ -1,0 +1,52 @@
+---
+layout: post
+title: Doesn't look like a number, but it is
+date: 2009-04-23 12:16:22.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/ahmOBr
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I came across a data set with some variables in it that recorded actual measurements, so their values could be zero or higher. Then a need arose to quickly look up how many of these variables would have recorded anything -- in effect, separating the yes/no part from the how much -- and adding the result. I essentially needed to treat continuous variables as dummies for this one purpose and then move on. Turns out there's a very easy way to do that. Consider a data set that looked something like this (sorry for the ugliness of tables in WordPress posts; there's probably a plugin for that somewhere):</p>
+<p> </p>
+<table border="0">
+<tbody>
+<tr>
+<td align="right">_var1</td>
+<td align="right">_var2</td>
+<td align="right">_var3</td>
+</tr>
+<tr>
+<td align="right">1.5</td>
+<td align="right">0</td>
+<td align="right">2.7</td>
+</tr>
+<tr>
+<td align="right">0</td>
+<td align="right">1.2</td>
+<td align="right">0</td>
+</tr>
+<tr>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Now suppose you wanted to generate a fourth variable that was equal to the sum of the non-zero instances of the first three. You would do this:<br />
+<code><br />
+gen _var4=(_var1!=0)+(_var2!=0)+(_var3!=0)<br />
+</code><br />
+Trivial? Yes. Obvious? I dunno. I'm sure you use logical operators all the time inside compounded logical expressions. I thought it was kind of neat and post-worthy that you could also use them inside arithmetic expressions.</p>

@@ -1,0 +1,42 @@
+---
+layout: post
+title: Recipe for pairing up RStudio with GitHub
+date: 2014-10-12 02:36:55.000000000 -04:00
+categories:
+- GitHub
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _wpcom_is_markdown: '1'
+  _edit_last: '1'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>On both Windows and Mac I have been happy to use RStudio for R development and the <a href="https://windows.github.com/">GitHub app</a> for handling version control. The app seems to be GitHub's own preferred interface, and if you use it you don't even need <a href="http://msysgit.github.io/">Git for Windows</a>. I'm not sure why you wouldn't just do that. The only cost is that you have to flit between RStudio and the GitHub app every time you make a commit, but how much of an interruption is that? You flit between RStudio and the browser all the time to check StackOverflow, don't you?</p>
+<p>Regardless, suppose that you find the thought of doing your version control from inside RStudio appealing. Below are the setup steps that worked for me, pieced together from many places in the process of integrating my <a href="https://github.com/ghuiber/startUpViz">startUpViz</a> repo into RStudio's Git workflow.</p>
+<h2>Step 1: Give RStudio the Git</h2>
+<p>Install Git for Windows or, if it's installed already, tell RStudio about it as explained in the five-step method described <a href="http://www.molecularecologist.com/2013/11/using-github-with-r-and-rstudio/">here</a>. <em>Make sure to stop at "Restart RStudio and that is all there is to it!"</em> My instructions below supersede the remaining instructions there, not because those are wrong, but because I have a specific kind of R project in mind: a package.</p>
+<h2>Step 2: Create a brand new R project</h2>
+<p><a href="https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects">Create a brand new R project in a brand new directory</a> and check the box "Create a Git repository." You might as well place this at the end of <code>c:/users/[yourusername]/documents/GitHub/</code> because this is probably where you keep all the work that ends up published on GitHub.</p>
+<h2>Step 3: Open the Git shell and configure your SSH key pair</h2>
+<p>In RStudio your brand new project comes with a Git tab in the top right corner where you usually only pay attention to the Environment and History tabs. That Git tab has a gear icon, and the drop-down menu that opens when you click it has a "Shell..." option. That is your GitHub BASH shell. Open it, create a new SSH key pair, then send the public one to GitHub. The complete instructions for this are <a href="https://help.github.com/articles/generating-ssh-keys/">here</a>, but there's one crucial twist: instead of <code>ssh-agent -s</code> as shown in the last screenshot at step 2 on that page, you must type <code>eval `ssh-agent -s`</code>. Only then can you <code>ssh-add</code> your new private key. Details are offered on <a href="http://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent">StackOverflow</a>. You only need to do this step once. Subsequent RStudio projects that you'll be version-controlling on GitHub from inside RStudio will use the same key pair for authentication.</p>
+<h2>Step 4: Create a brand new GitHub repo at github.com</h2>
+<p>Now go to GitHub and create a bare-bones new repo of the same name as your directory at <em>Step 2</em> above. <em>Do not</em> check the box "initalize this repo with a README file" because that part can wait, and doing so will bypass some options you'll want. When you create this new repo, you will be given the options<br />
+- <em>Quick setup — if you've done this kind of thing before</em><br />
+- <em>…or create a new repository on the command line</em><br />
+- <em>…or push an existing repository from the command line</em><br />
+The third is the one you want. Now you go back to RStudio, but before you leave notice that though the "clone URL" that you can copy to clipboard says <code>https://</code> by default, that is not your only option. If you read the hint that "You can clone with..." and click SSH, the URL changes to something that starts with <code>git@github.com:</code>. That's the one you'll want. Save it to the clipboard now.</p>
+<h2>Step 5: Add a remote repo</h2>
+<p>Now you're back in RStudio. If at the Git BASH shell prompt you type <code>git remote -v</code> and hit Enter, you should see nothing, because you don't yet have a remote repo. You add one with <code>git remote add origin git@github.com:[yourusername]/[yourrepo].git</code> where the part after the word <code>origin</code> comes from what you saved to the clipboard at Step 4 above.</p>
+<h2>Conclusion</h2>
+<p>Once you complete the 5 steps above, you can <code>git push -u origin master</code> for the first commit, and then commit, push, pull, etc. directly from RStudio. Either skipping this little "eval" tweak or using the <code>https://[...]</code> URL for the remote repo instead of the <code>git@[...]</code> one will cause the ssh connection to fail, and RStudio will be unable to push to the remote.</p>
+<p>I don't know why this had to be so hard to set up, but there it is. I wrote it down because it took trial and error. Anyway, this is how you hook RStudio for the first time to a pristine, not-yet-having-had-the-first-commit GitHub repo. This is the kind of repo you need for an R project that starts in a new directory, with the further options that it can be an empty project, a package, or a Shiny app.</p>
+<p>A much easier way to go (especially once you have a SSH key pair set up) is to set up your repo at github.com with the box "initalize this repo with a README file" checked. That immediately triggers your first commit. Next, you go to RStudio and start a brand new project but this time you pick the "Version Control" option (bottom of the dialog box) instead of either of the two above it ("New Directory" or "Existing Directory as of this writing). You then pick Git, then give it the <code>git@[...]</code> URL you saved to the clipboard at step 4, and you're good to go.</p>
+<p>This, though, will be a bare-bones project, and it's up to you to fill in the goods. None of the setup work that RStudio provides for new packages or Shiny apps will be done by default. You can see why this is: the typical use case for a project <em>checked out</em> from a version control <em>repository</em> is that you're picking up where you or somebody else left off earlier: there's some work in progress you'll be making use of, not just an empty repo that you happened to start with the box "initalize this repo with a README file" checked.</p>
+<p>Either way you do it, starting afresh or checking out from an existing repo, you still have the option to revert to the GitHub app if, say, you miss the Sync button. You just need to do a push and pull from RStudio to make sure that your local copy is identical to the remote, and then let the GitHub app clone the remote onto the local one. No conflicts will be reported, and from then on you can handle the version control from either app.</p>

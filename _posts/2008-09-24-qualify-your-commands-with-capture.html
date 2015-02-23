@@ -1,0 +1,54 @@
+---
+layout: post
+title: Qualify your commands with capture
+date: 2008-09-24 10:59:43.000000000 -04:00
+categories:
+- Stata
+tags:
+- capture
+- code recycling
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cdszXx
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Suppose you are assembling a .dta file from disparate pieces of raw data -- an .xls workbook here, a .txt file there -- that must each meet some specific conditions. If you do this in a do-file (as you should, for the sake of reproducibility) you will find it useful to first save each of these components into a <code>tempfile</code> and assemble your tempfiles at the end into the .dta file of interest. Tempfiles reside in memory, and die as soon as your do-file has finished running. That is a very convenient way to avoid hard drive clutter.</p>
+<p>Now suppose that your final .dta file does not care if some components are not present -- say because you are building it repeatedly, based on data arriving weekly, and it's OK if some of the components are not present in each week. You would want to make this process a server job (cron job if you're UNIX-minded) but for that you would want to ensure that the do-file will not terminate with an error. </p>
+<p>Enter <code>capture</code>. Here's how it works:</p>
+<p><code>foreach i in 1 2 {<br />
+local tempfile`i'_ok=0<br />
+capture confirm file "`tempfile`i''"<br />
+if _rc==0 {<br />
+local tempfile`i'_ok=1<br />
+}<br />
+}<br />
+</code></p>
+<p>So I'm assuming you have two files of interest. The <code>confirm file</code> command, unqualified, can check if a file exists, but if it does not it will exit with an error. The <code>capture</code> qualifier stores that error away, in a sense. It sends it to the _rc predefined macro, which is equal to 0 if the file exists, and some other positive integer if it does not. The point of qualifying <code>confirm file</code> by <code>capture</code> is to keep your do-file going. You can store the state of the _rc in the locals tempfile`i'_ok shown above, and then based on their values you can do various things with your tempfiles, based on whether they exist:</p>
+<p><code>if `tempfile1_ok'==1 &amp; `tempfile2_ok'==1 {<br />
+use "`tempfile1'"<br />
+merge `mergevars' using "`tempfile2'"<br />
+tab _merge<br />
+keep if _merge==3<br />
+drop _merge<br />
+}<br />
+foreach i in 1/2 {<br />
+else if `tempfile`i'_ok==1' {<br />
+use "`tempfile`i''"<br />
+}<br />
+}<br />
+save myfinalset, replace<br />
+}<br />
+else {<br />
+display "no tempfiles this week, so moving on"<br />
+}<br />
+</code></p>
+<p>That's it. Now your do-file will run unencumbered. Capture can be used for all sorts of checks.</p>
+<p>As an aside, you may have noticed that I merged the two files using the local `mergevars'. It's nice to use local macros for things like combinations of variables, file paths, or file names. Declaring them all at the top of your do-files makes for easier code maintenance and code recycling.</p>

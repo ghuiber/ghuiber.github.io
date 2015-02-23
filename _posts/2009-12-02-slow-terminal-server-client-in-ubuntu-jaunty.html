@@ -1,0 +1,25 @@
+---
+layout: post
+title: Slow terminal server client in Ubuntu Jaunty
+date: 2009-12-02 00:31:55.000000000 -05:00
+categories:
+- Ubuntu
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/8paqmK
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My migration to Ubuntu has just hit a major snag.</p>
+<p>I spend most of my work day connected to a Windows Server 2003 machine sitting in a colocation facility in Atlanta. I write and run Stata code on it, use the MS Office products, a bit of Gmail -- the usual stuff. As it turns out, the Ubuntu half of my computer has a much slower connection to this thing than its Win XP Pro sister does. It's so bad it's heart-breaking. I like Ubuntu, but I can't type very well with a two to three second lag. This should not have happened. Before I turned my main machine (a Dell Latitude D630) into a dual-boot system I had puttered around with a Dell Latitude D400 running Hardy LTS. I was pretty happy. I certainly don't remember the VPN connection on that computer being this slow.</p>
+<p>Google didn't help much. There is some consensus that tsclient with RDPv5 is slower than mstsc.exe (the program behind the Remote Desktop Connection on Windows XP), but it doesn't sound like the difference is as painful as I'm feeling it. I have not found any working guidance to maybe fire up rdesktop without tsclient, which I was hoping might speed things up a bit, under the hypothesis that fewer apps in the chain are better than more. So I am not sure if the standard-issue Ubuntu solution -- tsclient+rdesktop -- has suffered some performance decrease between Hardy and Jaunty, or getting a remote desktop in a bigger full screen is going to be that much slower. I have no other ideas.</p>
+<p>Has anybody seen this before? One thing that might still save this migration project is that the server in Atlanta is on its last leg, to be replaced soon by a far better system, running 64-bit Windows Server 2008. That should come with a Remote Desktop server with RDP version 7 according to <a href="http://en.wikipedia.org/wiki/Remote_Desktop_Protocol">Wikipedia</a>. Maybe that will speed things up a bit on my end too -- if not right away, maybe another month or two into Karmic.</p>

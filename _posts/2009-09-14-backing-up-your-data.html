@@ -1,0 +1,35 @@
+---
+layout: post
+title: Backing up your data
+date: 2009-09-14 02:03:36.000000000 -04:00
+categories:
+- FreeBSD
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/2O9m8
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Microsoft makes this free utility called <a href="http://www.microsoft.com/downloads/details.aspx?familyid=c26efa36-98e0-4ee9-a7c5-98d0592d8c52&amp;displaylang=en">SyncToy</a>. I don't know if it will come standard with Windows 7, but it probably should. It provides a very elegant way to back up your data to an external hard drive or to a Samba share. You can even schedule it to run regularly, say right after you're done scanning for viruses every night. You do have an automatic nightly scan, right? Instructions for scheduling SyncToy are here: <a href="http://tweakhound.com/xp/backup/1.htm">XP</a> and <a href="http://tweakhound.com/vista/backup/synctoy.htm">Vista</a>.</p>
+<p>The UNIX equivalent to this would be <a href="http://www.samba.org/rsync/">rsync</a>. Cygwin comes with it. In FreeBSD you can install it from ports:</p>
+<pre><code>
+portsnap fetch update
+whereis rsync
+cd /usr/ports/net/rsync
+make install
+</code></pre>
+<p>Then, assuming that you have ssh access with a key pair to your server, all you need to do is this:</p>
+<pre><code>
+rsync -avzu [username]@example.com:[yourfolder] /cygdrive/g/[yourlocalmirror]
+</code></pre>
+<p>A simple <code>ls /cygdrive</code> in Cygwin will tell you what letter corresponds to your external hard drive. In my case it's g. I back up this web site to a WD MyBook with rsync. My wife uses SyncToy to back up her Vista notebook to her Samba share on our FreeBSD home server.</p>
+<p>Now: if you do not have ssh access to your UNIX server yet, see my earlier notes for setting up OpenSSH on FreeBSD, or buy <a href="http://nostarch.com/freebsdserver.htm">the book</a>. For Linux, see <a href="http://www.trueblade.com/knowledge/using-rsync-and-cygwin-to-sync-files-from-a-linux-server-to-a-windows-notebook-pc">here</a>. If rsync fails on the first run with some cryptic message that includes "error in rsync protocol data stream (code 12)" just check the file permissions.  That fixed it for me.</p>

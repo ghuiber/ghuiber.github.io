@@ -1,0 +1,41 @@
+---
+layout: post
+title: 'Getting data into Stata: odbc load'
+date: 2008-10-01 23:58:33.000000000 -04:00
+categories:
+- Stata
+tags:
+- odbc load
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/9CERRu
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>ODBC stands for Open Database Connectivity; <code>odbc load</code> is a tool for getting data out of ODBC-ready applications and into Stata quickly and reliably. One such application is Microsoft Excel. If you haven't yet received data in an Excel workbook, you will.</p>
+<p>Just to get it out of the way: if you run Stata 10 and you receive data from somebody using one of the newer, XML-style Excel versions, you don't need <code>odbc load</code> for that. Use the command <code>xmluse</code> instead. You can tell by the file name extension. Whenever Excel went XML (as of Office 2007 perhaps? I've been using OOo for a while now, so I'm not sure) it started saving workbooks with the .xlsx extension. The notes below apply to getting data from old-school -- .xls -- workbooks into Stata.</p>
+<p>So, back to <code>odbc load</code>. Its syntax is a bit arcane; for that reason, sometimes more code is preferred to less. You can split this command into components with local macros, for example. Well-chosen local macros make it much easier to re-use code or organize it into modules that can be maintained by different people working simultaneously.</p>
+<p>Stata may still be the preserve of the lone researcher, or the grad student working for the typical PI, which is the same thing, and for them these niceties don't matter as much. But the private sector has highly structured ways and Stata can roll with that just as well as it does with the more freewheeling style of the academia. So here's how I propose that <code>odbc load</code> should be run for getting data out of an Excel workbook:</p>
+<p><code><br />
+// your customers can edit this<br />
+local my_path     "D:/data/My Project/Source Files/"<br />
+local my_workbook "workbook.xls"<br />
+local my_file     "Sheet1"<br />
+</code><code><br />
+// without worrying about any of this<br />
+local source "Excel Files;DBQ=`my_path'`myworkbook'"<br />
+clear<br />
+odbc load, dsn("`source'") table("`my_file'$")<br />
+tempfile my_file<br />
+compress<br />
+describe<br />
+save "`my_file'", replace<br />
+</code><br />
+And that's all for MS Excel. Your temporary file "`my_file'" has all the data on worksheet Sheet1. If you ever need to pass this code on to other people, they will appreciate that they only need to edit the local macros with the path, workbook and worksheet that are right for them, and everything else works unchanged. You can use <code>odbc load</code> for getting data out of MS Access or a MySQL database. You can even embed SQL code. More on that <a href="http://www.ats.ucla.edu/stat/Stata/faq/odbc.htm">here</a>.</p>

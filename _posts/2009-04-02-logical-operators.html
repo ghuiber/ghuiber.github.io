@@ -1,0 +1,26 @@
+---
+layout: post
+title: Logical operators
+date: 2009-04-02 16:28:31.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bLILGB
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>This really should go under "more gems from the User's Guide". If you come to Stata like I did, with minimal previous experience with any kind of computer programming, you might not know this:</p>
+<p>When you combine !, &amp; and | (the logical operators NOT, AND and OR) in an expression you will want to make sure that they are properly nested in parentheses that follow your thinking about how you want to use them. This is because there is an order of precedence to these operators similar to the order of precedence in arithmetics. Left to its own devices, Stata will follow that proper order. In other words, in the same way that in the code a=b+c*d the multiplication will be executed before the addition, any code where !, &amp; and | show up without any parentheses, Stata will execute in the following order:</p>
+<p>1. NOT (!)</p>
+<p>2. AND (&amp;)</p>
+<p>3. OR (|)</p>
+<p>At the top of page 137 in the Stata 10 User's Guide there's a one-sentence section on the order of evaluation of all operators. It's a handy reference.</p>

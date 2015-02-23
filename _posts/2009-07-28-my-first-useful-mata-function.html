@@ -1,0 +1,80 @@
+---
+layout: post
+title: My first useful Mata function
+date: 2009-07-28 22:12:08.000000000 -04:00
+categories:
+- Stata
+tags:
+- cluster analysis
+- Mata
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+  yourls_shorturl: http://bit.ly/aT7SsD
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Or so I thought.</p>
+<p>I'm working on a cluster analysis project. There are multiple data sets, they are massive, and there are several variable subsets by which one could plausibly cluster the observations.</p>
+<p>Agglomerative hierarchical clustering is the way to go when you don't have any notion of how many clusters there should be, but it is impractical for large data sets -- its run time is O(n-squared). For big data sets you want to use some partition clustering method, such as k-means. This, in turn, has the drawback that you need to specify how many clusters you want (never mind the bigger issues of overlaps, or unequal-sized clusters for now; you're in the exploration stage).</p>
+<p>So you take a suitably small, suitably stratified random sample of the data, and use hierarchical clustering on it, just to figure out how many clusters there might be in the original population. Whatever number you get, that's what you use for k-means clustering on the full data set.</p>
+<p>Stata offers several options for picking the number of clusters. The default is to pick the number of scores that maximizes the Calinski-Harabasz pseudo-<em>F</em> index. That's easy enough to look up in the table, but how do you make Stata store it?</p>
+<p>To see what I'm talking about, run this first (call it code snippet 1):</p>
+<pre><code>
+drop _all
+use http://www.stata-press.com/data/r10/physed
+set varabbrev on
+cluster averagelink flex speed strength, name(avglnk)
+cluster stop avglnk, matrix(a)
+</code></pre>
+<p>You see a table; now it's clear that you want 4 clusters, because that's what corresponds to the highest pseudo-F value. OK, now you need to get Stata to find it for itself, and keep it in mind somehow.</p>
+<p>Time for some Mata I figured, after I asked the Statalist for advice and didn't trouble myself with waiting for it. So I wrote up this:</p>
+<pre><code>
+// Mata function for getting value in col i
+// on row that corresponds to max in col j
+// (that is, the i neighbor of the max in j)
+capture mata mata drop maxneighbor()
+mata
+real scalar maxneighbor(real matrix A, real scalar i, real scalar j)
+{
+  real scalar k, r, max
+  r=rows(A)
+  max=colmax(A)[1,j]
+  k=1
+  while(A[k,j]&lt;max) {
+     k=k+1
+  }
+  return(A[k,i])
+}
+mata mosave maxneighbor(), dir("${adoroot}") replace
+end
+</code></pre>
+<p>Feeling all good about it, I thought I'd trumpet it on the Statalist too, only to get this response:</p>
+<pre><code>
+sort(A,j)[rows(A),i]
+</code></pre>
+<p>Really, this one-line thing does the exact same job as the slab of code I proposed above. Good thing I'm a big proponent of learning by doing; it does wonders for one's self-esteem.</p>
+<p>So, for my documentation and yours, below is how both work. You enter Mata for calculations, and then you need to have Mata send the result to Stata. Since the result we're after is a scalar, (the number 4 in this example), we use Mata's st_numscalar() function. The Statalist example first (after code snipped 1, shown above):</p>
+<pre><code>
+mata
+A=st_matrix("a")
+st_numscalar("maxneighbor",sort(A,2)[rows(A),1]) // here's the one-liner
+end
+di maxneighbor // and here's your value
+</code></pre>
+<p>With my own function, the code above would have been</p>
+<pre><code>
+mata
+A=st_matrix("a")
+st_numscalar("maxneighbor",maxneighbor(A,1,2))
+end
+di maxneighbor
+</code></pre>
+<p>As you can see, in the implementation phase the two functions look like they'd take about the same amount of effort to use. That said, it's still a bit silly to build obscure functions of your own concoction when standard tools for doing the same job already exist.</p>

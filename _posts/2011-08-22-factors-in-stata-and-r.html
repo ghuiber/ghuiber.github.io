@@ -1,0 +1,42 @@
+---
+layout: post
+title: Factors in Stata and R
+date: 2011-08-22 14:16:59.000000000 -04:00
+categories:
+- R
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/rsPBwK
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The quick version of this post goes like this:<br />
+-- # in Stata is : in R<br />
+-- ## in Stata is * in R.</p>
+<p>The long version is that both Stata and R handle very nicely factor variables in regression models. If you want a full-factorial interaction between a factor variable x1 and a continuous variable x2, the Stata way is to say</p>
+<pre><code>
+regress y i.x1##c.x2
+</code></pre>
+<p>whereas the R way is to say</p>
+<pre><code>
+lm(y~factor(x1)*x2)
+</code></pre>
+<p>Now, if you just want to interact x1 with the slope of x2, the Stata way becomes</p>
+<pre><code>
+regress y i.x1#c.x2
+</code></pre>
+<p>whereas the R way becomes</p>
+<pre><code>
+lm(y~factor(x1):x2)
+</code></pre>
+<p>That's all.</p>

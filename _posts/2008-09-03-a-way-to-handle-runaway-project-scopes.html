@@ -1,0 +1,47 @@
+---
+layout: post
+title: A way to handle runaway project scopes
+date: 2008-09-03 23:33:00.000000000 -04:00
+categories:
+- Stata
+tags:
+- dir
+- extended macro function
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/abq3kH
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The extended macro function <code>dir</code> will make Stata run whatever files it finds in a given directory. You don't have to enumerate those files. Sometimes that is useful.</p>
+<p>Say you start out with a simple idea, like running an OLS regression. And say your dependent variable and some of the regressors are in one file, and the rest of the regressors are in another.</p>
+<p>It's a good idea to keep your do-files short and sensible and to have them follow the general logic of the project. In this case you might split the work between two separate do-files: one collects the data needed into one joint dataset, the other runs the actual regression. Appropriate file names and judicious comments make it easy to quickly see what each do-file does and how, and all is well.</p>
+<p>Then complications come up. The client remembers there's a third file with some regressors of potential interest, but it's in an exotic format and it has a bunch of stuff in it you don't need; or the client wants a summary report that's elaborate enough to warrant a third do-file.</p>
+<p>Clients like it when you can accommodate gracefully their changing requirements. One easy way to do this is to keep a master do-file that points Stata to the project code directory and has it run whatever do-files it finds there without explicitly enumerating them. The extended macro function <code>dir</code> can do that. If you add a third project do-file, <code>dir</code> will find it and run it along with the others. Combine two do-files in one and <code>dir</code> will roll with that too.</p>
+<p>For <code>dir</code> to work properly you need to help it read your files in the right succession. One way to do that is that in addition to naming these target do-files something suggestive -- like "merge first and second source file.do" -- you also pre-pend their order in the queue. If the file in this example is first in the process, simply call it "step 1 merge first and second source file.do" and number the remaining do-files in a similar fashion. That's helpful regardless of your usage of <code>dir</code> -- just give yourself two weeks away from the project and try to remember what goes where.</p>
+<p>A <code>dir</code>-enabled master do-file will look something like this:</p>
+<p><code>#delimit ;<br />
+global my_project_root=strlower("C:/My Stata Projects/This Project/Do files/");<br />
+local run_these: dir "${my_project_root}" file *;<br />
+</code><code><br />
+foreach dofile in `run_these' {<br />
+do "${my_project_root}`dofile'";<br />
+</code><code><br />
+/* or, if this won't work, try<br />
+do `"${my_project_root}`"`dofile'"'"';<br />
+*/<br />
+</code><code><br />
+};<br />
+</code></p>
+<p>Notice a few things: first, I do this <code>strlower()</code> thing, because Stata's macro extended function <code>dir</code> likes its file paths in all lower case; second, I use UNIX-style forward slashes to delimit nodes in the directory path; third, when your directory and file names include spaces, you have to make Stata use adorned strings. OK, the last two items may require some additional explanations.</p>
+<p>On using forward slashes: I think this is a good habit to pick up. Windows doesn't care either way, and forward slashes eliminate the possibility of misleading Stata into thinking that a directory delimiter is an escape order. That alone is a good reason to just never use backslashes in file paths.</p>
+<p>Adornments are Stata speak for preserved quotation marks. Adorned strings obviously require compound quotes. How you compound them takes a little trial and error. That is a bit of a pain, but there's no way around it if you insist on spaces in file names.</p>
+<p>If, for example, you have two do-files, one called "foo 0.do" and the other "bar 1.do", adornments help the dir function correctly establish that the local macro `run_these' is a list of two items (as in ""foo 0.do" "bar 1.do"") and not a string of four words (as in "foo 0.do bar 1.do"). Adornments and compound quotes make it possible to use spaces in file names. Spaces help legibility. It's up to you whether that benefit is worth the extra cost of more complicated syntax.</p>
+<p>But that was a digression. The point of this post was the extended macro function <code>dir</code>. This function allows you to have Stata read whatever do-files you put in a directory, so that if your project scope changes over time your list of do-files is free to change along with it. I think that's a neat option to have.</p>

@@ -1,0 +1,21 @@
+---
+layout: post
+title: Macbook Pro running hot, draining battery after upgrading to SSD?
+date: 2014-01-12 09:24:34.000000000 -05:00
+categories: []
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p><a href="http://support.apple.com/kb/sp619">Mine</a> did. That was an unpleasant surprise. Googling for a solution brought up untold amounts of speculation and wasted time. </p>
+<p>What ended up working for me was resetting the System Management Controller (SMC), as documented <a href="http://support.apple.com/kb/HT3964">here</a> and especially <a href="http://www.reddit.com/r/apple/comments/1fadpa/quick_advice_for_anyone_planning_to_put_an_ssd_in/">here</a>. You should see that Reddit comment thread, especially if you're also wondering whether you're supposed to enable TRIM.</p>
+<p>Resetting the SMC brought down the <a href="http://www.bresink.com/osx/TemperatureMonitor.html">CPU core temperatures</a> from about 90&deg;C to about 60&deg;C, low enough for the fan to not kick in. My Mac is once again as quiet as it used to be.</p>

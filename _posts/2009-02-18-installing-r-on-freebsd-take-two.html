@@ -1,0 +1,48 @@
+---
+layout: post
+title: Installing R on FreeBSD, part two
+date: 2009-02-18 13:20:18.000000000 -05:00
+categories:
+- FreeBSD
+tags:
+- R
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cisgKP
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>R took a long time to compile yesterday because it depends on all kinds of things that I didn't have installed already. One of them is the Tcl/Tk language, which apparently comes from two separate FreeBSD ports -- one named tcl85 and the other tk85. The latter made trouble. It aborted the installation and it advised me to remove a directory called /nonexistent.</p>
+<p>I googled around a bit and it turns out that /nonexistent is the default home directory of all sorts of system users, such as www or cups, which you might want to have. So, I read the <a href="http://www.freebsd.org/doc/en/books/handbook/users.html">friendly manual</a> and decided that these users needed a new home. There seem to be two steps to that.</p>
+<p>The first is that you move their stuff, like so:<br />
+<code><br />
+# cp -R /nonexistent <em>/newhome</em><br />
+</code><br />
+The second is that you move them to the new address. You can see all the system users who reside at /nonexistent in the /etc/passwd file. If you don't have too many -- I had seven -- you can move them one by one with the command<br />
+<code><br />
+# chpass <em>user</em><br />
+</code><br />
+The <code>chpass</code> command uses the vi editor to do the job, or whatever is your default $EDITOR setting. If, like me, you don't use the thing often enough, you may prefer an easier one. For that, you need to change the environment variable EDITOR to something that works for you before you do <code>chpass</code>. I chose ee:<br />
+<code><br />
+# setenv EDITOR ee<br />
+</code><br />
+Finally, I removed the offending /nonexistent directory:<br />
+<code><br />
+# rm -Rf /nonexistent<br />
+</code><br />
+After that, I thought I'd resume installation. First I found the port:<br />
+<code><br />
+# whereis R<br />
+</code><br />
+Then I cd'd to it, then did:<br />
+<code><br />
+# make deinstall clean &amp;&amp; make reinstall clean<br />
+</code><br />
+The installation resumed where the tk85 port had left off. Now I have R under FreeBSD. I used to dabble in R a while back, with the help of <a title="viaLibri link" href="http://tinyurl.com/ddlt4s">this book</a>. I had it installed under Windows XP from <a title="Install R" href="http://cran.r-project.org/">binaries</a>, and I must say that that process was a lot more convenient.</p>

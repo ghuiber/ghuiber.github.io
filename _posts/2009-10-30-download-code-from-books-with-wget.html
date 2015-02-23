@@ -1,0 +1,30 @@
+---
+layout: post
+title: Download code from books with wget
+date: 2009-10-30 12:51:31.000000000 -04:00
+categories:
+- Cygwin
+- FreeBSD
+- Ubuntu
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/4sbiGf
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The books I'm reading these days come with examples of code, saved on associated web sites. Sometimes that code is neatly packaged into a zip archive or tarball, with every piece of code sitting in a directory named after the chapter it was referenced in. But other times these web sites have the code sitting in directories that you're expected to browse by hand. One example is <a href="http://sobell.com/UB2/code/">here</a>.</p>
+<p>Suppose you don't want to do that. Suppose you just want to get the code all in the same directory structure on your local machine, and only the code, not the associated html files that make it render in a browser. In that situation, you can do this:<br />
+<code><br />
+wget -r -np -nH -R "*.html*" http://www.sobell.com/UB2/code/<br />
+</code><br />
+Recursive downloads with wget are discouraged because they hit the web server hard with a fast succession of requests. But I think the example above is a case of polite wget use: it only downloads what the original host of the code intended to make available for downloading. The <em>-r</em> part means "recursive". The <em>-np</em> part means "but not upwards". The <em>-nH</em> part means "and do not visit any hosts referenced here". Finally, the <em>-R "*.html*"</em> part means "and I don't want any file with .html in it".</p>
+<p>As it turns out, wget can do a lot of things, so its man page is rather long. I googled around for a more concise reference, and I found <a href="http://www.informatik.uni-hamburg.de/RZ/software/www/wget/wget_4.html">this</a>. Enjoy.</p>

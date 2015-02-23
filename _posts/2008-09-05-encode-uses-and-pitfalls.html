@@ -1,0 +1,44 @@
+---
+layout: post
+title: Encode uses and pitfalls
+date: 2008-09-05 22:45:46.000000000 -04:00
+categories:
+- Stata
+tags:
+- encode
+- extended macro function
+- regular expression
+- type
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/drXzmX
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>You won't always receive data saved in the most efficient format and there is no relief in sight. Bandwidth and hard drive sizes are growing unabated and making this only more likely, not less. It's common, for example, that data sets have string variables with a limited range of values.</p>
+<p>Suppose you have a file of 200,000 newspaper subscribers, half of them to The New York Times, the other to the Washington Post, and they are identified as such by a string variable named "paper" with two values -- "The New York Times" showing up 100,000 times and "Washington Post" another 100,000 times.</p>
+<p>If "paper" were instead an integer variable with value labels "The New York Times" for 1 and "Washington Post" for 2, it would be a lot more practical. Labels need only be remembered once and your computer will have an easier time reading 1 and 2 than it would parsing the corresponding strings "The New York Times" and "Washington Post" in every single one of the 200,000 observations. The fix is simple:</p>
+<p><code>encode paper, gen(x)<br />
+drop paper<br />
+rename x paper</code></p>
+<p>There are some options available with <code>encode</code>, you can see them in the Stata help, but this will do the job: "paper" now has values 1 and 2 for the two papers. You can now <code>save, replace</code> and all is well: the dataset is smaller, it loads more quickly, and if you want to look at it with the data browser you will still see "Washington Post" instead of 2 on screen -- it simply shows up in blue, not red.</p>
+<p>Now suppose you have fifty such data sets, with subscribers spanning some 150 different newspapers. And suppose you have a master list of newspapers that has 150 observations in it, where "paper" is in its original, string type. Now you have a problem. Encoding "paper" here will give you an integer with values between 1 and 150 and with value labels guaranteed to not match those in your data sets. In a data file this small, you may want to leave "paper" in string type.</p>
+<p>There's another problem. Suppose you need to append together two data sets -- the Times/Post one in the example above and another, that combines subscribers to Baltimore Sun and Chicago Tribune. If "paper" is encoded in both sets, it has the same range of values -- 1 and 2. In the first set 1 means "The New York Times" and in the second "Baltimore Sun". Not a good thing, that.</p>
+<p>You could recast "paper" as string, append the two datasets, then encode it again. Now it has values ranging from 1 to 4, labeled from "Baltimore Sun" to "Washington Post" in alphabetical order. But if you do this a few times with different data sets, you won't be able to keep your values and labels straight. This is just so you're aware of the problem. There are ways around it, and in all fairness sometimes the memory savings from encoding string variables aren't worth the hassle. The growing availability of 64-bit computing along with the falling cost of RAM work in your favor too.</p>
+<p>Of course now you have the same variable in different types across datasets. What do you do if you need to operate on it inside a do-file loop that picks it out of datasets regardless of its type? One way to avoid having to remember which type "paper" is in for any given dataset is to use the extended macro function <code>type</code>. It works like this:</p>
+<p><code> local paper_type: type paper<br />
+if regexm("`paper_type'","str") {<br />
+* perform operations on paper as if it were of type string<br />
+}<br />
+else {<br />
+* perform operations on paper as if it were of type numeric<br />
+}<br />
+</code></p>
+<p>Notice the <code>regexm()</code> expression. Stata does regular expression matching. That's a matter for another post.</p>

@@ -1,0 +1,27 @@
+---
+layout: post
+title: Goodbye, FreeBSD
+date: 2011-02-03 22:42:08.000000000 -05:00
+categories:
+- FreeBSD
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/fLsXI3
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I cut my teeth at open source software on Old Ironsides, a 2000-vintage 1U PIII/1G server that I bought for $35 back in 2007. That machine is now dead. The BIOS started to hang at a variety of points along the way to loading the OS, blaming a bad CPU speed setting. At first I thought that it was just a matter of replacing the CMOS battery, but when I opened the case I found the CPU fan hanging from its power lines because the little hook that it should lock onto broke off, no doubt because the plastic has just become that brittle over time. Also, one capacitor is popped -- not oozing, just domed.</p>
+<p>Like one of those B-24 bombers that would come back with sunlight showing through the wings where they caught flak, Old Ironsides is a resilient machine. Laying it flat so the fan would sit on top of the CPU by virtue of gravity and replacing the CMOS battery brought it back to life long enough for some thorough data recovery. But it's been drawing a lot of power, about 60-80 Watt, and maintaining the ports and whatnot had become a bit of a chore.</p>
+<p>So this accident gave me the excuse to get me a nicer, greener setup: the <a href="http://www.intel.com/products/desktop/motherboards/D510MO/D510MO-overview.htm">Intel D510MO</a> motherboard in an <a href="http://www.in-win.us/products_pccase_series.php?cat_id=1&series_id=47">In-Win BP655</a> case with 2G of DDR2 RAM, a 500GB HD, and a CD-DVD drive, because paying $25 is much more pleasant than trying to install an OS off a USB stick. The lot cost about $260 at <a href="http://www.intrex.com/">Intrex Computers</a> down the road.</p>
+<p>Not wanting to throw away all that Unix human capital I accumulated over the past three years, I dug around for a compromise between ease of use and FOSS, and found <a href="http://www.amahi.org/">Amahi</a>, via <a href="http://www.webmonkey.com/2010/02/set_up_a_home_server/">Webmonkey</a>. By the way, do you know how old Webmonkey is? That's where I learned HTML in 1997, at least that old. Many happy returns, whenever its birthday is.</p>
+<p>Amahi works. It runs on Fedora 12 for now, but the Fedora 14 edition is in alpha testing and anyway there's nothing wrong that I can think of with Fedora 12, once you do <code>yum -y update</code> on it. Amahi has everything I want, and while VNC did take me some fiddling, it was nothing compared to having to configure every little service by hand like I had to do with FreeBSD. I didn't complain at the time, it was educational, but the novelty wore off right away.</p>

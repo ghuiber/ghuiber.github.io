@@ -1,0 +1,94 @@
+---
+layout: post
+title: Filling the gaps in your panel with winsor
+date: 2010-05-26 16:18:41.000000000 -04:00
+categories:
+- Stata
+tags:
+- extrapolation
+- gaps
+- winsor
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/blqYQ3
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I recently worked on a project where I had to model groundwater salinity as an indirect function of population growth. The idea is that more people will draw more fresh water from the aquifer; other things equal, saline water will be displace it. I had to do this for sixteen counties in Southern Florida and my data -- on population, salinity, and water withdrawals, by year and by county -- had some gaps here and there.</p>
+<p>A search on how to best fill them had to start with the Statalist archive. I quickly found <a href="http://www.stata.com/statalist/archive/2008-08/msg00856.html">this simple solution</a> by Scott Merryman, which solved the core of the problem. But then things got complicated. First, I had several variables of interest and I had no reason to expect that they all would have a linear time trend. Second, some of my variables -- such as measured groundwater salinity -- showed pretty unbelievable outliers.</p>
+<p>So I needed some kind of wrapper that would accommodate different variables, trends of different orders, and dummy variables to account for any differences between counties or groups of counties. And I needed a quick and easy way to deal with the outliers. The wrapper is below:</p>
+<p><code>
+<pre>
+// #### higher-order predictions of anything against time. 
+// takes three arguments: 
+// 1. order, numeric= 1,2,3,4,5,etc. for linear, squared, 
+//    cubed, etc. trend
+// 2. lhs, string, the name of the left-hand side variable: 
+//    salinity, usage, population, etc.
+// 3. dummy, string -- name of the group identifier on the 
+//    right-hand side, e.g., county fips code.
+capture prog drop getValueHat
+program getValueHat
+
+args order lhs dummy
+
+levelsof `dummy', local(countem)
+local checkit: list sizeof countem
+// if `dummy' is not degenerated to one value, then use xi: regress
+if `checkit'>1 {
+   local regressors i.`dummy'*year1
+   forvalues i=1/`order' {
+      gen year`i'=year^`i'
+      if `i'>1 {
+         local regressors `regressors' i.`dummy'*year`i'
+      }
+   }
+   xi: regress `lhs' `regressors'
+}
+// otherwise, just regress
+else {
+   local regressors year1
+   forvalues i=1/`order' {
+      gen year`i'=year^`i'
+      if `i'>1 {
+         local regressors `regressors' year`i'
+      }
+   }
+   regress `lhs' `regressors'   
+}   
+predict `lhs'_hat
+replace `lhs'_hat=max(0,`lhs'_hat)
+if `checkit'>1 {
+   drop _I*
+}
+forvalues i=1/`order' {
+   drop year`i'
+}
+
+end
+</pre>
+<p></code></p>
+<p>Now I can use the same code for different variables with different functional forms, which is nice. For example, if I want to fill gaps in salinity at the county level with a quadratic trend, this program call will get me the right salinity_hat:<br />
+<code>
+<pre>
+getValueHat 2 salinity county
+</pre>
+<p></code></p>
+<p>Dealing with the outliers was a far simpler matter: Nick Cox's <code>winsor</code> command -- <code>findit winsor</code> if you don't have it installed. The complete solution to my problem of gaps and outliers is:</p>
+<p><code>
+<pre>
+winsor salinity, h(3) gen(x)
+getValueHat 2 x county
+rename x_hat salinity_hat
+drop x
+</pre>
+<p></code></p>
+<p>If, like me, you've never Winsorized before, <a href="http://en.wikipedia.org/wiki/Winsorising">here's the Wikipedia entry</a> on the procedure.</p>

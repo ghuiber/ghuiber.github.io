@@ -1,0 +1,31 @@
+---
+layout: post
+title: Infrequently asked questions
+date: 2008-10-15 19:08:23.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/btQrdS
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Some of the things I do with Stata are so rare that I always forget how I'd done them before. So, they turn into questions and they're infrequent.  </p>
+<p>1. Turn a string variable into more variables, one for each word of the longest string:</p>
+<p><code>split mystringvar, gen(stub)</code></p>
+<p>2. Collect the levels of a categorical string variable into a list:</p>
+<p><code>levelsof mycatvar, local(levels)</code></p>
+<p>3. Check that two lists are logically identical (same items, not necessarily in the same order):</p>
+<p><code>local foo: list clean thislist<br />
+local bar: list clean thatlist<br />
+local test: list foo===bar // `test' returns either 0 or 1</code></p>
+<p>Notice the three equal signs. That's not a typo. Two equal signs check for strict identity (i.e., the order of the items in the two lists matters).</p>
+<p>You care to add to the list?</p>

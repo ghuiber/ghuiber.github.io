@@ -1,0 +1,49 @@
+---
+layout: post
+title: I switched to Vim
+date: 2010-02-26 13:08:34.000000000 -05:00
+categories:
+- Stata
+tags:
+- syntax
+- text editors
+- Vim
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/aXjj0A
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I was looking for an excuse to try something new and I decided to pick on one <a href="http://notepad-plus.sourceforge.net/uk/site.htm">Notepad++</a> shortcoming that was handy: the Stata syntax highlighting gets utterly mangled after compound quotes -- `"`like so'"' -- which do sometimes arise, usually in the process of file open/file write. </p>
+<p><a href="http://www.vim.org/">Vim</a> does not get confused by compound quotes and it comes with Stata syntax highlighting out of the box. Integrating it with Stata is not hard at all, either. There are some general directions by Nick Cox <a href="http://fmwww.bc.edu/repec/bocode/t/textEditors.html#vim">here</a>, but on my Windows XP machine I just had to do two things.</p>
+<p>First, I had to edit the PERSONAL/e/editors.ado file to make Vim replace Notepad++ entry in the Editors... sub-menu of the User menu:</p>
+<p><code>
+<pre>
+program define editors
+	version 10
+	window menu append submenu "stUser" "Editors"
+	window menu append item "Editors" "Vim" "winexec gvim.exe"
+end
+</pre>
+<p></code></p>
+<p>Next, I wrote a PERSONAL/v/vim.ado file like so:</p>
+<p><code>
+<pre>
+program vim
+	version 10
+	syntax anything
+	winexec gvim.exe `anything'
+end
+</pre>
+<p></code></p>
+<p>This is based on Nick Cox's recipe, slightly altered so you can launch Vim from the Stata command line to edit an existing do-file that say has spaces in it, as in <code>vim "my dofile.do"</code>. There's a little more on this "syntax anything" solution in my<a href="http://enoriver.net/index.php/2010/02/23/calling-irregular-arguments-with-syntax-anything/"> previous Stata post</a>.</p>
+<p>One thing I did give up -- for now -- is the ability to launch a Stata instance from within Vim after I'm done editing a do-file, either for running the entire do-file or some select lines, the way I used to be able to do in Notepad++. There's got to be a way for that, though. If you know it, please drop me a line.</p>
+<p>That said, I'd never knock Notepad++. It is still a fine text editor that has served me well. The people at <a href="http://mathereconomics.com/">Mather Economics</a>, who adopted it a while back at my instigation, are sticking with it -- and I recommend it to anybody who does not insist on a modal editor.</p>

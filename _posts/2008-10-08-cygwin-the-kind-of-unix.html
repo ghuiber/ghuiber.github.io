@@ -1,0 +1,27 @@
+---
+layout: post
+title: Cygwin, the kind-of-UNIX
+date: 2008-10-08 18:09:31.000000000 -04:00
+categories:
+- Cygwin
+tags:
+- Cygwin
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bJnxNA
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>A couple of days ago I installed <a href="http://www.cygwin.com/">Cygwin</a> because I wanted a way to run UNIX applications in Windows. Cygwin sets up a UNIX-like directory with the root, /, wherever it is that you install it (by default, C:\cygwin).</p>
+<p>Example of usage: to get SSH access to my server, I normally use PuTTY. But after I installed the OpenSSH Cygwin package, I could just do this from the Cygwin command line:</p>
+<p><code>~ ssh my_server_username@my_server.homeip.net</code></p>
+<p>For that to work, I had to set up a .ssh directory in my Cygwin user folder, namely C:\cygwin\home\my_Windows_username\. But you can't set up directory names that start with a dot in Windows XP. Instead, you can set up the \home\my_Windows_username part, and then from the Cygwin window, you just do this:</p>
+<p><code>~ mkdir /home/my_Windows_username/.ssh</code></p>
+<p>Of course Cygwin, like UNIX and unlike Windows, is case-sensitive. I copied my id_dsa private key from the USB stick here, and I was in business. As soon as the server recognized my key, Cygwin created a known_hosts file as well. So far, very UNIX-like. Took me a while, though, to figure out how Cygwin emulated the UNIX directory structure. Google took me <a href="http://punctuatedproductivity.com/category/cygwin/">here</a>, and then all was well.</p>

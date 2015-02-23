@@ -1,0 +1,32 @@
+---
+layout: post
+title: Auto-mount the NFS share
+date: 2009-06-07 16:07:30.000000000 -04:00
+categories:
+- Ubuntu
+tags:
+- NFS
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/64u7TY
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Local access to an NFS share is useful enough that I want it enabled by default, without the need for the <code>mount</code> command as shown in my <a href="http://enoriver.net/index.php/2009/05/19/setting-up-nfs-freebsd-server-ubuntu-client/">previous post</a>.</p>
+<p>This default access to the server share also goes by the name "auto-mount". You have two options for setting it up: using the autofs utility or a static mount point. I'm not sure what their relative merits are. I chose the latter.</p>
+<p>First I created a local home for the NFS share:<br />
+<code><br />
+sudo mkdir /from_server<br />
+</code></p>
+<p>Then I made a simple edit to the /etc/fstab file:<br />
+<code><br />
+my_server_url:/usr/home/gabi /home/gabi/from_server nfs rw,hard,intr 0 0<br />
+</code></p>
+<p>That's all. From now on, the contents of my home folder on the FreeBSD server will show up in the /from_server directory on the Ubuntu client, with read-write access.</p>

@@ -1,0 +1,77 @@
+---
+layout: post
+title: Dynamic arithmetic expressions
+date: 2009-04-27 23:26:11.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/axLIrX
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>A couple of days ago I showed how you can use logical operators inside arithmetic expressions. The point of that post was that if you had three variables, called say _var1, _var2 and _var3, then you could build another variable, call it _var4, that counted row-wise their non-zero instances, like so:<br />
+<code><br />
+gen _var4=(_var1!=0)+(_var2!=0)+(_var3!=0)<br />
+</code><br />
+This was actually spun off a larger project. I had several data sets that could each have all or any subset of a list of measurements saved as _var1 through _var17. I had to count the non-zero instances row-wise with a formula that worked across all of the data sets, regardless of which of these _var measurements each of them included. I also had to allow for the possibility that some data sets would have no such variables at all, and that some data sets added later would bring in additional measurements, labeled _var18 and  onward. Clearly, a static formula like the one above won't do. Here's an alternative:<br />
+<code><br />
+// 1. build a mock-up file to try this thing out<br />
+clear<br />
+set obs 4<br />
+gen id=_n<br />
+gen _var1=0<br />
+gen _var2=0<br />
+replace _var1=1.2 in 1<br />
+replace _var1=1.1 in 2<br />
+replace _var2=1.2 in 2<br />
+replace _var2=.5 in 3<br />
+</code><code><br />
+// 2. build the formula<br />
+// 2.1. generate a list of the _var variables<br />
+// you have in this particular file, if any.<br />
+</code><code><br />
+unab allvars: _all // this collects all the variable names<br />
+foreach varname in `allvars' {<br />
+  if regexm("`varname'","_var") {<br />
+    local myvars `myvars' `varname' // this collects those that start with "_var"<br />
+  }<br />
+}<br />
+local myvars_ct: list sizeof myvars // this counts them<br />
+</code><code><br />
+// check it out:<br />
+di "`myvars'"<br />
+di `myvars_ct'<br />
+</code><code><br />
+// 2.2. build the actual formula<br />
+if `myvars_ct'&gt;0 {  // if you have any _var variables, then proceed<br />
+  forvalues i=1/`myvars_ct' {<br />
+    local this_var: word `i' of `myvars'<br />
+    local vars_sum "`vars_sum'(`this_var'!=0)+"  <br />
+  }<br />
+</code><code><br />
+  // check it out:<br />
+  di "`vars_sum'" // ok, got an extra + sign.<br />
+</code><code><br />
+  // 2.3 clean up the formula<br />
+  local vars_sum=substr("`vars_sum'",1,strlen("`vars_sum'")-1)<br />
+</code><code><br />
+  // looks good now:<br />
+  di "`vars_sum'"<br />
+</code><code><br />
+  // 3. now put the formula to use<br />
+  gen vars_sum=`vars_sum'<br />
+}<br />
+else {<br />
+  di "No _var found in this file."<br />
+}<br />
+</code><br />
+This will build your formula for any combo of the _var measurements. One code fits all and it's future proof too. That's always nice.</p>

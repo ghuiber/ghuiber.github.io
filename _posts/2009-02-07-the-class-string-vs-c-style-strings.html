@@ -1,0 +1,109 @@
+---
+layout: post
+title: The class string vs. C-style strings
+date: 2009-02-07 00:34:02.000000000 -05:00
+categories:
+- C++
+tags:
+- class string
+- structs
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cisYLB
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My previous C++ post illustrated how <code>struct</code>s worked. The same example -- reading student names and grades from a .csv file into an array of Student structs -- can be used to illustrate the differences between C-style strings -- null-terminated arrays of characters -- and the class <code>string</code>.</p>
+<p>The advantage of using the class <code>string</code>, so far, seems to be that it saves the work of array length accounting. The global constant NAMELEN is gone. Here's the new version of the code in the previous post:<br />
+<code><br />
+// An example of using structs: reading data from a list of student <br />
+// names and grades, saved as a .csv file, into an array. In this <br />
+// example the file is saved as .csv, but the delimiter between <br />
+// name and grade is the tab character, '\t'. Also, the first row <br />
+// of the .csv file has column names -- "name" and "grade" -- so<br />
+// I want to skip it.<br />
+//-------------------------------------------------------------------<br />
+</code><code><br />
+#include &lt;iostream&gt;<br />
+#include &lt;fstream&gt;<br />
+#include &lt;string&gt;<br />
+using namespace std;<br />
+</code><code><br />
+const int LISTMAX=1000;    // maximum number of students<br />
+</code><code><br />
+struct Student {<br />
+  string name;<br />
+  float grade;<br />
+};<br />
+</code><code><br />
+void readList(string infilename);<br />
+// Arguments:<br />
+//   file name, passed as a class string.<br />
+// Side effects:<br />
+//   open file stream, function call of fillUp.<br />
+</code><code><br />
+void fillUp(ifstream&amp; inList, Student wholeClass[],<br />
+int LISTMAX, int&amp; stCount);<br />
+// Preconditions: global constant LISTMAX is the dimension of<br />
+//   the wholeClass[] array of Student structs.<br />
+// Postconditions:<br />
+//   (1) grades[0] through grades[stCount-1]  filled with positive<br />
+//   real numbers read from input file stream open by readList.<br />
+//   (2) names[0] through names[stCount-1] are class string objects.<br />
+//-------------------------------------------------------------------<br />
+</code><code><br />
+int main()<br />
+{<br />
+  string infilename="example_list.csv";<br />
+  readList(infilename);<br />
+  return 0;<br />
+}<br />
+//-------------------------------------------------------------------<br />
+</code><code><br />
+// open input, file stream call fillStudent to fill array named<br />
+// wholeClass[LISTMAX] with Student structs<br />
+void readList(string infilename)<br />
+{<br />
+  ifstream inList(infilename.c_str( ));<br />
+  if (inList.fail()) {<br />
+    cout &lt;&lt; "Input file opening failed.\n";<br />
+    exit(1);<br />
+  }<br />
+  else {<br />
+    Student wholeClass[LISTMAX]; // initialize array of structs<br />
+    int stCount=0;  // number of valid elements starts at zero<br />
+    fillUp(inList, wholeClass, LISTMAX, stCount);<br />
+    cout &lt;&lt; "\nGrade Roll Report" &lt;&lt; endl;<br />
+    cout &lt;&lt; "There were " &lt;&lt; stCount &lt;&lt; " students." &lt;&lt; endl;<br />
+  }<br />
+  inList.close();<br />
+}<br />
+</code><code><br />
+// fill wholeClass[LISTMAX] using data from infilename.<br />
+void fillUp(ifstream&amp; inList, Student wholeClass[],<br />
+int LISTMAX, int&amp; stCount)<br />
+{<br />
+  string dummy;               // container for garbage.<br />
+  getline(inList,dummy,'\n'); // toss the entire first row.<br />
+  for(int i=0; i&lt;LISTMAX; i++) {<br />
+    while (stCount&lt;LISTMAX &amp;&amp;<br />
+           getline(inList, wholeClass[i].name,'\t')) {<br />
+      if(inList &gt;&gt; wholeClass[i].grade) {<br />
+        getline(inList,dummy,'\n');<br />
+        cout &lt;&lt; "Name: " &lt;&lt; wholeClass[i].name<br />
+             &lt;&lt; " Grade: "&lt;&lt; wholeClass[i].grade &lt;&lt; endl;<br />
+      }<br />
+      stCount++;<br />
+    }<br />
+  }<br />
+}<br />
+//-------------------------------------------------------------------<br />
+</code><br />
+So I'm back in school, continuing the course I started last fall. We're using the same textbook, and the quotes at the beginning of the sections are only getting better. Here's the one on testing and debugging your functions: "I beheld the wretch -- the miserable monster whom I had created." Can you tell it's from <em>Frankenstein</em>?</p>

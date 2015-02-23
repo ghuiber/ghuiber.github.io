@@ -1,0 +1,355 @@
+---
+layout: post
+title: Simulation
+date: 2011-01-03 13:04:35.000000000 -05:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/ewTwJL
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p><a href="http://www.sigkdd.org/explorations/issues/4-2-2002-12/lo.pdf">This paper</a> by <a href="http://www.bentley.edu/arts-sciences-center/visiting-research-fellow.cfm">Victor S. Y. Lo</a> came up in a conversation about how to best model treatment response in a business context, where the population of interest is the customers, and the treatment is some kind of marketing action -- you try and up-sell, cross-sell or simply keep them from buying from somewhere else.</p>
+<p>Because this is stuff I should know about now, I replicated the author's simulation in Stata. That was a success and the code is enclosed, in case any Stata user ever googles "victor lo database marketing" and ends up here. But the exercise got me thinking again about programming and long-term code maintenance.</p>
+<p>I have a bit of adult education in two widely-used programming languages: C++ and Perl. In my meager experience, there's one big difference between the two. C++ forces you to write code in a very rigid way. Perl does not. C++ is like a regular game for older kids, played by rules. Perl is like free-flowing toddler play. Perl is easier on you because it's less capable than C++: not being able to do some things means that you don't get to worry about them. With this disclaimer out of the way, what matters for this story is that Perl instructions need not be encapsulated into subroutines. You write them as you go, you check that they do what you want, then you can clean up after yourself later, or not. </p>
+<p>This means that quick and dirty things are easier to do in Perl than in C++, but usually quick and dirty things end up needing to be useful in the long run, so you will end up having to go slow and clean soon enough. With Perl that is optional. Optional will bite you in the ass, but clean isn't an unadulterated blessing, either: clean somehow always manages to be more obscure than dirty. I wish it weren't, and there's probably a right way to do it that would prevent this inconvenience, but I'm too old and too trapped in middle-class comfort to afford an apprenticeship, so I'll just have to muddle through.</p>
+<p>Stata is like Perl. Because of this, I start out writing do-files in freestyle. This lets me explore at my leisure. Then, as things grow clear enough in my head, I encapsulate my code into reusable programs -- not so much to avoid cutting and pasting code, which is a worthy goal, but to enforce consistency and check my thinking.</p>
+<p>This leaves me with code that looks good and tidy at the end of a project, but that tidiness makes it awful hard to follow when the specifics of the problem I tried to solve are no longer fresh in my mind. So: I am posting this simulation below, in its finished form, with plenty of comments, hoping that it will forever make sense to me, but I make no guarantees. If you stumble across it a month from now or later, odds are you're on your own.</p>
+<pre><code>
+clear 
+set type double
+set more off
+pause on
+
+version 10
+
+set obs 100000
+
+// GLOBAL VARIABLES
+
+// my random seed value and cutoffs:
+global seed     12345671  // seed for random number generator
+global traincut .49875    // at this seed, this cutoff splits data 50/50 exactly into training and holdout
+global treatcut .8003884  // at this seed, this cutoff splits data 80/20 exactly into treatment and control
+
+// my file path for graphs:
+global savehere c:/data/lo simulation/
+
+// Victor Lo's variables:
+global varz age wealth asset homevalue
+
+// means
+global m_age        45
+global m_wealth     935
+global m_asset      680.5
+global m_homevalue  654.5
+
+// standard deviations
+global sd_age       13
+global sd_wealth    150
+global sd_asset     150
+global sd_homevalue 70
+
+// parameters of the true response functions. a means intercept. t means treatment
+// baseline (control)
+global a        -7.5
+global b_age      .02
+global b_wealth   .005
+global b_asset    .00155
+
+// treatment dummies (add to baseline)
+global ta        -.5
+global tb_age     .02
+global tb_wealth 0
+global tb_asset   .0001
+
+// PROGRAM DEFINITIONS SECTION
+
+// generate data according to Lo's DGP:
+capture prog drop generateData
+program generateData
+
+foreach k in seed traincut treatcut varz {
+	local `k' ${`k'}
+}
+// means and standard deviations
+foreach k in m sd {
+	foreach var in `varz' {
+		local `k'_`var' ${`k'_`var'}
+	}
+}
+// variances
+foreach k in `varz' {
+	local var_`k'=`sd_`k''^2
+}
+// matrices of interest for 3 vars that make it into the final model
+foreach k in m sd {
+	matrix `k'z=(``k'_age',``k'_wealth',``k'_asset')
+}
+// Lo's own covariance matrix:
+matrix covz=(`var_age',507,15207,`var_wealth',675052,6750,`var_asset')
+
+// simulate data with given seed value
+drop _all
+set seed `seed'
+drawnorm age wealth asset, n(100000) means(mz) cov(covz)
+
+// set up treatment and control group and their respective true response functions
+gen treatment=runiform()
+
+// find cutoff for treatment group exactly equal to random 80000 observations
+local tcut `treatcut'
+count if treatment<=`tcut'
+gen byte treated=(treatment<=`tcut')
+drop treatment
+tab treated
+
+// get true response for treatment and control group
+foreach k in a b_age b_wealth b_asset {
+	local `k'  ${`k'}
+	local t`k' ${t`k'}
+}
+local intercept     (`a'+`ta'*treated)
+foreach k in age wealth asset {
+	local `k'_effect    (`b_`k''+`tb_`k''*treated)*`k'
+} 
+gen logit_response=`intercept'+`age_effect'+`wealth_effect'+`asset_effect'
+
+// split the data randomly 50/50 into training and holdout subsets
+gen training=runiform()
+local tcut `traincut'
+count if training<=`tcut'
+gen byte trained=(training<=`tcut')
+drop training
+tab trained treated
+
+// now jitter the response so you can run a regression
+gen error=rnormal()
+gen logit_jittered=logit_response+error
+
+// now identify observations, to check overlap of top decile btw current 
+// and proposed methodology.
+gen id=_n
+order id
+
+end
+
+// predict treated response in holdout set, then rank and decile it:
+capture prog drop getDeciles
+program getDeciles
+
+args whichone // "current" or "proposed"
+
+keep if !trained            // keep only holdout group
+
+local current_treatment  _b[_cons]+_b[age]*age+_b[wealth]*wealth+_b[asset]*asset // estimated by current regression model
+local current_control    ${a}+${b_age}*age+${b_wealth}*wealth+${b_asset}*asset   // known from simulation (not estimated by current model)
+
+local proposed_treatment (_b[_cons]+_b[_Itreated_1])+(_b[age]+_b[_ItreXage_1])*age+_b[wealth]*wealth+_b[asset]*asset // estimated by proposed regression model
+local proposed_control   _b[_cons]+_b[age]*age+_b[wealth]*wealth+_b[asset]*asset                                     // ditto (so, better than current)
+
+local current_decile  treatment_response // In current methodology Lo ranks the holdout sample by decile of the estimated treatment response rate,
+                                         // because that's what's being modeled. That's the only thing you can try and maximize. But that won't maximize 
+                                         // true lift, as shown in Figure 4.
+local proposed_decile observed_lift      // In proposed methodology Lo ranks the holdout sample by decile of the estimated lift, because he models
+                                         // the response of both the treatment and the control group, which allows him to maximize true lift. 
+
+// Now fill in individual response probability for either case -- what it would have been if: 
+// -- individual had been picked in target group
+// -- individual had stayed in the control group
+// Then based on that, fill in the lift you think you can credit to the treatment (observed lift).
+gen logit_treatment=``whichone'_treatment'
+gen logit_control=``whichone'_control'
+foreach k in treatment control {
+	gen `k'_response=exp(logit_`k')/(1+exp(logit_`k'))
+	drop logit_`k'
+}
+gen observed_lift=treatment_response-control_response
+
+// get true response to treatment and true response in control group (simulated).
+// then based on that, fill in actual (simulated) lift that treatment could have
+// given (you don't know this when you have real data, because you don't know
+// the true response functions in the two groups).
+foreach k in a b_age b_wealth b_asset {
+	local `k'  ${`k'}
+	local t`k' ${t`k'}
+}
+local treatment_intercept     `a'+`ta'
+local control_intercept     `a'
+foreach k in age wealth asset {
+	local treatment`k'_effect  (`b_`k''+`tb_`k'')*`k'
+	local control`k'_effect    `b_`k''*`k'
+} 
+foreach k in treatment control {
+	gen logit_`k'=``k'_intercept'+``k'age_effect'+``k'wealth_effect'+``k'asset_effect'
+	gen `k'_actual=exp(logit_`k')/(1+exp(logit_`k'))
+	drop logit_`k'
+}
+gen actual_lift=treatment_actual-control_actual
+drop treatment_actual control_actual
+
+label var actual_lift        "Actual Lift"
+label var observed_lift      "Observed Lift"
+label var treatment_response "Treatment Response"
+label var control_response   "Control Response"
+
+// now get deciles -- based on current model (treatment response) or proposed (observed lift)
+local response ``whichone'_decile'
+quietly {
+	pctile pct = `response', nq(10) 
+	levelsof pct, local(deciles) 
+	drop pct
+	gen decile=.
+	forvalues i=1/9 {
+		local decile: word `i' of `deciles'
+		replace decile=10-`i'+1 if `response'<=`decile' & missing(decile)
+	}
+	replace decile=1 if missing(decile)
+}
+tab decile, missing
+tabstat treatment_response control_response actual_lift observed_lift, stats(mean n) by(decile)
+
+end
+
+// Draw graph of response rate -- figure 3 or 5.
+capture prog drop drawResponse
+program drawResponse
+
+args whichone // "current" or "proposed"
+
+local stitle subtitle((`whichone' methodology))
+
+local current_fignum   3
+local proposed_fignum  5
+local responses        treatment_response control_response
+local fignum           ``whichone'_fignum'
+
+preserve
+collapse (mean) `responses', by(decile)
+local title   Fig `fignum'. Response rate by decile
+local titles  title(`title') `stitle'      
+tempfile fig
+graph bar `responses', over(decile) ytitle(response rate) `titles' saving("`fig'", replace)
+graph export "${savehere}Lo Figure `fignum'.png", as(png) replace
+restore
+
+end
+
+// Draw graph of lift -- figure 4 or 6.
+capture prog drop drawLift
+program drawLift
+
+args whichone // "current" or "proposed"
+
+local stitle subtitle((`whichone' methodology))
+
+local current_fignum   4
+local proposed_fignum  6
+local responses        actual_lift observed_lift
+
+local fignum           ``whichone'_fignum'
+local control          ``whichone'_control'
+
+preserve
+collapse (mean) `responses', by(decile)
+local ytitle ytitle(lift (treatment minus control))
+local title  Fig `fignum'. Lift by decile
+local titles `ytitle' title(`title') `stitle'      
+tempfile fig
+graph bar `responses', over(decile) `titles' saving("`fig'", replace)
+graph export "${savehere}Lo Figure `fignum'.png", as(png) replace
+restore
+
+end
+
+// estimate model -- current or proposed methodology
+capture prog drop estimateModel
+program estimateModel
+
+args whichone // "current" or "proposed"
+
+// estimate the response in the training set. 
+// for current methodology, include only treated subset in e(sample). this
+// will mimic the true model, so you can't run a regression on logit_response
+// directly. instead, you must use logit_jittered, so you have an error term.
+local current_condition if trained & treated
+local current_model     regress logit_jittered age wealth asset `current_condition'
+
+// for proposed methodology, no need to jitter the response to run the 
+// regression, because though e(sample) includes both the treated and 
+// control subsets and uses a dummy, the regression equation does not 
+// mimic true model. only age is interacted with treatment dummy, not also asset.
+// but, no harm in using logit_jittered, either.
+local proposed_condition if trained
+local proposed_model     xi: regress logit_response i.treated*age wealth asset `proposed_condition'
+
+// Generate the data for the three variables that
+// make it into the model: age, wealth and asset.
+quietly generateData
+
+// estimate the response in the training set.
+``whichone'_model'
+
+// use model to predict treated response in holdout set:
+getDeciles `whichone'
+
+end
+
+// EXECUTION SECTION
+
+// for current methodology, estimate model based only on treatment subset
+// of the training data set
+// for proposed methodology, you will need both treatment and control 
+// subsets of the training data set
+
+// CURRENT METHODOLOGY (DRAW FIGURES 3 AND 4)
+
+estimateModel current
+
+// OK, this will draw Fig 3.
+drawResponse current
+
+// Now draw Fig 4.
+drawLift current
+
+// Keep top decile according to current methodology
+tempfile topdecile_current
+keep if decile==1
+keep id observed_lift
+rename observed_lift lift
+sort id
+save "`topdecile_current'", replace
+
+// PROPOSED METHODOLOGY (DRAW FIGURES 5 AND 6)
+
+estimateModel proposed
+
+// OK, this will draw Fig 5.
+drawResponse proposed
+
+// Now draw Fig 6.
+drawLift proposed
+
+// Keep top decile according to proposed methodology
+tempfile topdecile_proposed
+keep if decile==1
+keep id observed_lift
+rename observed_lift true_lift
+sort id
+save "`topdecile_proposed'", replace
+
+// Now see how much the two overlap.
+merge id using "`topdecile_current'"
+tab _merge
+</code></pre>

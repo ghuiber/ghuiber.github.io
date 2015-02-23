@@ -1,0 +1,36 @@
+---
+layout: post
+title: The zen of UNIX
+date: 2010-09-29 10:41:51.000000000 -04:00
+categories:
+- FreeBSD
+- Ubuntu
+- Vim
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/d7Pwg6
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My main trouble with UNIX is that I'll go looking for a quick answer, find it, and then somehow still keep digging until I'm utterly stumped, long after I solved the initial problem. Here's one example:</p>
+<p>On the recommendation of my friend <a href="http://balinterdi.com/">Bálint Érdi</a>, I signed on with <a href="http://dropbox.com">Dropbox</a>, and I figured one good use of it would be to keep my vimrc files in sync across three virtual Linux computers I'm having to use.</p>
+<p>So, I went looking for the originals -- the Vim configuration files on the Linux Mint 8 VM that I am using now. Except I didn't go straight to the VM. I took a detour through Chrome, and typed this in the address box: "where is .vimrc". That got me <a href="http://www.computing.net/answers/linux/vimrc-location/26702.html">here</a>, which is a comment thread that happened six years ago. </p>
+<p>Of course, the answer is trivial: <code># locate vimrc</code>. That's UNIX love right there. If you want to find a file, just <code>locate</code> it. If you're the almighty root (#), the computer will fetch it without a fuss. But the more fascinating bit is a little further below, posted by the user Wolfbone:</p>
+<blockquote><p>
+.foorc = <strong>r</strong>untime <strong>c</strong>onfiguration file for programme "foo" located in user's home directory.</p>
+<p>/etc/foorc (if it exists) = global (all users) runtime configuration file for programme "foo", overridden by .foorc, if it exists.</p>
+<p>Suggesting to someone who cannot find an 'rc' file that '#locate vimrc' is a useful command is not very helpful.
+</p></blockquote>
+<p>I had no idea that vimrc was called that in order to respect this [r]untime [c]onfiguration naming convention. I also had no idea that the ~/.foorc files are there to override /etc/foorc files. Sounds like an architecture thing. I am guessing that the common use is that your IT guy will put configuration files in /etc/foorc, and if you like those, fine. If you don't, just make up your own .foorc files and stick them in the home folder. Neat, but it gets even better.</p>
+<p>If you run this <code># locate vimrc</code> command, it'll turn up /etc/vimrc.local. If you then <code>cat</code> vimrc you can see that it defers to vimrc.local if it exists. So, there are two available layers of configuration overrides: first is /etc/vimrc.local, then ~/.vimrc, which reigns supreme. What's the use of that? And how is this implemented in FreeBSD? My initial guess was that the FreeBSD convention is that rc is a file extension, as in mail.rc. But then in the /etc folder I also saw things like rc.firewall. And in /usr/local/etc I saw things called ddclient.conf. What's different between files that start with rc., or end with .rc, or end with .conf?</p>
+<p>So many questions, so little time. Still, this is better than my experience with Windows, where things either just work (thank you, Windows 7) or they're so arcane that, if I ever attempt them, it's always on guts alone. I have no theory whatsoever of what might go wrong.</p>

@@ -1,0 +1,34 @@
+---
+layout: post
+title: Your Linux VM can talk to your Windows PC
+date: 2010-07-05 13:56:57.000000000 -04:00
+categories:
+- Ubuntu
+tags:
+- UNIX
+- VMware
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/df5Vf1
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>If you run a virtual Linux machine as a VMware appliance, and you have VMWare Tools installed, you can let it write to folders accessible from the Windows host. This takes two steps.</p>
+<p>First, in VMware Player (as of 3.0) you edit the virtual machine settings -- enable Shared Folders in the Options tab, and add a host path there -- say C:\data\share_with_vm. You can add several distinct Windows paths here. </p>
+<p>Next, you add this line to /etc/rc.local right before the "exit 0" line:<br />
+<code>
+<pre>
+mount -t vmhgfs .host:/ /home/user/Shares
+</pre>
+<p></code><br />
+Your Linux virtual computer will see any of the Windows folders you shared at the first step as children of the ~/Shares directory. Adding this line to /etc/rc.local makes Shares available to you as soon as you start the VM.</p>
+<p>This is how I do Linux on my work computer now, after I first tried Cygwin, then had a dual-boot setup for a while.</p>

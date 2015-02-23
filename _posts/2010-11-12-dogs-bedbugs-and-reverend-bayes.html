@@ -1,0 +1,112 @@
+---
+layout: post
+title: Dogs, bedbugs and Reverend Bayes
+date: 2010-11-12 15:52:01.000000000 -05:00
+categories:
+- Stata
+tags:
+- Bayes' Theorem
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/8ZtUpN
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>This morning I finished watching <a href="http://www.infoq.com/presentations/Machine-Learning">this</a>, then I went and got my New York Times fix, where I found <a href="http://nyti.ms/aGJYdi">this</a>. The two are connected because Hilary Mason's talk gave me a nice little reminder of the counterintuitive <a href="http://en.wikipedia.org/wiki/Bayes'_theorem">Bayes' Theorem</a>, and the idea to use it to see if the Times has any base in casting doubts over the good name of the city's fine corps of bedbug-sniffing dogs. </p>
+<p>The answer is that it depends. If the infestation rate in New York City is 5% rather than the 10% that <a href="http://bit.ly/ckMGzx">The Daily News</a> claims, and if the dogs' accuracy in the field is 95% rather than the hoped-for 98%, then really, if you live in one of the typical New York apartments and a dog says you have bedbugs, you might as well flip a coin. As hard as that may be to believe, that's how the numbers work out. When the actual infestation rate is low, a 95% accuracy rate is pretty limiting.</p>
+<p>Here's my Stata code:</p>
+<pre><code>
+capture prog drop findBedbugs
+program findBedbugs
+
+version 10
+
+args bir_prb bsd_prb
+
+// legend of the variable names in this program
+local bir "reported NYC bedbug infestation rate"
+local bsd "bedbug sniffing dog"
+local nhu "NYC housing units in 2009"
+local prb "probability"
+local num "number"
+
+// Bayes' theorem: p(A|B)=p(B|A)*p(A)/p(B)
+// P(A) is the true infestation rate -- bir_prb.
+// P(B) is the detected infestation rate (both true and false positives) -- bsd_prb.
+// P(B|A) is the dog's accuracy rate.
+// P(A|B) is the probability of a true positive.
+
+// data sources
+// for bir_prb=.1 (10% infestation rate):
+// http://bit.ly/ckMGzx
+// for nhu_num=8,017,263 (over 8 million housing units) in NYC:
+// http://quickfacts.census.gov/qfd/states/36000.html
+// for bsd_prb=.98 (the dogs' accuracy rate is 98%):                                  
+// http://bit.ly/apbldH 
+
+// collected values  
+local nhu_num  8017263	 
+
+// some formatting
+local bsdr: di %2.0f 100*`bsd_prb' "%"
+local bsdw: di %2.0f 100*(1-`bsd_prb') "%"
+local ir:   di %2.0f 100*`bir_prb' "%"
+
+// some labels
+local DS "Total possible cases where the dog"
+local DR "`DS' is right (`bsdr' of infested units)"
+local DW "`DS' is wrong (`bsdw' of units not infested)"
+local TP "P(you really have bedbugs when this dog says so)"
+
+// some calculations
+local DR_num=`bsd_prb'*`bir_prb'*`nhu_num'         // true positives
+local DW_num=(1-`bsd_prb')*(1-`bir_prb')*`nhu_num' // false positives
+local I_num=`nhu_num'*`bir_prb'                    // number of infestations
+local npi=.98*`I_num'/(`DR_num'+`DW_num')          // net P(infestation)
+
+// show this on screen
+local col 75
+di ""
+di "The infestation rate is `ir' and the dog is `bsdr' accurate."
+di "Total number of housing units in NYC: " _col(`col') %12.0fc `nhu_num'
+di "Infested units: " _col(`col') %12.0fc `I_num'
+di "`DR': "           _col(`col') %12.0fc `DR_num'
+di "`DW': "           _col(`col') %12.0fc `DW_num'
+di ""
+di "`TP': "           %4.2fc `npi'*100 "%"
+
+end
+</code></pre>
+<p>And here's what you get when you run this, first with a 10% infestation rate and 98% dog accuracy, and then with a 5% infestation rate and a 95% dog accuracy:</p>
+<pre><code>
+. findBedbugs .1 .98
+
+The infestation rate is 10% and the dog is 98% accurate.
+Total number of housing units in NYC:                                        8,017,263
+Infested units:                                                                801,726
+Total possible cases where the dog is right (98% of infested units):           785,692
+Total possible cases where the dog is wrong ( 2% of units not infested):       144,311
+
+P(you really have bedbugs when this dog says so): 84.48%
+
+. findBedbugs .05 .95
+
+The infestation rate is  5% and the dog is 95% accurate.
+Total number of housing units in NYC:                                        8,017,263
+Infested units:                                                                400,863
+Total possible cases where the dog is right (95% of infested units):           380,820
+Total possible cases where the dog is wrong ( 5% of units not infested):       380,820
+
+P(you really have bedbugs when this dog says so): 51.58%
+</code></pre>
+<p>The point is that this low probability of having bedbugs when the dog says so is a function of both how bad the problem is, and how accurate the dog is. The 10% infestation rate expectation comes from a Daily News poll. The 95% accuracy rate comes from a clinical trial. It's hard to say which is more trustworthy. It's possible that dogs perform worse in the field than they do in the lab. It's also possible that the poll suffers from non-response bias.</p>
+<p>Plus, if you live in a less-infested neighborhood (and you can tell from <a href="http://samizdat.cc/bdbgs/">here</a>) your chance that you're wasting your money if you hire a sniffer dog increases greatly. That's not the dog's fault.</p>

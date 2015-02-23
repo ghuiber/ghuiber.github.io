@@ -1,0 +1,32 @@
+---
+layout: post
+title: Old-school summary statistics
+date: 2008-11-10 11:52:39.000000000 -05:00
+categories:
+- Stata
+tags:
+- _result()
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/b22lwW
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>If you do this</p>
+<p><code>sysuse auto<br />
+sum price, detail<br />
+return list<br />
+</code></p>
+<p>you will see that Stata saves summary statistics in a few scalars with some rather apt names, like r(N) for count, r(mean) for mean, or r(p99) for the 99th percentile.</p>
+<p>Those names used to be far less descriptive until a few years back. If you come across code written by people who learned their Stata prior to version 6 or so, you're bound to see things like _result(1) rather than r(N). For a full listing of the old-school names, do this after you've ran the code above:</p>
+<p><code>forvalues i=1/20 {<br />
+di "_result(`i') is "_result(`i')<br />
+}</code></p>
+<p>There are only 18 _result()-style results, but I couldn't remember the exact number. 20 was my first guess, based on the eyeballed length of the <code>return list</code> output. Stata doesn't mind if you overshoot the loop size. It will just return missing scalars as, well, missing.</p>

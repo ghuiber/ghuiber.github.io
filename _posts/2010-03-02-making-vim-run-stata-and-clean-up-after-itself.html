@@ -1,0 +1,53 @@
+---
+layout: post
+title: Making Vim run Stata and clean up after itself
+date: 2010-03-02 02:04:11.000000000 -05:00
+categories:
+- Stata
+tags:
+- text editors
+- Vim
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/bWG9Mi
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Last week I mentioned that in the course of switching from Notepad++ to Vim I lost the ability to run Stata do-files or selected lines from within the text editor, and I asked my readers for help if they had a solution. What do you know, one of them did, and wrote to me all the way from China with a Vim script that solves both problems. I won't repeat it here because it is almost identical to <a href="http://www.stata.com/statalist/archive/2006-06/msg00905.html">this one</a>. Clearly, I need to remember to always look into the Statalist archive first. </p>
+<p>There was one line that I had to change, where Vim is ordered to clean up after itself. Every time you runDoLines() you produce a bunch of .tmp.do files in your %temp% directory, which Vim knows as $TEMP. Though this<br />
+<code>
+<pre>
+au VimLeave * exe "!del -y " temp
+</pre>
+<p></code><br />
+should have deleted them, on my computer it did not. This one did:<br />
+<code>
+<pre>
+au VimLeave * silent exe '!del /Q "'.$TEMP.'\*.tmp.do"'
+</pre>
+<p></code><br />
+Another thing I tinkered with was the way Vim handles these backup files that end in a tilde. You can disable them entirely, by adding<br />
+<code>
+<pre>
+set nobackup nowritebackup
+</pre>
+<p></code><br />
+to _vimrc as explained <a href="http://www.faqs.org/faqs/editor-faq/vim/">here</a>. You can also have Vim keep them somewhere you can delete them explicitly, in bulk, as explained <a href="http://vimdoc.sourceforge.net/cgi-bin/vimfaq2html3.pl#7.2">here</a>. Finally, you can use a combination of both: you save backup files while Vim is working, but then you make it delete them all when it starts next time. That is explained <a href="http://vim.wikia.com/wiki/Remove_swap_and_backup_files_from_your_working_directory">here</a>. I went with it, so after I created a temp folder in $VIMRUNTIME, I added this to my _vimrc file:<br />
+<code>
+<pre>
+" Keeps backups in $VIMRUNTIME\temp folder, cleans them up
+silent execute '!mkdir "'.$VIMRUNTIME.'\temp"'
+silent execute '!del /Q "'.$VIMRUNTIME.'\temp\*~"'
+set backupdir=$VIMRUNTIME\temp\
+set directory=$VIMRUNTIME\temp\
+</pre>
+<p></code><br />
+In the process of figuring this out, I also discovered that there's a quick way to clean up %temp% thoroughly, as shown <a href="http://www.css-networks.com/2008/08/how-to-clear-the-temp-directory.html">here</a>. Good to know. One of these days I might add that to _vimrc too. Now I'm on a roll.</p>

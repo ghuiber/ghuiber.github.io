@@ -1,0 +1,103 @@
+---
+layout: post
+title: Dealing with unhelpful .csv files
+date: 2009-01-16 15:28:41.000000000 -05:00
+categories:
+- Stata
+tags:
+- .csv
+- regular expression
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bGmiGG
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The easiest way to get your .csv (comma-separated values) text files into Stata is this:<br />
+<code><br />
+insheet using myfile.csv, comma names<br />
+</code><br />
+This assumes that your .csv file is well-behaved: names are on the first row, and any commas really are field separators.</p>
+<p>This is sometimes not the case. Recently I got a set of .csv files that were likely exported from Microsoft Excel and had four main problems. The first was that the first row was empty except for the first cell, which had some gibberish in it; the variable names were on the second row. Second, some of these names were things like "$100 &amp; UP". Third, some of the files had an empty las variable, as if MS Excel had tacked an extra spreadsheet column onto the .csv file. Finally, all the variables entered Stata as string, because Stata, seeing alphanumeric characters all over the second row, reasonably assumed that there were no numeric variables in this file.</p>
+<p>So I wrote a program that would fix these four problems in any set of .csv files that shared any of them, regardless of the actual number of variables, which were string and which were numeric, and what crazy characters were in the original variable names.</p>
+<p>It went like this:<br />
+<code><br />
+capture prog drop fixVarlist<br />
+prog def fixVarlist<br />
+</code><code><br />
+// get rid of last var if empty<br />
+unab oldvars: _all<br />
+quietly describe<br />
+local varnum=r(k)<br />
+local last: word `varnum' of `oldvars'<br />
+capture confirm byte var `last'<br />
+if _rc==0 {<br />
+  count if `last'!=.<br />
+  if r(N)==0 {<br />
+    drop `last'<br />
+    unab oldvars: _all<br />
+    quietly describe<br />
+    local varnum=r(k)<br />
+  }<br />
+}<br />
+// collect names of vars from first row and fix them as needed<br />
+forvalues i=1/`varnum' {<br />
+  local oldvar: word `i' of `oldvars'<br />
+  // capture value from first row<br />
+  local newvar=`oldvar' in 1<br />
+  // turn $ signs to USD<br />
+  local newvar=regexr("`newvar'","^\\$","USD")<br />
+  // clean up blank spaces<br />
+  while regexm("`newvar'"," ") {<br />
+    local newvar=regexr("`newvar'"," ","")<br />
+  }<br />
+  // some more cleanup<br />
+  // -- these changes apply to only a subset of the vars<br />
+  if regexm("`newvar'","&amp;UP") {<br />
+    local newvar=regexr("`newvar'","&amp;UP","andUp")<br />
+  }<br />
+  // -- these apply to all vars<br />
+  local newvar=regexr("`newvar'","w/o","Without")<br />
+  local newvar=regexr("`newvar'","w/","With")<br />
+  // collect clean var names into a list<br />
+  local newvars `newvars' `newvar'<br />
+}<br />
+di "there are `varnum' valid variables in this file"<br />
+di "they are: `newvars'"<br />
+</code><code>// now rename vars<br />
+drop in 1<br />
+local newvarnum: list sizeof newvars<br />
+forvalues i=1/`newvarnum' {<br />
+  local oldvar: word `i' of `oldvars'<br />
+  local newvar: word `i' of `newvars'<br />
+  rename `oldvar' `newvar'<br />
+}<br />
+// now de-string any numeric vars<br />
+unab newvars: _all<br />
+local newvarnum: list sizeof newvars<br />
+quietly count<br />
+local check=r(N)<br />
+forvalues i=1/`newvarnum' {<br />
+  local newvar: word `i' of `newvars'<br />
+  gen x=real(`newvar')<br />
+  quietly count if x==.<br />
+  if r(N)==`check' {<br />
+    di "`newvar' is not numeric"<br />
+  }<br />
+  else {<br />
+    destring `newvar', replace force<br />
+  }<br />
+  drop x<br />
+}<br />
+end<br />
+</code><br />
+You need to fix blank spaces inside that <code>while</code> loop because Stata's <code>regexr()</code> command would operate only on the first blank space it found, and leave the rest alone. You check whether there are any blank spaces left to fix with <code>regexm()</code>, which returns 1 if there are, and 0 otherwise.</p>
+<p>Also, you need to escape the dollar sign, twice as it turns out, because in regular expressions $ by itself is the end-of-string marker. If you didn't escape it with a backslash (OK, two in this case) then <code>regexr()</code> would tack the string "USD" as a suffix onto all your variable names. Oh, and there's the ^ sign: in regular expressions it's the beginning-of-string character. Essentially, ^\\$ means "look for dollar signs at the beginning of this string".</p>
+<p>Other than that, there's nothing exotic about this program. Its nice feature is that it keeps track of how many variables you have (by using the <code>unab</code> command to read in the unabbreviated variable list and by filling recursively the local <code>`newvars'</code>, another Stata feature not commonly used) and it does its own counting. Features like these aren't mandatory, but they make your code more reusable.</p>

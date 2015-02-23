@@ -1,0 +1,110 @@
+---
+layout: post
+title: Parenting with Stata
+date: 2009-08-30 04:01:44.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/4c4WeZ
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My daughter will be eight days old by the time I'm done writing this. She's on food intake and diaper watch, so among the things we brought home from the hospital was this pink sheet where we were supposed to record full diapers and feeding patterns. Of course we then filled it out, and when my wife tried to download a fresh one from the hospital website she could not find any such thing.</p>
+<p>No big loss that, because I don't approve of pen-and-paper data entry anyway. Instead, I propose baby_watch.do, below. It time-stamps feeding and excretion events and records them to baby_watch.txt:</p>
+<pre><code>
+clear
+set more off
+set type double
+pause on
+
+// GENERAL INSTRUCTIONS
+
+/*
+   How this works:
+      Update the locals breast, wet, and dirty with bytes 0 or 1
+      as needed -- e.g., 1 0 0 means baby was breast-fed, and
+      diaper was clean; or 0 1 0 means a wet diaper was changed.
+      Update the local named bottle with ounces of formula drunk
+      (if you don't need to supplement, count your blessings and
+      leave it at zero).
+   Notes:
+      The clock() time is in seconds since 00:00:00 on Jan 1, 1960.
+      That's a very large number. It's easier to just have a string
+      that can be converted into Stata format date if needed, sorts
+      in chronological order, and is legible. The mask that I thought
+      worked best on all counts was %tcCCYYNNDD_HH:MM.
+*/
+
+// EVENTS, FILE PATHS, FILE NAMES
+
+// --- update these as needed, every time
+local bottle 2.5
+local breast 0
+local wet    1
+local dirty  0
+
+// --- change these with what works for you
+local whereis  "//oldirons/public/baby/"
+local myfile   "baby_watch.txt"
+
+// --- no need for any changes below this line
+// PROGRAM DEFINITIONS
+
+// ### time-stamp the latest event
+capture program drop latestEvent
+program latestEvent
+
+args bottle breast wet dirty
+
+drop _all
+set obs 1
+local when clock("`c(current_date)' `c(current_time)'", "DMY hms")
+local when: di %tcCCYYNNDD_HH:MM `when'
+gen when       ="`when'"
+gen bottle     =`bottle'
+gen byte breast=`breast'
+gen byte wet   =`wet'
+gen byte dirty =`dirty'
+
+end
+
+// ### update the baby status file
+capture program drop updateFile
+program updateFile
+
+args whereis myfile bottle breast wet dirty
+
+capture confirm file "`whereis'`myfile'"
+if _rc!=0 {
+   latestEvent `bottle' `breast' `wet' `dirty'
+}
+else {
+   insheet using "`whereis'`myfile'", clear
+   preserve
+   tempfile latest
+   latestEvent `bottle' `breast' `wet' `dirty'
+   save "`latest'", replace
+   restore
+   append using "`latest'"
+}
+sort when
+outsheet using "`whereis'`myfile'", replace
+
+end
+
+// PROGRAM CALLS
+
+updateFile `whereis' `myfile' `bottle' `breast' `wet' `dirty'
+
+</code></pre>
+<p>There you have it. If you or somebody you know decide to take baby_watch.do for a spin, please let me know how it goes.</p>

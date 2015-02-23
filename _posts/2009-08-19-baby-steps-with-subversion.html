@@ -1,0 +1,38 @@
+---
+layout: post
+title: Baby steps with Subversion
+date: 2009-08-19 11:39:06.000000000 -04:00
+categories:
+- FreeBSD
+tags:
+- Subversion
+status: publish
+type: post
+published: true
+meta:
+  yourls_shorturl: http://bit.ly/ObWE6
+  yourls_tweeted: '1'
+  _edit_last: '1'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I set up a Subversion server on the FreeBSD box <a href="http://enoriver.net/index.php/2009/03/01/ive-got-subversion/">a while back</a>, then didn't do much with it until this past weekend, when Software Carpentry <a href="http://software-carpentry.org/version.html">mentioned it</a>.</p>
+<p>I installed SmartSVN on the Ubuntu box and declared a new repository with a svn+ssh:// protocol. I figured it would make sense, since I connect to the server through a ssh tunnel with authentication key files. I was right. SmartSVN connected to the server without a hitch. Then I tried svn://, http:// and https://. None of them worked. The latter two require some extra module (WebDAV?) enabled in the Apache server. I don't know much about any of it, so I figured I'd just stick with svn+ssh:// and be done with it.</p>
+<p>Then my first commit attempt promptly failed, with a message that a certain lock file could not be opened.</p>
+<p>That looked like a file permissions issue to me. In FreeBSD, the /etc/group file lists the group names, ID's and members. I had a group named svn present already, so I added my name to the member list and saved over. Now whatever that group's permissions needed to be, I was going to be in on them.</p>
+<p>Then, as root, I did this:<br />
+<code><br />
+chown -R gabi:svn /usr/home/svn/repos<br />
+</code><br />
+OK, so now I own the files in any sub-directories of the repository, and the group permissions will apply to the svn group. I set them like so:<br />
+<code><br />
+chmod 775 /usr/home/svn/repos/hooks<br />
+chmod 775 /usr/home/svn/repos/locks<br />
+chmod 775 /usr/home/svn/repos/db<br />
+</code><br />
+It worked. I could commit a folder with some example text file in it. Then I changed it and updated it, and then I made a different working copy and caused a conflict, so I would have something to resolve. All of that worked as advertised. There are a few things left to do, like branching, tagging, merging, and reverse and forward integration. I'll write more as I go through the learning process, but before I close this post I have to mention <a href="http://betterexplained.com/articles/a-visual-guide-to-version-control/">this neat little post</a>. It's a better introduction to how version control works and why it's done than even Chapter 1 in the <a href="http://books.google.com/books?id=tMpR77ZeHhMC&amp;dq=version+control+with+subversion&amp;printsec=frontcover&amp;source=bn&amp;hl=en&amp;ei=v7CqSZW0BdKgtwee8IjgDw&amp;sa=X&amp;oi=book_result&amp;resnum=5&amp;ct=result#v=onepage&amp;q=&amp;f=false">Subversion book</a>, which is great, so that's saying something. Better explained, indeed. I'd never heard of them. All hail Google, again.</p>
+<p>And now my Stata code can go under proper version control. Life's good.</p>

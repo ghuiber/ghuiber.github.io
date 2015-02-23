@@ -1,0 +1,44 @@
+---
+layout: post
+title: Masks
+date: 2008-12-04 17:17:26.000000000 -05:00
+categories:
+- Stata
+tags:
+- date and time functions
+- mask
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cmTEL1
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>One way to get free Stata help is to post your question to the <a title="Stata listserver" href="http://www.stata.com/statalist/">Statalist</a>. A dedicated band of Stata users will go at it like a school of hungry piranhas at a drowning zebu, and odds are excellent that whatever baffled you will be ripped apart practically while you watch. Another is to just blog about your work.</p>
+<p>A while ago I posted about keeping track of files I receive every week, with names such as client_YYYYMMDD.txt. I don't receive them on the same day, and I get a lot of them from several clients. It'd be nice to be able to make Stata look for them without me having to spell out the date of arrival. Well, there is a way. The YYYYMMDD variation poses no more of a challenge than any other way of describing a date -- <em>e.g.</em> December 4, 2008 -- once you get acquainted with the <code>mask</code> feature of Stata's clock and date functions. Take this code for example:<br />
+<code><br />
+local clients "foo bar"<br />
+local start=date("1nov2008","dmy")<br />
+local end=date(c(current_date),"dmy")<br />
+</code><code><br />
+foreach client in `clients' {<br />
+   forvalues i=`start'/`end' {<br />
+</code><code><br />
+      local x=string(`i',"%tdCYND") // one way to YYYYMMDD<br />
+      local x: display %tdCYND `i'  // and here's another<br />
+</code><code><br />
+      capture confirm file "`file_path'`client'_`x'.txt"<br />
+      if _rc==0 {<br />
+         di "Success. Got a file from `client' on `i'."<br />
+         // your code goes here<br />
+      }<br />
+   }<br />
+}</code></p>
+<p>This is a beautiful solution. Steli's comment in response to <a href="http://enoriver.net/index.php/2008/11/11/leading-zeroes/">my post on leading zeroes</a> had sent me riffling through the friendly manual (Data Management volume, dates and times section; page 76 if your manual is for Stata 10). That enlightened me on how the masks on Stata's time and clock functions work. The time to deploy that grain of wisdom arrived a few minutes ago. </p>
+<p>One last thing: you may have noticed that this example is written in Stata 9. In Stata 10 the %td mask would be a little different, and the "dmy" part of the date function would be "DMY".</p>

@@ -1,0 +1,55 @@
+---
+layout: post
+title: Arguments
+date: 2008-11-26 02:04:09.000000000 -05:00
+categories:
+- Stata
+tags:
+- arguments
+- program
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bMAl87
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>In an <a href="http://enoriver.net/index.php/2008/09/30/soup-up-your-do-files-codeprogramcode/">older post</a> I wrote about the <code>program</code> capability in Stata. One thing I didn't say and I find increasingly useful these days is that you can pass arguments to programs.</p>
+<p>Packaging a set of commands inside a program, to be read once and then invoked as many times as they are needed, is nice enough. But what if you need to make those instructions apply to different variables in different instances?</p>
+<p>For example, I have a set of parameter estimates for a survival model. I use them to calculate the lambda part of the hazard function under various scenarios for one variable of interest. You can do this immediately after estimating your hazard model, of course, using <code>predict</code> with appropriate modifiers, but you don't want to re-estimate the model every time you need to use the parameters. Besides, you may have to use one data set for estimating the model (say historical data) and other data sets (say current data) for making the predictions of interest.</p>
+<p>So let's say that you have your parameters saved in a matrix, and declare a program, called e.g. getLambda, to pair them with the corresponding regressors as many times as you need to. But every time you call getLambda, instead of the first regressor you need to use a variable that is some sort of transformation of it, and you saved that variable with a different name to make it absolutely clear that this is not the actual regressor. It would be nice if you could pass that variable as an argument to getLambda, in effect telling Stata "I want to calculate lambda with this particular variable at the front of the regressor list this time".</p>
+<p>The program getLambda might look something like this:</p>
+<p><code><br />
+capture prog drop getLambda<br />
+prog def getLambda</code></p>
+<p><code> </code></p>
+<p><code>local thiscase `1'<br />
+local myregressors "`thiscase' var1 var2 var3 1"<br />
+local regressorcount: list sizeof myregressors<br />
+</code><code><br />
+forvalues i=1/`regressorcount' {<br />
+   local thisreg: word `i' of `myregressors'<br />
+   gen param_`i'=beta[`i',1]*`thisreg'<br />
+}<br />
+egen lambda_`thiscase'=rsum(param_1-param_`regressorcount')<br />
+drop p_*<br />
+</code><code><br />
+end<br />
+</code><br />
+I forced the last element of `myregressors' to be 1 because I am assuming that the constant is the last parameter saved in your parameter matrix. Notice the local `1' in the first line after the program definition. It is Stata's name for the first argument of your program. In our case, that argument is simply the name of the variable that you want in the first position in the regressor list. So the call to getLambda would be</p>
+<p><code><br />
+getLambda foo<br />
+</code><br />
+This would make Stata calculate the lambda with the variable foo at the front of the regressor list. If later you want the variable bar there instead, you just call<br />
+<code><br />
+getLambda bar<br />
+</code><br />
+Arguments can be strings, numbers, whatever. As long as your function is strictly for internal use and you know what you're using it for, you don't need to program the fancy stuff -- like error codes or help files. That, at least, is what I found. When I get to the point where I need those extras, I'll learn how to do them and then blog about it here.</p>
+<p>You may have noticed the apparently superfluous use of the <code>list sizeof</code> extended macro function. After all, it's plain enough that the word count of the "myregressors" local is 4. Well, sometimes you have more regressors than that. Do you care to count them by hand? I don't.</p>
+<p>There are all sorts of very good reasons for leaving to Stata as much of the grunt work as possible. The most obvious of them is that code written this way is more portable across different projects. But the honest truth is that I really like those list functions. I've been finding all sorts of uses for them lately. I am going to have a blog post dedicated to them sometime soon.</p>

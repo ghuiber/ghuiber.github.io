@@ -1,0 +1,42 @@
+---
+layout: post
+title: Looping across observations
+date: 2008-11-26 12:29:09.000000000 -05:00
+categories:
+- Stata
+tags:
+- loops
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/c8Fszx
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>People who stress that you very seldom have to do this in Stata are right. That's why I always forget how it's done. So here, for my reference and yours:</p>
+<p>Today I looked at a table in .rtf format. It had test scores for a bunch of students in Poli Sci at the University of Cluj, in Romania. The table is simple: two columns, with the students' full names on the first and their respective test score on the second.</p>
+<p>I tried to copy and paste this table straight into the Stata data editor and surprise: I got a single column, with twice the number of original rows and alternating names and scores. The odd-numbered rows had names, the even-numbered ones had scores. Evidently the RTF column delimiter looks like an end-of-line character to both Stata and Notepad++.</p>
+<p>So here was my chance to loop across observations in order to turn this table back into the two-column format. The code is below:<br />
+<code><br />
+set more off<br />
+count<br />
+local obs=r(N)/2<br />
+di `obs'<br />
+capture drop var2<br />
+gen var2=""<br />
+</code><code><br />
+forvalues i=1/`obs' {<br />
+  local there=`i'*2<br />
+  local here=`there'-1<br />
+  replace var2=var1[`there'] in `here'<br />
+}<br />
+drop if var2==""<br />
+destring var2, replace<br />
+</code><br />
+There's not much to it. Looping across observations is intuitively simple, but it's awfully inefficient. Do it if you must with small data sets, but consider alternatives, which are plentiful, if you are dealing with thousands of observations.</p>

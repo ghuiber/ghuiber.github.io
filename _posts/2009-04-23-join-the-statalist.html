@@ -1,0 +1,47 @@
+---
+layout: post
+title: Join the Statalist
+date: 2009-04-23 12:51:29.000000000 -04:00
+categories:
+- Stata
+tags:
+- find
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/95YTgz
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>If you were looking up something Stata-related and Google sent you here, you may or may not be in the right place. What I know for sure is that you should definitely join the <a href="http://www.stata.com/statalist/">Statalist</a>. I've benefited lots over the years from lurking there. Here's the latest example: somebody asked yesterday about an easy way to search through several files for a given string.</p>
+<p>You can do that in a few obvious ways outside Stata, depending on your operating system and on whether you use a programmer's text editor. They're all mentioned in the prompt and typically helpful responses this query received. But here's a slick way to build yourself a Stata <code>find</code> command, courtesy of longtime Statalist contributor Austin Nichols:</p>
+<p><code><br />
+clear all<br />
+prog find<br />
+version 10.1<br />
+syntax [anything] [, Match(string asis)]<br />
+foreach f of local anything {<br />
+  tempfile t<br />
+  filefilter `"`f'"' `t', from(`"`match'"') to("")<br />
+  loc n=r(occurrences)<br />
+  if `n'&gt;0 &amp; `n'&lt;. {<br />
+    di `"`n' matches found in `f'"'<br />
+    *could also display relevant lines of file here<br />
+  }<br />
+}<br />
+end<br />
+</code></p>
+<p>And now let's try finding the string "version 8" inside all the ado-files in the Stata base package whose names start with a. This is Austin's own example, with some liberties I took so it would work on my computer:</p>
+<p><code><br />
+cd "`c(sysdir_base)'a"<br />
+local t : dir . file "*.ado"<br />
+find `t', match(version 8)<br />
+</code></p>
+<p>Try it. You'll like it. You might want to add it to your <code>c:/ado/personal</code> stash. </p>
+<p>Regarding Statalist, the usual rules of polite behavior apply, but there's one I especially approve of: nobody likes a mailing list member who sends an "Out of office" auto-reply (or any auto-reply, for that matter). That stuff will get you booted, as it should (but you can always re-join, which is nice; Statalist enforces its rules with a firm, but sensible hand). Now go <a href="http://www.stata.com/statalist/">join</a>.</p>

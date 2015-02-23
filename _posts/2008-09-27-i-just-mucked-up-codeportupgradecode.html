@@ -1,0 +1,29 @@
+---
+layout: post
+title: I just mucked up portupgrade
+date: 2008-09-27 22:40:06.000000000 -04:00
+categories:
+- FreeBSD
+tags:
+- portaudit
+- portupgrade
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/1JmXZe
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Since I run FreeBSD, once in a while I also run <code>portaudit</code>. Parenthesis: if I let some time go by between such exercises, portaudit will complain that the database is too old, but that's easy to fix with <code>portaudit -F</code>.</p>
+<p>Usually the console message is "0 problems found with your installed packages", but sometimes problems will be found, faulty programs will be listed, and a recommendation of deleting or updating them will be issued. I don't run a whole lot of things on that box, what I do run I want to keep, so deleting is not an option. Updating, however, is something you can screw up, as it turns out.</p>
+<p>You update a program installed from ports with <code>portupgrade</code>. This is where responsible writers about the subject will urge you to check out <code>man portupgrade</code>, but you won't find anything there about what just happened to me. Still happening, in fact.</p>
+<p>Portaudit found three problems today: one in Python, one in PHP, and the other in MySQL. I ran <code>portupgrade -fRr python25</code> and that did the trick. The next run of portaudit found nothing wrong with it. Why <code>-fRr</code>? Thoroughness, I guess. The f forces the update, the R updates packages that depend on Python, and the r updates packages that Python depends on. Or the other way around; the point is, one r is recursive downwards and the other upwards. I read the man page and this combo looked reasonable to me.</p>
+<p>OK, so then I moved on to PHP and tried the same stunt. Four hours later, the thing is still compiling something. Nobody -- the man page included -- said anything about compiling. This can't possibly be right. When I installed PHP in the first place, from ports, it didn't take this long, not even close.</p>
+<p>One underrated advantage of using an operating system that's still the preserve of nerds, and of speaking an obscure language, is that if you combine the two within and advanced Google search, you will find useful stuff. <a href="http://www.skullbox.info/unix-linux-*bsd-16/updatarea-aplicatiilor-in-freebsd-portaudit-si-portupgrade/?PHPSESSID=0u4un7c7in047qqic3752b0mo0">Here</a>, for example, is a write-up on portupgrade done right, in Romanian. I wish I'd looked it up before messing with my PHP install, but I've still got MySQL to go, so all is not lost.</p>
+<p>Turns out you want to go into the directory of the faulty program (find it with <code>whereis</code>), and run <code>portupgrade</code> from there. Just plain <code>portupgrade</code> -- no options, no program name. Now couldn't this have been posted somewhere closer to home, and in English?</p>

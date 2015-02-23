@@ -1,0 +1,60 @@
+---
+layout: post
+title: Calling irregular arguments with syntax anything
+date: 2010-02-23 13:04:39.000000000 -05:00
+categories:
+- Stata
+tags:
+- syntax
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/a7mYzA
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The other day I wrote a program that needed to call a file as an argument -- with the full file path. My first pass at it was to capture the argument as usual, with say <code>args input_file</code>. But that would not have worked with file paths that have spaces in them. What might have worked, I guessed, was to use something like this:<br />
+<code>
+<pre>
+syntax namelist
+local input_file `namelist'
+</pre>
+<p></code><br />
+That, however, choked on a Windows-style file path, because the colon in C:\ is an illegal name. Trial and error (and the [I] book) led me to <code>syntax anything</code>. Here's my scratchpad:<br />
+<code>
+<pre>
+capture prog drop myHello
+program myHello
+
+syntax namelist
+local names `namelist'
+di "Hello `names'"
+
+end
+
+myHello Eenie: Meenie
+</pre>
+<p></code><br />
+OK, so "illegal name" it is. Now let's see if "anything" might work better than "namelist":<br />
+<code>
+<pre>
+capture prog drop myHello
+program myHello
+
+syntax anything
+local names `anything'
+di "Hello `names'"
+
+end
+
+myHello c:\my file path here\my file name here.txt
+</pre>
+<p></code><br />
+Success. This may look trivial, but everything is after the fact. We have a long-standing policy at the Eno River Analytics worldwide headquarters that we should write toy programs for sketching things out before we go ahead and actually break something.</p>

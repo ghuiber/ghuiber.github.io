@@ -1,0 +1,24 @@
+---
+layout: post
+title: Terminal server client somehow woke up
+date: 2010-01-15 13:29:00.000000000 -05:00
+categories:
+- Ubuntu
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/7gEjh8
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>This is a revision of my earlier assessment that tsclient is so slow it's useless. The thing came back to life somehow and it looks like it's thanks to either Dell or Microsoft. I upgraded to Karmic over Christmas with some hope that it might fix tsclient, but nothing changed. Then the server in Atlanta that I log in to was replaced with a brand-new monster of a machine running Windows 2008 Server. That did it. The terminal server client is again a functional piece of software, and my attempt to migrate entirely to Ubuntu is back on track.</p>
+<p>There was one small hiccup: one of the recent updates to rdesktop must have overwritten the /usr/share/rdesktop/keymaps/common file, because all of a sudden I could not use the Caps Lock key on the remote desktop. That's OK. I googled it as usual, and I found help <a href="http://ubuntuforums.org/showthread.php?p=8188847">here</a>. Also as usual, those lively Ubuntu forums will send you all sorts of places before you hit something useful. You're happy when you find it, then the next moment you appreciate paid customer support. Then the moment after that you think OK, but it didn't take that long, and it didn't cost a dime. There's room for all of us, it seems. I wish Microsoft the best of luck. I wish Canonical the same.</p>
+<p>Next up: fix the "Connect to Server..." item on the Places menu in Gnome. I can't SSH into the home server from there anymore. I can do so from a terminal window, and I can still auto-mount my home folder on the server via NFS, as documented earlier <a href="http://enoriver.net/index.php/2009/05/19/setting-up-nfs-freebsd-server-ubuntu-client/">here</a> and <a href="http://enoriver.net/index.php/2009/06/07/auto-mount-the-nfs-share/">here</a>. Auto-mounted NFS shares are best anyway, because that way my stuff on the server is available on the client automatically at start-up.</p>

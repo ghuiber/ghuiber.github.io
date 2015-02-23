@@ -1,0 +1,68 @@
+---
+layout: post
+title: Finally dabbling in Mata
+date: 2009-03-09 17:40:15.000000000 -04:00
+categories:
+- Stata
+tags:
+- Mata
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/btdizE
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I'm taking a discrete math class at NC State and today I had a homework assignment due that had to do with matrix algebra. I didn't feel like doing it with paper and pencil, but the point of it was that I was supposed to understand how things like matrix multiplication worked, so I couldn't just whip up <br />
+<code><br />
+mata<br />
+a=(1,2\3,4)<br />
+b=(5,6\7,8)<br />
+c=a*b<br />
+c<br />
+end</code></p>
+<p>This presented an excellent opportunity to see how Mata programming worked. Turns out it works like C programming, which will mean nothing to you if you don't program in any of the usual general-purpose, high-level programming languages. And that, I think, is the reason why my first attempt at understanding what use Mata was, back in 2006, ended in abject failure.</p>
+<p>Mata programmers and Stata users mean different things by the same words. I started out as a Stata user without any programming education. I was in grad school, taking econometrics and trying to get through it one day at a time. To me a variable was a member of a data set (as in <code>sysuse auto.dta</code> and then <code>describe mpg</code>). Programming without a data set was too abstract a thing to countenance. I did the right things -- used do-files, kept notes, commented out the code -- and over the years I became a competent Stata user, but my Stata vocabulary grew without any idea how that fit into the larger field of computer science. It grew around my applied econometrics needs.</p>
+<p>Then I saw Mata. It was talking about functions, but these weren't mathematical functions; it was also talking about variables, but there was not a word about the data set in memory; and it bragged about how fast it was and why, as in "it's compiled into bytecode". Huh?</p>
+<p>Whatever. Let's pretend that Stata doesn't know how to do matrix multiplication, and we must help it out with a Mata function that would do that.  Let's call it <code>mymulti()</code>. In this post I will go over programming this function. Then in a future post I will show how you put it to work.</p>
+<p>You write Mata code in a regular do-file. You let Stata know that you're about to write Mata code by typing <code>mata</code> and you tell it that you're done with that by typing <code>end</code>. Everything between <code>mata</code> and <code>end</code> is Mata code: different syntax, different rules. Here's the do-file for defining <code>mymulti()</code>:<br />
+<code><br />
+// Mata function for matrix multiplication<br />
+capture mata mata drop mymulti()<br />
+mata<br />
+real matrix mymulti(real matrix A, real matrix B)<br />
+{<br />
+  real scalar r, c<br />
+  real matrix C<br />
+  if(cols(A)==rows(B)) {<br />
+    r=rows(A)<br />
+    c=cols(B)<br />
+    C=J(r,c,0) // shell matrix (r by c zeroes)<br />
+    for(i=1;i&lt;=r;i++) {<br />
+      for(j=1;j&lt;=c;j++) {<br />
+        for(q=1;q&lt;=cols(A);q++)<br />
+          C[i,j]=C[i,j]+A[i,q]*B[q,j]<br />
+        }<br />
+     }<br />
+     return(C)<br />
+  }<br />
+  else {<br />
+    exit(error(503)) // conformability error<br />
+  }<br />
+}<br />
+mata mosave mymulti(), dir(c:/ado/personal/m) replace<br />
+end</code></p>
+<p>The <code>capture mata</code> line does the same job as <code>capture program drop</code>: it flushes mymulti() out of Stata's memory so on subsequent runs of this do-file you don't get an "already exists" error message.</p>
+<p>Matrix multiplication returns a value: the resultant matrix. Functions that return values must be declared as being of the same type as the value returned. That is why the next line starts with "real matrix". Had mymulti() performed a multiplication of real numbers and returned a real number as a result, its type declaration would be "real scalar".</p>
+<p>The arguments of mymulti() are two matrices of real numbers. They too need to be declared as such. All the code that defines how this function will work and what it will return goes between a set of curly brackets. That's how Mata knows where a function's definition starts and ends. It is a matter of convention, not a requirement, that the open curly bracket at the start of a function definition's body gets to have its own empty line, while open curly brackets that help the flow of control -- whether in if-else statements or in loops -- follow in-line. It helps readability.</p>
+<p>Inside this function there's some bookkeeping.  If the two matrices are conformable, a scalar named r will be assigned the number of rows of the first matrix; another, named c, will be assigned the number of columns of the second matrix. A shell matrix full of zeroes, of size r by c, will be generated and then filled in with the actual elements of the resultant matrix. The scalars r and c and the matrix C are internal to mymulti(). Programmers sometimes call them variables; other times they call them data objects. Whatever they're called, they need to be initialized (which is another word for introduced) before you can use them. Variables of the same type can be initialized on the same line, separated by commas.</p>
+<p>Notice that the innermost nested loop, with the counter q, does not need curly brackets. That is a quirk of the C programming language: you only need curly brackets if you run more than one line of code inside a loop. Also notice the Mata equivalent of Stata's <code>forvalues</code> loop syntax. This <code>for()</code> spelling with two semicolons and an increment operator (++) is also straight from the C language.</p>
+<p>Finally, your function can be saved for future use in either the PERSONAL folder (type <code>sysdir</code> in Stata to see where yours is) or along some existing file path declared explicitly, as shown above. I use Stata's convention of saving my .ado and .mo files in subfolders of PERSONAL named after the first letter of any such file names.</p>
+<p>There's an important difference between .ado and .mo files, and it is what makes the latter faster. An .ado file is interpreted: you can open it in Notepad++ and you will see familiar Stata syntax -- your original code as written at the time. You will see no such thing if you try that with a .mo file. Your code, unless you saved your do-file, is gone. What you have here is <a href="http://en.wikipedia.org/wiki/Bytecode">bytecode</a>. That is a good thing.</p>
+<p>Traditionally, the core Stata commands were written in C and the rest were written in Stata's usual syntax, also known as ado language. That made Stata, even before including any user-generated commands, partially open-source: you could see the source of any the command implemented as an .ado file as clear as daylight. That's nice, but not the reason you buy Stata. You want a fast and reliable statistics and data management package. You got it, but Mata makes it better. Stata syntax is interpreted. This makes it easy to use and write code in, but slower to run than a compiled alternative would be. Mata offers such an alternative. As more and more of Stata's commands move from the .ado language to Mata implementation, Stata will be incrementally faster.</p>

@@ -1,0 +1,28 @@
+---
+layout: post
+title: The limits of encapsulation
+date: 2010-07-09 10:10:46.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/alhw57
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I just read <a href="http://www.johndcook.com/blog/2010/06/30/where-the-unix-philosophy-breaks-down/">this</a>. I liked it. It put some bit of anguish I've been having into clearer words than I could.</p>
+<p>My Stata code between 2000 and 2006 consisted exclusively of do-files that put to work either standard Stata commands or user-written commands from the <a href="http://www.stata.com/help.cgi?ssc">SSC</a>. There was not a single program definition anywhere and things worked alright. These do-files were pretty elaborate and their functionality overlapped a fair bit, but that was never that much of an inconvenience.</p>
+<p>Then in early 2007, during my brief tenure at RTI Health Solutions, that way of working showed its limitations when I tried to program in plain Stata matrices something that was normally being done in GAUSS. It had to do with the design of factorial experiments and my project ended in an instructive kind of failure, because it got me started on using Stata programs. I still like those things. I can define them once and then nest and have them call each other every which way to my heart's content. They take arguments, return values, and generally they make you feel like a real programmer.</p>
+<p>Then in 2008 I had my introduction to C++, and the instructions were clear: break down a problem in small morsels; use as many functions as you need; if a function definition fills up a screen, it's way too big, so break it down further; encapsulation is a good thing. Then came header files, namespaces, classes, templates, the works. It was an extreme kind of validation of the way I had started to do business, and my enthusiasm for modular code only grew from there.</p>
+<p>Then, about a year ago, I started running into problems. Component programs can be debugged individually, sure, and you only need to fix them once, in one place, which is great. In fact, if they're small and simple enough, you don't even need to do that; they just work. But with complicated projects you're going to have so many interlocked small and simple programs that it will just be too hard to keep tabs on which programs call which, where, and why. It's also pretty expensive to write them in such a way that they can talk with not just one other program, but are truly universal within the context of the given problem. </p>
+<p>So I'm not sure anymore that I would recommend my way of writing Stata code to everybody. It still has its uses, but I can see a growing number of circumstances where it's simply not worth the trouble.</p>

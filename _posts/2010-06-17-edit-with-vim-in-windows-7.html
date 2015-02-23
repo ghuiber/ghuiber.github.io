@@ -1,0 +1,27 @@
+---
+layout: post
+title: '"Edit with Vim" in Windows 7'
+date: 2010-06-17 12:21:38.000000000 -04:00
+categories:
+- Vim
+tags:
+- Vim
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/ccTPU8
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Sooner or later I will have to make a permanent move from Windows XP to Windows 7. I have a spare hard drive for this sort of experiments, so I transferred my settings to it with the wonderful <a href="http://windows.microsoft.com/en-us/windows7/products/features/windows-easy-transfer">Windows Easy Transfer</a> and watched to see what might break.</p>
+<p>Sure enough, Vim promptly lost the ability to write any backup files (the ones with the tilde after the extension) into the temp directory as I <a href="http://enoriver.net/index.php/2010/03/02/making-vim-run-stata-and-clean-up-after-itself/">originally intended</a>. I'm not sure how to fix this, so I cobbled together the workaround below:</p>
+<p>First, I figured that Vim's sudden inability to write to the temp folder must have been caused by this <a href="http://en.wikipedia.org/wiki/User_Account_Control">UAC stuff</a> that started in Vista and annoyed a bunch of people at the time, so I went and disabled it with help from <a href="http://www.howtogeek.com/howto/windows-vista/disable-user-account-controluac-for-administrators-only/">here</a>. That did the trick, but with the side effect of neutering the "Edit with Vim" context menu entry: clicking on it would simply remind me to put gvim on the PATH, and then keep doing so even after I did add "C:\Program Files\Vim\vim72\" to the PATH. The context menu, by the way, is what you get when you right-click on a file name.</p>
+<p>So, I had to tinker with the registry. That took three steps: first, back up the registry as explained <a href="http://www.addictivetips.com/windows-tips/how-to-make-backup-of-your-registry-in-windows-vista-and-xp/">here</a>; next, eliminate the unresponsive "Edit with Vim" entry from the context menu as explained <a href="http://www.addictivetips.com/windows-tips/remove-useless-items-from-right-click-context-menu-by-hacking-registry/">here</a>; finally, add a working "Edit with Vim" entry to the context menu as explained <a href="http://vim.wikia.com/wiki/Vim_On_Vista">here</a>.</p>
+<p>So far, it doesn't look like I wrecked anything. Vim is as good as I remember it from XP. It can <a href="http://enoriver.net/index.php/2010/03/02/making-vim-run-stata-and-clean-up-after-itself/">run Stata do-files</a> with my old settings out of the box. Next up: Subversion and TortoiseSVN.</p>

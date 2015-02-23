@@ -1,0 +1,315 @@
+---
+layout: post
+title: Cheap Iceland
+date: 2008-10-25 18:22:31.000000000 -04:00
+categories:
+- Stata
+tags:
+- date and time functions
+- trip planner
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bECbYR
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I really wish it weren't so, because good people there are hurting badly, but all of a sudden, thanks to the global credit crunch, Iceland has become a cheap destination. Icelandair will fly you to Reykjavik from Boston or New York and put you up in the Hilton for three nights. Total cost: $559+ $90 in various airport taxes. If you want an extra night, it's $69. </p>
+<p>Given what that wonderful country has to offer, and what the right price for that is, this is an incredibly good deal, so I got busy. Kirstin and I could fly there between December 10 and 14. Got to find flights from Raleigh-Durham to either Boston or NYC, at the right times. That means toggling between Expedia.com and Icelandair.com, ballpen in hand, building and scratching out various itineraries.</p>
+<p>All that recomputing of total costs, layovers, etc. with different flight combinations is not much fun. And I like seeing my data in some compact and logical form: like outbound flights arranged A to B to C, and inbound flights C to B to A. I like my layovers spelled out so I can quickly see if they're acceptable,  and I like to see the total cost of the whole thing. Finally, I don't want this information scattered across several pages.</p>
+<p>This presented an opportunity for yet another frivolous use of Stata:</p>
+<p><code> <br />
+capture prog drop printItinerary<br />
+prog def printItinerary<br />
+</code><code><br />
+// user input<br />
+// ##########<br />
+</code><code><br />
+// enter the number of travelers<br />
+local people      2<br />
+</code><code><br />
+// airport lists<br />
+//   you may enter either airport codes or city names, but if you choose<br />
+//   the latter, enter them as one word (e.g. NewYork). if the return trip<br />
+//   is along the same airport string, enter "same". either airport list<br />
+//   can be empty or missing, in case you want to plan a one-way trip.<br />
+</code><code><br />
+local airports_there "RDU JFK KEF"<br />
+local airports_back  "same"<br />
+</code><code><br />
+// flight itinerary<br />
+//   enter dates in the format DDmonYYYY<br />
+//   enter legs of the trip as strings of 4, 6 or 8 words.<br />
+//   4 words: airline, flight#, dep_hh:mm.am/pm, arr_hh:mm.am/pm<br />
+//   6 words if either the departure or arrival are on next day.<br />
+//   8 words if both are. (i.e., "next day" x 2 = 4 words)<br />
+</code><code><br />
+local date_there  "10dec2008" // as of departure, not arrival<br />
+local date_back   "14dec2008" // ditto.<br />
+</code><code><br />
+local leg1_there "Delta 6742 4:00pm 6:00pm"<br />
+local leg2_there "Icelandair 614 8:00pm 6:45am next day"<br />
+</code><code><br />
+local leg2_back "Icelandair 615 5:05pm 6:10pm"<br />
+local leg1_back "Delta 6227 7:10pm 9:30pm"<br />
+</code><code><br />
+// prices<br />
+//   enter numbers in the order of legs counted<br />
+//   from destination. on the way back, enter<br />
+//   zero for legs priced as round-trip.<br />
+//   for any airport taxes, etc. not<br />
+//   included in the prices by leg, enter<br />
+//   the total amount per traveler.<br />
+</code><code><br />
+local prices_there "199 559"<br />
+local prices_back  "199 0"<br />
+local otherfees     90<br />
+</code><code><br />
+// you're done. now watch.<br />
+</code><code><br />
+// calculations<br />
+// ############<br />
+</code><code><br />
+// set some constants based on layout of input strings<br />
+local airln    1 // airline is always 1st word<br />
+local flightno 2 // flight # is always 2nd word<br />
+local deptime  3 // departure time is always 3rd word<br />
+local ways     "there back"<br />
+</code><code><br />
+// calculate ends and legs<br />
+foreach k in `ways' {<br />
+  local ends_`k': list sizeof airports_`k' // all airports of the trip<br />
+  local legs_`k'=0<br />
+  if `ends_`k''>0 {<br />
+    if `ends_`k''==1 & "`airports_`k''"!="same" {<br />
+      di as error "You must have at least two airports if you have any."<br />
+      error 102<br />
+    }<br />
+    else if `ends_`k''>1 {<br />
+      local legs_`k' =`ends_`k''-1 // trip legs<br />
+    }<br />
+  }<br />
+  if "`k'"=="back" & "`airports_`k''"=="same" {<br />
+    foreach w in ends legs {<br />
+      local `w'_`k'=``w'_there'<br />
+    }<br />
+    local airports_`k' "`airports_there'"<br />
+  }<br />
+}<br />
+</code><code><br />
+// initialize some locals you'll need later<br />
+foreach k in `ways' {<br />
+  local layovers_`k'=0<br />
+}<br />
+</code><code><br />
+// final input check<br />
+foreach k in `ways' {<br />
+  if `legs_`k''>0 {<br />
+    forvalues i=1/`legs_`k'' {<br />
+      local leg_`i' "leg`i'_`k'"<br />
+      local check: list sizeof `leg_`i''<br />
+      if `check'!=4 & `check'!=6 & `check'!=8 {<br />
+        di as error "check your flight inputs."<br />
+        di as error "each should have 4, 6, or 8 words:"<br />
+        di as error "airline"           // 1 word<br />
+        di as error "flight #"          // 1 word<br />
+        di as error "(departure) hh:mm" // 1 word<br />
+        di as error "[next day]"        // 2 words<br />
+        di as error "(arrival) hh:mm"   // 1 word<br />
+        di as error "[next day]"        // 2 words<br />
+        error 102<br />
+      }<br />
+    }<br />
+  }<br />
+}<br />
+</code><code><br />
+// calculate cost<br />
+foreach k in `ways' {<br />
+  local cost_`k'=""<br />
+  if `legs_`k''>0 {<br />
+    forvalues i=1/`legs_`k'' {<br />
+      local thiscost: word `i' of `prices_`k''<br />
+      local cost_`k' "`cost_`k''`thiscost'+"<br />
+    }<br />
+  }<br />
+}<br />
+local cost=(`cost_there'`cost_back'`otherfees')*`people'<br />
+</code><code><br />
+// build itinerary lines and calculate layovers<br />
+foreach k in `ways' {<br />
+  // default layovers: same day<br />
+  local layovers_`k'=0<br />
+  if `legs_`k''>0 {<br />
+  // default arrival date: same as departure date<br />
+  local `k'_at_`legs_`k'' "`date_`k''"<br />
+    forvalues i=1/`legs_`k'' {<br />
+      local from=`i'<br />
+      local to=`i'+1<br />
+      local input    "`leg`from'_`k''"<br />
+      local next_leg "`leg`to'_`k''"<br />
+      if "`k'"=="back" {<br />
+        local j=`ends_`k''+1-`i'<br />
+        local from=`j'<br />
+        local to=`j'-1<br />
+        local next=`to'-1<br />
+        local input "`leg`to'_`k''"<br />
+        local next_leg "`leg`next'_`k''"<br />
+        local `k'_at_1 "`date_`k''"<br />
+      }<br />
+      local input_words:  list sizeof input<br />
+</code><code><br />
+      local leaves_here:  word `from' of `airports_`k''<br />
+      local arrives_here: word `to' of `airports_`k''<br />
+  </code><code><br />
+      local airline:      word `airln'    of `input'<br />
+      local flight:       word `flightno' of `input'<br />
+      local leaves_time:  word `deptime'  of `input'<br />
+      local arrives_time: word 4 of `input'<br />
+</code><code><br />
+      local layover_from=0 // default arrival,<br />
+      local layover_to  =0 // departure and<br />
+      local layover_next=0 // connecting flight on same day<br />
+</code><code><br />
+      // now see if any flight arrives/departs the next day<br />
+      if `input_words'==6 {<br />
+        local token: word 4 of `input'<br />
+        if "`token'"=="next" {<br />
+          local layover_from=1 // departure on next day<br />
+          local arrives_time: word 6 of `input'<br />
+        }<br />
+        else {<br />
+          local layover_to  =1 // arrival on next day<br />
+        }<br />
+      }<br />
+      if `input_words'==8 {<br />
+        local arrives_time: word 6 of `input'<br />
+        local layover_from=1 // departure on next day<br />
+        local layover_to  =1 // and also arrival on next day<br />
+      }<br />
+</code><code><br />
+      local next: list sizeof next_leg<br />
+	if `next'>4 {<br />
+        local token: word 4 of `next_leg'<br />
+        if "`token'"=="next" {<br />
+        local layover_next=1<br />
+        }<br />
+	}<br />
+</code><code><br />
+      local layover_arrives=`layover_to'<br />
+      local layover_leaves =`layover_from'<br />
+</code><code><br />
+	// build itinerary line `from'-`to' on leg `k'<br />
+      foreach z in leaves arrives {<br />
+	  local token ""<br />
+	  local plane ""<br />
+	  if "`z'"=="leaves" {<br />
+          local plane   "`airline' `flight' "<br />
+        }<br />
+	  if `layover_`z''==1 {<br />
+	    local token " next day"<br />
+	  }<br />
+        local `z'_msg   "`plane'`z' ``z'_here' at ``z'_time'`token'"<br />
+      }<br />
+</code><code><br />
+      local msg           "`leaves_here'_`arrives_here'_label"<br />
+	local `msg'         "`leaves_msg' `arrives_msg'"<br />
+</code><code><br />
+	// now calculate layover at node `to' on leg `k'<br />
+      // cumulate all layovers up to this point for correct date<br />
+	local layovers_`k' =`layovers_`k''+`layover_from'+`layover_to'<br />
+      local date_getthere=td("`date_`k''")+`layovers_`k''<br />
+	local date_leavethere=`date_getthere'+`layover_next'<br />
+	foreach w in getthere leavethere {<br />
+	  local day        =day(`date_`w'')<br />
+        local month      =month(`date_`w'')<br />
+        local year       =year(`date_`w'')<br />
+        local `k'_at_`w' "`day'-`month'-`year'"<br />
+	}<br />
+      local subtr_this "``k'_at_getthere' `arrives_time'"<br />
+      local subtr_from: word `deptime' of `next_leg'<br />
+      local subtr_from "``k'_at_leavethere' `subtr_from'"<br />
+      foreach z in this from {<br />
+        local clock_`z'=clock("`subtr_`z''","DMYhm")<br />
+      }<br />
+      local minutes=minutes(`clock_from'-`clock_this')<br />
+      local `to'_`k'_hours=int(hours(`clock_from'-`clock_this'))<br />
+      local `to'_`k'_minutes=`minutes'-``to'_`k'_hours'*60<br />
+      local `k'_at_`to' "``k'_at_getthere'"<br />
+    }<br />
+  }<br />
+}<br />
+</code><code><br />
+// screen output<br />
+// #############<br />
+</code><code><br />
+// display legs in reverse order<br />
+// on the way back<br />
+</code><code><br />
+local go_there "leaving home"<br />
+local go_back  "returning"<br />
+</code><code><br />
+di "length of layovers displayed as [h]h:[m]m"<br />
+di ""<br />
+foreach k in `ways' {<br />
+  if `legs_`k''>0 {<br />
+  di ""<br />
+  di "`go_`k'' on `date_`k''"<br />
+  di ""<br />
+    forvalues i=1/`legs_`k'' {<br />
+      local from=`i'<br />
+      local to=`i'+1<br />
+</code><code><br />
+	if "`k'"=="back" {<br />
+        local j=`ends_`k''-`i'+1<br />
+	  local from=`j'<br />
+	  local to=`j'-1<br />
+	}<br />
+</code><code><br />
+	local leaves_here:  word `from' of `airports_`k''<br />
+      local arrives_here: word `to' of `airports_`k''<br />
+      di "``leaves_here'_`arrives_here'_label'"<br />
+	if `to'!=1 & `to'!=`ends_`k'' {<br />
+        local hrs=``to'_`k'_hours'<br />
+        local min=``to'_`k'_minutes'<br />
+        di "layover in `arrives_here' -- `hrs':`min' hour(s)"<br />
+      }<br />
+    }<br />
+    di ""<br />
+    di "arrive `k' on " %td date("``k'_at_`to''", "DMY")<br />
+  }<br />
+}<br />
+di ""<br />
+di "Total cost is $" `cost'<br />
+</code><code><br />
+end<br />
+</code></p>
+<p>This program handles multiple legs, departure and arrival on different dates, or one-way trips. It uses Stata's clock functions to calculate layovers accurately, across different days if need be; I prefer mine in whole hours and minutes. Stata's date and time functions recognize either the am/pm format or the 24-hour format. The thing works, as far as I can tell. I tested it with a few bogus itineraries and I had no surprises. The code appears properly indented in my original do-file. You'll have to do that yourself.</p>
+<p>One of these days I will send the output straight to e-mail, so I can have my itinerary on my BlackBerry on one clean screenful, maybe two. It would be nice if input were via some web form, with Stata launched in batch mode once the user input is collected. But for now this thing will do for trip planning when I must buy tickets from different places for different legs, not that that happens very often.</p>
+<p>Here's the output of the <code>printItinerary</code> Stata command as defined above:</p>
+<p><small><em><strong><br />
+length of layovers displayed as [h]h:[m]m<br />
+</strong><strong><br />
+leaving home on 10dec2008<br />
+</strong><strong><br />
+Delta 6742 leaves RDU at 4:00pm arrives JFK at 6:00pm<br />
+layover in JFK -- 2:0 hour(s)<br />
+Icelandair 614 leaves JFK at 8:00pm arrives KEF at 6:45am next day<br />
+</strong><strong><br />
+arrive there on 11dec2008<br />
+</strong><strong><br />
+returning on 14dec2008<br />
+</strong><strong><br />
+Icelandair 615 leaves KEF at 5:05pm arrives JFK at 6:10pm<br />
+layover in JFK -- 1:0 hour(s)<br />
+Delta 6227 leaves JFK at 7:10pm arrives RDU at 9:30pm<br />
+</strong><strong><br />
+arrive back on 14dec2008<br />
+</strong><strong><br />
+Total cost is $2094<br />
+</strong></em></small></p>

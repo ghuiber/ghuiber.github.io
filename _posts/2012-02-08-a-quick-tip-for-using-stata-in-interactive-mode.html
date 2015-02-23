@@ -1,0 +1,32 @@
+---
+layout: post
+title: A quick tip for using Stata in interactive mode
+date: 2012-02-08 13:09:58.000000000 -05:00
+categories:
+- Stata
+tags:
+- cmdlog
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: failed
+  twitter_failure_code: '401'
+  twitter_failure_reason: Invalid / expired Token
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>You don't always want to start a do-file in the editor for every small thing, though I usually do, and then trash it if I don't need it. So, my default stance is that I want to preserve work for later. </p>
+<p>Yours may be the opposite. If so, one option is to type in the Command window. If you decide that you do want that work preserved for later after all, you can always save the content of the Review window as a .do file.</p>
+<p>Another option is to have this in your <a href="http://www.stata.com/support/faqs/lang/profiledo.html">profile.do</a> file:</p>
+<pre><code>
+// log today's interactive commands
+cmdlog using "~/data/cmdlogs/cmdlog `c(current_date)'.smcl", append
+</code></pre>
+<p>This saves a running log with everything you typed at the command line on a given day, in the folder data/cmdlogs. This will save the commands, but not the output (that's the difference between calling <code>cmdlog</code> as opposed to <code>log</code>).</p>
+<p>More on this topic <a href="http://www.michaelnormanmitchell.com/stow/always-starting-a-log.html#comment7811938">here</a>. That may well be where I got the idea to put this in my own profile.do, but if anybody thinks otherwise, I'll be glad to append this post with the correct credit.</p>

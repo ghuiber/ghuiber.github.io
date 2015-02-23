@@ -1,0 +1,108 @@
+---
+layout: post
+title: 'Another use for local macros: Stata graphs'
+date: 2009-04-14 15:25:32.000000000 -04:00
+categories:
+- Stata
+tags:
+- graph
+- macros
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cbS9XA
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Graphs are tricky beasts in every programming environment. There are so many ways in which you might want them that any command for drawing them will have to be laden with options and it will probably run over numerous lines.</p>
+<p>Stata, from version 8 onward, has done a wonderful job of taking the pain out of the process as much as practical. The Stata 10 graphics menu is a sight to behold and the ability to click-and-edit graphs interactively, if you haven't tried it yet, will blow your mind. Better yet, anything you do interactively leaves a command trail that you can save, so next time you need the same graph you can just run the command counterpart.</p>
+<p>Still, the topic is heavy enough to warrant its own <a href="http://www.stata-press.com/books/vgsg.html">book</a> and you probably will want to buy it. What I'm proposing here is just one option for mass-producing graphs and changing them in bulk, as needed.</p>
+<p>If you ever looked at a graph command, you may have noticed that the commands for three or four graphs that show different facets of the same analysis, maybe feeding off the same data set, have pretty large common chunks. I did, and I thought it'd be nice if these common chunks showed up in only one place where if I need to edit them I can do so once and for all.</p>
+<p>Local macros can accomplish that. You store parts of a full command in separate strings, some common, some specific to each graph, and save these strings as locals. Calling the graph command is then simply a matter of chaining all these locals back together.</p>
+<p>Here's some code that does that for three different graphs, each with some quirk that needs to be accommodated:<br />
+<code><br />
+// all graphs to draw<br />
+local graphs    "retention cos revenue"<br />
+</code><code><br />
+// graphs for only the test group<br />
+local lilgraphs "cos revenue"<br />
+</code><code><br />
+// graph titles<br />
+local retention_title  "Retention rates by target cohort, oldest first"<br />
+local cos_title       "Changes of service by snapshot date"<br />
+local cos_subtitle    "Accounts on a different FOD from when targeted"<br />
+local revenue_title   "Current revenue per targeted subscriber"<br />
+</code><code><br />
+// var labels<br />
+label var count_then     "Accounts targeted"<br />
+label var cos            "Change of service"<br />
+label var retention_rate "Retention rate"<br />
+label var age            "Days since targeted"<br />
+label var control        "Group"<br />
+label var date_target    "Snapshot date"<br />
+label var revenue_pc_now "Average revenue per targeted subscriber"<br />
+label var count_now      "Targeted subscribers now active"<br />
+foreach time in then now {<br />
+  format count_`time' %6.0fc<br />
+}<br />
+label define control_label 0 "Control Accounts" 1 "Targeted Accounts"<br />
+label values control control_label<br />
+levelsof date_target, local(date_ticks) // note 1 <br />
+</code><code><br />
+// generic graph settings<br />
+local xtick_settings_1 "xtick(none) xlabel(none) xmtick(`date_ticks')" // note 2<br />
+local xtick_settings_2 "xmlabel(`date_ticks', angle(vertical) labsize(small))"<br />
+local xtick_settings   "`xtick_settings_1' `xtick_settings_2'"<br />
+local ytick_settings_1 "ylabel(,angle(horizontal) labsize(small) axis(1))"<br />
+local ytick_settings_2 "ylabel(,angle(horizontal) labsize(small) axis(2))"<br />
+local legend_settings  "legend(cols(1))"<br />
+</code><code><br />
+// specific graph settings<br />
+foreach gph in `graphs' {<br />
+  local title        "title("``gph'_title'")"<br />
+  local subtitle     "subtitle("``gph'_subtitle'", size(small))" // note 3<br />
+  local `gph'_title  "`title' `subtitle' "<br />
+  local `gph'_saving "saving("`report_to'`gph'_`date'.gph", replace)"<br />
+}<br />
+local style          "twoway line"<br />
+local retention_line "`style' retention_rate age, by(control, `retention_title') "<br />
+local cos_line       "`style' cos date_target, `cos_title' "<br />
+local revenue_line_1 "`style' revenue_pc_now date_target || "<br />
+local revenue_line_2 "line count_now date_target, yaxis(2) `revenue_title' "<br />
+local revenue_line   "`revenue_line_1' `revenue_line_2'"<br />
+</code><code><br />
+local retention_ticks "`ytick_settings_1'"<br />
+local cos_ticks       "`xtick_settings' `ytick_settings_1'"<br />
+local revenue_ticks   "`cos_ticks' `ytick_settings_2' `legend_settings'"<br />
+</code><code><br />
+// assemble complete commands<br />
+foreach gph in `graphs' {<br />
+  local `gph'_graph "``gph'_line' ``gph'_ticks' ``gph'_saving'"<br />
+}<br />
+</code><code><br />
+// draw retention graph<br />
+`retention_graph'<br />
+</code><code><br />
+preserve<br />
+keep if control==1<br />
+sort date_target<br />
+levelsof date_target, local(date_ticks)<br />
+</code><code><br />
+// draw test group graphs<br />
+foreach gph in `lilgraphs' {<br />
+  ``gph'_graph'<br />
+}<br />
+restore</code></p>
+<p>The code above is part of a larger effort to keep daily newspapers in business, to which I am a contributor. I had to draw up some reports for a client -- a media company that runs a bunch of local papers -- to show the status report for an experiment in subscriber retention started a while back. Certain subsets of monthly cohorts of subscribers are selected into a target and a control group, we do some magic to the target group, and then compare its retention, revenue, and change-of-service (cos) behavior to that of the control group. </p>
+<p>The cos and revenue graphs above need only use a subset of data in this case. The revenue graph is the kind with two y-axes, with average revenue per subscriber tracked along the first y axis and count of active subscribers tracked along the second. The common x axis is time.</p>
+<p>Look at the block of code labeled "generic graph settings". Never mind the two separate xtick_settings locals. I am only defining them in order to trade width from length. For the purpose of this blog, I want my code to fit properly inside the column. I am stringing them together immediately afterwards as `xtick_settings'. The two `ytick_settings_' locals are a different matter, however. I need them both for the revenue graph (since it has two y-axes) and I need only the first for the retention and cos graphs. To see how that works later on, notice the difference in the definitions of the `cos_ticks' and `revenue_ticks' locals.</p>
+<p>Now look at the in-line comments "note 1" and "note 2". Stata, by default, will keep you from cluttering your axes with too many tick marks and a jumble of overlapping labels. That's nice, but not what I want in this case. These are small graphs and I want every point on the x-axis ticked and labeled. I collect the labels on the line marked "note 1" as the list `date_ticks' and then use them as arguments for the xmtick() and xmlabel() options on the line marked "note 2" and the one below it.</p>
+<p>If you look at the block of code labeled "graph titles" you will notice that only the cos graph has a subtitle. That's OK. Stata won't kick up a fuss if you invoke a missing subtitle. That is what I do in the line marked with the in-line comment "note 3".</p>
+<p>Now all I need to do is assemble these pieces into full graph commands. Notice the line below the comment "draw retention graph": all of your graph command, with options and everything, fits into that little `retention_graph' local. Of course the point is not to hide your command away. It's to make the chunks available for editing in blocks that make sense. If you need to change the title of a graph, it's easier to look for it in a block of local definitions clearly labeled <code>// graph titles</code> than it would be to go fishing for it inside big messy graph commands. But the bigger gain is that you get to re-use common chunks: everything in the block labeled "generic graph settings" needs to be changed only in one place and applies everywhere, and even some of the "specific graph settings" can be thought of that way.</p>
+<p>Of course, you don't want to go through this exercise in abstraction for every occasional graph. This stuff is strictly for mass production. You've got to be able to justify to the client a fixed cost of this size.</p>

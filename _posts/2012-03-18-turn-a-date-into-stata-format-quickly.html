@@ -1,0 +1,46 @@
+---
+layout: post
+title: Turn a date into Stata format quickly
+date: 2012-03-18 10:02:19.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>There's a little program that's shown up more than once now in my housekeeping do-files,  so it may be useful enough for a blog post, but it doesn't quite warrant a spot in <code>c(sysdir_personal)</code> as a stand-alone ado-file. Here:</p>
+<pre><code>
+// turn this date to Stata format
+// if it's not that way already
+capture prog drop setStataDate
+program setStataDate
+
+args v fmt // fmt can be MDY or YMD
+
+tempname x
+capture confirm string variable `v'
+if _rc==0 {
+   local l`v' : variable label `v'
+   gen `x'=date(`v',"`fmt'")
+   format `x' %td
+   drop `v'
+   rename `x' `v'
+   label variable `v' "`l`v''"
+   // order `v'
+}
+
+end
+</code></pre>
+<p>I use it with data sets derived from merging other data sets. It's useful if in the original data sets there are string dates in mixed formats -- maybe YYYY-MM-DD in the "master", and MM/DD/YYYY in the "using" -- or if these string dates have labels I want to keep. So, you see why it's not clear that this is worth an ado-file. I don't want to type all the code between the curlies more than once, but usually I don't have to. </p>
+<p>I do want to be able to call this program by name, as in <code>setStataDate somedate MDY</code> from within another program, then forget about it, safe in the knowledge that it won't make any difference if <em>somedate</em> is already in Stata format. That's the job of the if-condition you see there, and this is all this little program does.</p>
+<p>As to the reason for using the temporary name x, see the comment thread. Temporary names for variables generated only to be renamed are the safe option. The alternative is to use a one-letter convenience name, like x, and I did that first. But what if you want to use this program with a data set that includes a variable named x already?</p>

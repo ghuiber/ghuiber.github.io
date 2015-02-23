@@ -1,0 +1,65 @@
+---
+layout: post
+title: Consider ado-files
+date: 2009-03-19 16:12:09.000000000 -04:00
+categories:
+- Stata
+tags:
+- do-files
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cV13gs
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>A while ago I suggested a particular do-file architecture that seemed to work well for me at the time. The post is <a href="http://enoriver.net/index.php/2009/01/03/do-file-rules-one-suggestion/">here</a>.</p>
+<p>That architecture still works fine, but an obvious improvement suggested itself since I proposed it. I've been finding that some jobs that I had encapsulated in programs are so ubiquitous that I could have just as well saved them as ado files. I had resisted doing that, because I tend to treat ado-files with a bit of reverence. Code, I think, is ado-file worthy if it is general enough and has proper online help.</p>
+<p>Maybe I should ease up on that rule though. Maybe code that meets those requirements is actually package-worthy, ready to be distributed to the rest of the world, while the standards for ado-files should be more relaxed.</p>
+<p>As long as your code does a job that's general within the scope of a given job, maybe it could go into an ado file that is available to that job and not others. There is an easy way to do that. Typing <code>adopath</code> in the Stata command line will list all the places where Stata will look for code for any commands you throw at it. Ado-files that you write go into the PERSONAL folder by default, but you can send them anywhere, as long as you tell Stata where to look for them.</p>
+<p>Time for an example. I am working on a project where some do-files are built automatically (this is seldom necessary, by the way). Stata has some internal system limits (type <code>help limits</code> to see them all) and one of them is the restriction that a program cannot have more than 3,500 lines. This is very seldom a binding restriction. In fact, it should never even be an issue. But let's say you're stuck with legacy ways of writing code and adding to existing do-files, and you might run into this limit.</p>
+<p>In such cases it may be interesting to have a routine for counting the lines in any do-file. Since that is done in the same way regardless of the content of the do-file, this job lends itself to being packaged into an ado-file. That ado file might look like this:<br />
+<code><br />
+// counts lines in an ascii file (.do, .txt, .csv, etc)<br />
+// one argument: file name with path as needed<br />
+// (use full path for safety; spaces are OK)<br />
+capture prog drop lineCount<br />
+program lineCount, rclass<br />
+</code><code><br />
+version 9.2<br />
+local filename `0'<br />
+tempname fh<br />
+local linenum=0<br />
+file open `fh' using "`filename'", read<br />
+file read `fh' line<br />
+while r(eof)==0 {<br />
+  local linenum=`linenum'+1<br />
+  file read `fh' line<br />
+}<br />
+file close `fh'<br />
+return local count `linenum'<br />
+end<br />
+</code><br />
+So now, in your current do-file, you can do things such as<br />
+<code><br />
+foreach client in `clients' {<br />
+  local this_client_file "`my_file_path'`client'_data_cleaning.do"<br />
+  lineCount `this_client_file'<br />
+  display "lines in `client'_data_cleaning.do: " `r(count)'<br />
+}<br />
+</code><br />
+Now, under the old system, lineCount would have been a program defined in the Section 3 of either the current do-file or another do-file called by this one. But if I'm going to use it all the time and it never changes, making it a stand-alone ado-file instead makes sense. There are two steps for that. </p>
+<p>First, in the current project folder (let's say I defined is as the local `project_root') I set up a sub-folder called ado. Next, I set up a sub-folder called simply l, as in the first letter of lineCount. This may be overkill, but I like Stata's idea of grouping ado-files into subfolders by first letter. It's cleaner. Next, I save the program above into `project_root'/ado/l/ with the name lineCount.ado.</p>
+<p>Second, I need to let Stata know where to look for it. That is as simple as adding<br />
+<code><br />
+adopath + "`project_root'/ado"<br />
+</code><br />
+at the top of my current do-file.</p>
+<p>As time goes by and I find more jobs that could be handled this way, I can set aside their programs and save them as ado-files into sub-folders starting with their first letters. Stata only needs you to point it in the right direction. If it doesn't find your command in the ado folder, it will look for a sub-folder named after the first letter of your command.</p>
+<p>Ado-files will keep my do-files less cluttered and will make it easier to both recycle old code and debug new one.</p>

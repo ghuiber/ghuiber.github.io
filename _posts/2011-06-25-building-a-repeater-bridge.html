@@ -1,0 +1,28 @@
+---
+layout: post
+title: Building a repeater bridge
+date: 2011-06-25 16:24:06.000000000 -04:00
+categories: []
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/ilw9EX
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I turned a <a href="http://www.dd-wrt.com/wiki/index.php/Flash_Your_Motorola_WR850G">7-year old Motorola WR850G (v3) 802.11b/g router</a> into a <a href="http://www.dd-wrt.com/wiki/index.php/Repeater_Bridge">repeater</a> for a dual-channel Netgear WNDR3700 that I bought a few weeks ago. Dual-channel means that the thing works over both 2.4GHz and 5GHz. More on that later. The job took some googling, but flashing an old router and installing third-party firmware turned out to be a lot less scary than I thought it would be. Here are some lessons learned:</p>
+<p>1. If your wifi signal is suddenly weaker and spottier after years of perfect service, that doesn't mean that your old router is dying. Maybe you moved it somewhere new, for example from the middle of the basement to the side of the living room under the TV set on the main floor. If your your home office is on the top floor, you might be expecting no loss in signal strength, because the difference in elevation is now smaller. But the middle of the basement may have been closer as the stone falls than the side of the living room is. Maybe new gear in the house interferes with the router. Or maybe existing gear that you have where the TV sits interferes with the router where it is now, and it didn't when the router was in the basement. All of that sounds plausible to me. </p>
+<p>2. If the old router still works, the new router will probably not give you any better results, especially if you place it where you moved the old router. If moving the old router back to its old place is an option, just take the new one back to the store and don't bother reading further.</p>
+<p>3. Otherwise, your best option may be to flash the old router, put DD-WRT on it, then turn it into a repeater bridge. The bridge picks up signal from the router and the computers pick it up from the bridge. This will work if the old router is better at receiving weak signal than the computers of interest are. If this is true, then a repeater sitting in the home office can pick up signal from the new modem more reliably than the computers there can, and re-broadcast it to them.</p>
+<p>4. There are four kinds of 802.11 wifi signal that I know of: a, b, g and n; a works in the 5GHz band; b and g are 2.4GHz; n works over both. As you go up the alphabet from a to n, higher letters are newer. The data transfer speed also grows in that direction from a maximum of 11Mbps to 300Mbps. Fancy dual-channel routers transmit both 2.4GHz and 5GHz signal. 2.4GHz carries farther. Your repeater will pick up more n-signal bars in the 2.4GHz band than it will in the 5GHz band.</p>
+<p>5. Your router drops the data transfer speed to that of the slowest device in the network: if your laptops, smartphones, etc. are 802.11n but the wireless printer is 802.11g, then while you print all of your devices exchange data at 802.11g speed. That is a theoretical maximum of 54Mbps, which is still a lot faster than the typical internet connection, so you will notice no loss in how well YouTube works while you print. Also, since n-grade speeds resume after you're done printing, and you probably don't print that often, you probably won't want to upgrade a perfectly good wireless printer on account of its wifi capabilities alone, but read the bit below, about encryption. </p>
+<p>6. There is another reason why you might be getting g-grade speeds from an n-capable router: n-grade speeds are not possible if you use WPA-TKIP encryption. This means that if you choose this type of encryption, the g-grade speed you get is permanent. As of this writing, you should use WPA2-AES encryption. Some gear calls it WPA-AES. It's the same thing. AES encryption is the only consumer-grade encryption that's any use, though probably not for long. Your other choices, WEP and WPA-TKIP, are demonstrably useless. Both have been cracked a long time ago. If your cable guy set up your router with a WEP numeric key, change it. In particular, if your router proposes mixed WPA-TKIP/AES encryption (it might call it WPA-TKIP/WPA2-AES) don't pick that. Choose pure AES. The encryption on the repeater should also be AES. If your g-grade wireless printer offers WPA-TKIP but not WPA2-AES encryption, update its firmware. If that does not help, you do have two options that I can think of short of buying a new printer. You could connect it to the repeater bridge by USB or Ethernet cable, and have the bridge act as a wireless print server. Or you could make the printer join the wireless network through a wireless-n USB dongle. I didn't try either of them.</p>
+<p>7. If in the process of <a href="http://www.dd-wrt.com/wiki/index.php/Flash_Your_Motorola_WR850G">installing new firmware</a> your old router seems to be hanging in the "reboot" mode, with the power LED glowing red, and that's going on for a very long time, maybe you bricked your router. Then again, maybe you didn't. It happened to me, and when after about 10 minutes I still didn't see all the lit LED's settle into nice solid green, I gave up and unplugged the thing. When I plugged it back in, I was greeted by a working DD-WRT machine. Good surprises happen. </p>

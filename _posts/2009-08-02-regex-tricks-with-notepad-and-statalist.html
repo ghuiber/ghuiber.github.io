@@ -1,0 +1,25 @@
+---
+layout: post
+title: Regex tricks with Notepad++ and Statalist
+date: 2009-08-02 20:54:54.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+  yourls_shorturl: http://bit.ly/aRmTJp
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>If you haven't heard, the do-file editor in Stata 11 comes with proper syntax highlighting, folding, etc. That means that this post will be obsolete as soon as I upgrade, unless the new do-file editor doesn't do regular expression-based find and replace. No matter. In the meantime, here goes:</p>
+<p>People often post code on Statalist and sometimes this code comes from the Stata results window. The difference, as far as code is concerned, is that the command window outputs commands preceded by a dot-blank -- as in <code>. display "hello"</code> instead of <code>display "hello"</code>.</p>
+<p>Such dot-blanks need to be cleaned up before Stata can run this code. Notepad++ has a regular expression search option. All you have to do is look for <code>^\. </code> and replace it with nothing. The ^ sign means that you're only looking at the beginning of each line. The backslash escapes the period, which has special meaning in regular expressions. The blank after the dot is optional.</p>
+<p>So there. I just did it because I wanted to replicate a neat little <a href="http://stata.com/statalist/archive/2009-07/msg01240.html">simulation</a>.</p>

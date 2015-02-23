@@ -1,0 +1,38 @@
+---
+layout: post
+title: Ruby, Rails and Cygwin
+date: 2008-12-17 23:22:16.000000000 -05:00
+categories:
+- Cygwin
+tags:
+- Cygwin
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/b44yDb
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Somebody needs to write a simple content management system (CMS) for a project that a few friends of mine started a couple of years ago.</p>
+<p>Every year, a bunch of us chip in for two small scholarships for the graduating class of the high school in Salonta, Romania. The job would be a lot easier if we had a suitable website. It would say a little about the reasons for this enterprise, explain the application terms, and then serve as an interface between the applicants and the selection committee. It should have an online application form linked to an applicant database and to a tree of personal folders where only applicants themselves and the selection committee have access. These folders would hold application materials -- essays, transcripts, what have you.</p>
+<p>I volunteered to build this myself, based on some brief PHP experience I had accummulated in the process of building the first, non-WordPress version of this site. I guess now I'll have to, unless I find something both free and right for the job sometime soon.</p>
+<p>This looks like a good excuse to dabble in Ruby on Rails. That, in turn, brought me to back to Cygwin, which I installed a while ago. I used it to debug and compile C++ code, and didn't pay much mind to any of the other things you can do with it. Cygwin comes with Ruby, it turns out. I updated it based on instructions <a title="Updating Cygwin" href="http://classes.cs.kent.edu/sce/cygwinupdate.html">here</a> just to make sure that I had the latest version, and I was good to go:</p>
+<p><code><br />
+$ ruby -v<br />
+ruby 1.8.7 (2008-08-11 patchlevel 72) [i386-cygwin]</code></p>
+<p>Rails is another matter. I had to install it separately. With help from <a title="Rails on Cygwin" href="http://www.pluitsolutions.com/2006/03/30/install-ruby-on-rails-ror-on-cygwin/">here</a>, the effort was trivial and seems to have worked:</p>
+<p><code><br />
+$ rails .<br />
+exists<br />
+create  app/controllers<br />
+create  app/helpers<br />
+create  app/models<br />
+[snip]<br />
+</code><br />
+Why Rails? Because according to its creator, Rails is so great that it's probably easier to learn Ruby in order to use it, than it would be to learn another framework in some language you already know. The full citation is <a href="http://www.loudthinking.com/posts/34-myth-5-rails-is-hard-because-of-ruby">here</a>. Well, I hope it's true. I'll keep a running progress report.</p>

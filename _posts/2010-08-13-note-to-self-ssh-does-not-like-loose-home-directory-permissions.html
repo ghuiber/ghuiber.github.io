@@ -1,0 +1,26 @@
+---
+layout: post
+title: 'Note to self: ssh does not like loose home directory permissions'
+date: 2010-08-13 15:42:39.000000000 -04:00
+categories:
+- FreeBSD
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/91ZPgI
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>This really is a note to myself, regarding my FreeBSD setup. I use this section to jot down things that I expect to forget, because I use them rarely. Google is alright, but note-taking won't hurt anything. So here: </p>
+<p>A couple of days ago PuTTY started to demand password authentication, which it shouldn't, because I normally log in with a public-private key pair. That was a good excuse to refresh my keys anyway, so I generated a new pair and overwrote the authorized_keys file. I hoped, again and without any basis in reason or logic, that the problem would go away as quietly as it turned up. It did not.</p>
+<p>Fiddling with /etc/ssh/sshd_config didn't help either. What did help was fixing the home directory permissions: doing ls -l /usr/home as a super-user showed soon enough that they were drwxrwxr-x, when they should have been drwr-xr-x at a minimum. I can't remember when I changed them or why, but the problem is fixed with chmod 755 /usr/home/<em>username</em>. That this was indeed the fault of loose permissions was confirmed by a quick examination of /var/log/auth.log. The idea to look there came from <a href="http://unix.derkeiler.com/Mailing-Lists/FreeBSD/questions/2007-01/msg01592.html">here</a>. Some further clarifications on ssh, including a sample config file, are available <a href="http://forums.freebsd.org/archive/index.php/t-1508.html">here</a>.</p>
+<p>The other thing I learned from /var/log/auth.log is that I am getting hit by a flood of unauthorized login attempts from the weirdest places every day. So far, so good.</p>

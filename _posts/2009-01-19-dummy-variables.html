@@ -1,0 +1,122 @@
+---
+layout: post
+title: Dummy variables
+date: 2009-01-19 20:31:29.000000000 -05:00
+categories:
+- Stata
+tags:
+- arguments
+- dummy variables
+- tabulate
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bz4S4f
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>There are two straightforward ways to turn string variables into corresponding dummies -- also known as categorical variables -- using Stata. One is an extension of the <code>tab</code> command:<br />
+<code><br />
+tab stringvar, gen(dummy)<br />
+</code><br />
+Another makes use of the fact that you seldom need dummies for their own sake. Usually you want them used in some sort of regression model. The <code>xi:</code> extension to various estimation commands turns string variables into dummies automatically, as in<br />
+<code><br />
+xi: regress y x i.stringvar<br />
+</code><br />
+Both are described in detail <a href="http://www.stata.com/support/faqs/data/dummy.html">here</a> and they both work well when your string variable translates into dummies directly. That, however, is not always the case. Think of a data set where you have a string variable named "color" which is equal to "red" for the first observation, "blue" for the second and "yellow, blue" for the third. You would want the dummy "color_red" to be equal to 1 in the first observation; the dummy "color_blue" to be 1 in the second and the third; and you'd want a separate dummy, "color_yellow", to be equal to 1 in the third observation.</p>
+<p>I just ran across such a data set today. It had characteristics for a few hundred lottery games. The color described the ticket colors. There were a few other string variables that also could have observations that were comma-delimited lists. Moreover, the comma-delimited lists could include values that did not show up as unique values in other observations (like "yellow" in the example above).</p>
+<p>So I thought I'd write a program that could deal with all of that without the need of any visual inspection or case-by-case manual labor on my part. I wanted it to be applicable to any string variable in this situation. My suggestion is below:</p>
+<p><code> </code></p>
+<p><code>// ##### getDummies -- turns string to dummies. Takes one argument:<br />
+// #####                      `1' -- string, the name of the variable of interest.<br />
+capture prog drop getDummies<br />
+prog def getDummies<br />
+</code><code><br />
+local stringvar `1'<br />
+quietly count<br />
+local fullset=r(N)<br />
+quietly count if !regexm(`stringvar',",")<br />
+local uniques=r(N) // cases where `stringvar' is not a list<br />
+</code><code><br />
+if `fullset'!=`uniques' {<br />
+  quietly {<br />
+    tab `stringvar' if regexm(`stringvar',",")<br />
+    levelsof `stringvar' if !regexm(`stringvar',","), local(tags)<br />
+    preserve<br />
+    tempfile `stringvar'_lists<br />
+    keep `stringvar'<br />
+    keep if regexm(`stringvar',",")<br />
+    duplicates drop<br />
+    split `stringvar', p(",")<br />
+    save "``stringvar'_lists'", replace<br />
+    restore<br />
+    describe `stringvar'* using "``stringvar'_lists'", varlist // note(1)<br />
+    local `stringvar'_stubs=r(varlist)<br />
+    split `stringvar', p(",")<br />
+    local stubs: list sizeof `stringvar'_stubs<br />
+    forvalues i=2/`stubs' {<br />
+      local stub: word `i' of ``stringvar'_stubs'<br />
+      replace `stub'=trim(`stub') // note (2)<br />
+      levelsof `stub' if `stub'!="", local(extras)<br />
+      local tags: list tags | extras<br />
+    }<br />
+    local tags: list sort tags<br />
+  }<br />
+}<br />
+else {<br />
+  di "for each value of `stringvar' there corresponds one dummy variable"<br />
+  capture drop __*<br />
+  quietly levelsof `stringvar' if !regexm(`stringvar',","), local(tags)<br />
+  local `stringvar'_stubs `stringvar'<br />
+}<br />
+capture drop __*<br />
+</code><code><br />
+local stubnum: list sizeof `stringvar'_stubs<br />
+local tagnum: list sizeof tags<br />
+</code><code><br />
+quietly {<br />
+  forvalues i=1/`tagnum' {<br />
+    local thistag: word `i' of `tags'<br />
+    local thistag: list clean thistag<br />
+    gen byte _`stringvar'_`i'=0<br />
+    forvalues j=1/`stubnum' {<br />
+      capture drop __*<br />
+      local thisstub: word `j' of ``stringvar'_stubs'<br />
+      replace _`stringvar'_`i'=1 if `thisstub'=="`thistag'"<br />
+    }<br />
+  }<br />
+}<br />
+drop `stringvar'*<br />
+</code><code><br />
+// this section is for listing stuff on screen and in the log<br />
+local `stringvar'_stubs: list `stringvar'_stubs-stringvar<br />
+local stubs: list sizeof `stringvar'_stubs<br />
+di ""<br />
+di "total number of games: `fullset'"<br />
+di "number of games where `stringvar' is not a list: `uniques'"<br />
+di "unique values of `stringvar': `tagnum'"<br />
+if `stubs'&gt;0 {<br />
+  di "where `stringvar' is a list, it is this long at most: `stubs'"<br />
+}<br />
+di ""<br />
+forvalues i=1/`tagnum' {<br />
+  local thistag: word `i' of `tags'<br />
+  local thistag: list clean thistag<br />
+  di "_`stringvar'_`i' is for `stringvar' == `thistag'"<br />
+}<br />
+</code><code><br />
+end<br />
+</code></p>
+<p>That's it. This program collects all the possible values that your stringvar can take, whether inside comma-delimited lists or by themselves, and produces accurate dummies that are equal to one every time such a value is encountered, whether by itself or in a list, and regardless of its position in the list. With your data set in memory, you simply call<br />
+<code><br />
+getDummies color<br />
+</code><br />
+Now, I don't post programs unless they contain something I just learned in the process of writing them. Today's such thing is in line 24, next to the comment "note(1)". Turns out -- if you call <code>help describe</code> -- there are two kinds of <code>describe</code>: one for data in memory, another for data <code>using</code> a file. The latter comes with a different set of options. One of them is <code>varlist</code>. It stores the name of the variables in <code>r(varlist)</code>. I chose to preserve/restore and create the tiny temporary file "``stringvar'_lists'" so I could apply <code>describe using</code> to it, and get a variable list saved in the local ``stringvar'_stubs'. I'm using it later on.</p>
+<p>This may look like a lot of work, and it is, but it's all up-front. You do it once, and if it works now it works forever. The marginal cost of creating dummies out of any number of such variables is zero from here on out.</p>
+<p>Update (February 4, 2009): the first version of getDummies had a bug. The line marked with the comment "note(2)" was missing. As a result, the program produced more dummies than it should have.  To use my color example, without this line getDummies will produce two separate dummies for the color "blue": one for the case where color was equal to "blue" strictly, and another for the case where color contained the string " blue". Notice the leading blank space. You want to <code>trim()</code> it.</p>

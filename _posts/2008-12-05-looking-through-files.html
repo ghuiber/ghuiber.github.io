@@ -1,0 +1,64 @@
+---
+layout: post
+title: Looking through files
+date: 2008-12-05 12:58:32.000000000 -05:00
+categories:
+- Stata
+tags:
+- file open
+- regular expression
+- while
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/9zSKL4
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>You can have Stata scan a do-file instead of executing it, just as it would any text file. This is helpful if you have elaborate projects that cover entire directory trees full of little do-files that do different things for different subsets of the project if given conditions are met, and skip them otherwise. You don't want to go through these by hand if you just want to find the file where you used a certain command or operated on some variable you know.</p>
+<p>In the example below I am going over 30 do-files, trying to figure out in which of them I operated on a variable called "foo". The client is a consortium of 30 local newspapers, and the do-files I am scanning are in separate folders, one for each local market. The list of markets is in a file I call ticker. This file keeps a timeline of source files that I receive weekly from each market. Some have started sending them earlier, some later. That part is not important now. For this project all I care about is that in the ticker file I can find a full listing of the markets, so I don't have to type them out. Here goes:<br />
+<code><br />
+capture prog drop findString<br />
+prog def findString<br />
+</code><code><br />
+local ratespath  "${root}rates/"<br />
+local tickerpath "${root}source/"<br />
+local searchfor  "foo"<br />
+</code><code><br />
+drop _all<br />
+use "`tickerpath'ticker.dta"<br />
+levelsof market, local(markets)<br />
+local markets: list clean markets<br />
+</code><code><br />
+foreach market in `markets' {<br />
+  local myfilein "`ratespath'`market'/rates_`market'.do"<br />
+  capture confirm file "`myfilein'"<br />
+  if _rc==0 {<br />
+    tempname fh_in<br />
+    file open `fh_in' using "`myfilein'", read<br />
+    local linenum=0<br />
+    file read `fh_in' line<br />
+    while r(eof)==0 {<br />
+      local linenum=`linenum'+1<br />
+      if regexm(`"`macval(line)'"',"`searchfor'") {<br />
+        di "`searchfor' found in rates_`market'.do on line `linenum'"<br />
+        exit<br />
+      }<br />
+      file read `fh_in' line<br />
+    }<br />
+    file close `fh_in'<br />
+    di "`searchfor' not found in rates_`market'.do"<br />
+  }<br />
+  else {<br />
+    di "no rates_`market'.do file found for `market'"<br />
+  }<br />
+}<br />
+end</code></p>
+<p>The idea is simple. First I check if the do-file of interest -- rates_`market'.do -- even exists. If it does, I open it for reading line by line until I reach the end-of-file character, which in Stata translates to a non-zero value for the internal local r(eof). The first time I find "foo" I report that I found it, exit the reading loop, and move on to the next file. If I don't find it, I report that I didn't, and move on to the next file. </p>
+<p>There are a few niceties. Each line of of the file is read into a macro called simply `line'. But when I look for "foo", I'm not looking in `line'. Instead, I am looking in its raw version, `"`macval(line)'"'. This function (the name comes from "macro value") preserves all the content as it finds it. Normally, `line' alone might be tempted to skip things like quotation marks, special characters, etc. Observe the compound quotes. You will get used to them. And observe the regular expression-matching command <code>regexm</code>. You will grow very fond of it.</p>

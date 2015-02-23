@@ -1,0 +1,47 @@
+---
+layout: post
+title: Using Stata for Windows shell scripting
+date: 2009-06-11 21:37:36.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bgQ7cx
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Occasionally a need arises to move things between computers. You might, for example, be getting about 20 gigabytes of data per week, use it to re-run your model so your parameter estimates stay up to date, and then you must make room for next week's batch.</p>
+<p>For this sort of job you probably have a remote RAID system where data is compressed automatically as it arrives. But you need to get it there somehow, and there is an easy way to do so from within the very Stata do-file where your model runs. Here's one way:<br />
+<code><br />
+// i have three sub-folders and two loose files in the folder "experiment"<br />
+// i'm going to xcopy the whole thing to the archive, then rmdir it<br />
+local data_from    "D:\data\\"<br />
+local data_to      "\\nairobi\archive\\"<br />
+local data_folder1 experiment<br />
+</code><code><br />
+// assemble `from_here', `to_here' file paths<br />
+foreach where in from to {<br />
+  local `where'_here "`data_`where''`data_folder1'"<br />
+  di "path `where': ``where'_here'" // this is just for checking<br />
+}<br />
+// now move stuff<br />
+!xcopy "`from_here'" "`to_here'" /e /y /i<br />
+!rmdir "`from_here'" /s /q<br />
+</code><code><br />
+// notes on command-line options:<br />
+// xcopy /e -- copy all sub-directories, including empty ones<br />
+// xcopy /i -- copy to a folder that does not yet exist<br />
+// xcopy /y -- overwrite existing files at destination without prompting (!)<br />
+// rmdir /s -- forced delete of non-empty directory, ask for confirmation first<br />
+// rmdir /s /q -- forced delete of non-empty directory, ask no questions (!)<br />
+</code><br />
+Some details: from a Windows client I am moving data to a Samba server named Nairobi. The Windows shell command "move" works for loose files but not for entire folder structures. Those need to be copied with "xcopy" to the destination computer and then deleted with "rmdir" from the source computer. Both of these commands have some options, as detailed above. I googled a bit, found them <a href="http://www.computerhope.com/">here</a>, and figured I'd jot them down inside the Stata do-file for future reference.</p>
+<p>There you have it. You can embed this into a loop, say, if you have more than one folder to move, maybe spread across more than one `data_from' file path.</p>

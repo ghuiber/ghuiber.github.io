@@ -1,0 +1,85 @@
+---
+layout: post
+title: Count missing observations
+date: 2010-03-16 21:54:59.000000000 -04:00
+categories:
+- Stata
+tags:
+- missing()
+- syntax
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/aHR5vk
+  _wp_old_slug: count-missing-variables
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>With one variable, that's easy enough: <code>count if missing(<em>variable-name</em>)</code>. If you have several variables, you can put them in a foreach loop. But if you have to do this for arbitrary lists of variables in several files, it may be interesting to package that foreach loop inside a quick command that might handle special display instructions as well. </p>
+<p>Here is one suggestion:</p>
+<p><code>
+<pre>
+// countIfMissing: display the total count of observations, then 
+// any counts of missing observations for each variable in a list.
+capture prog drop countIfMissing
+program countIfMissing
+
+version 11
+syntax varlist
+
+quietly count
+local count=r(N)
+
+// now make things align nicely
+local sum=`count'
+local tens=1
+while `sum'/10>1 {
+   local sum=`sum'/10
+   local tens=`tens'+1
+}
+local width=`tens'+int(`tens'/3)
+local varct: list sizeof varlist
+
+di ""
+di "Observations:"
+di %`width'.0fc `count'
+di ""
+di "Missing:"
+foreach varble in `varlist' {
+   qui count if missing(`varble')
+   local ct=r(N)
+   local pct: di %4.2fc 100*`ct'/`count'
+   if `pct'>0 {
+      di %`width'.0fc `ct' " `varble' (`pct'%)"
+   }
+   else {
+      local varct=`varct'-1
+   }
+}
+if `varct'==0 {
+   local offset=`width'+2
+   di _column(`offset') "none of `varlist'"
+}
+di ""
+
+end
+</pre>
+<p></code></p>
+<p>For an example of usage, you can try this:</p>
+<p><code>
+<pre>
+sysuse auto
+local myvars "make price foreign"
+countIfMissing `myvars' 
+countIfMissing m*       // (1)
+countIfMissing _all     // (2)
+</pre>
+<p></code></p>
+<p>As you can see in (1) and (2), the usual varlist conveniences apply here. </p>

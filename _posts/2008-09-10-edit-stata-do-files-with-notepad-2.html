@@ -1,0 +1,30 @@
+---
+layout: post
+title: Edit Stata do-files with Notepad++
+date: 2008-09-10 14:27:34.000000000 -04:00
+categories:
+- Stata
+tags:
+- Notepad ++
+- text editors
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/adygV6
+  has_been_twittered: failed
+  twitter_failure_code: '400'
+  twitter_failure_reason: Settings do not permit the auto-tweeting of old posts
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Notepad is nice, but you can do better. <a href="http://notepad-plus.sourceforge.net/uk/download.php">Notepad++</a> can highlight your syntax, help you match your parentheses and, coolest of all, fold your code. If you already program in some other language using some graphical IDE, you know what that means. If you don't, here: when you enclose slabs of your Stata do-files inside what Stata calls "programmer's if" braces, Notepad++ will tuck those slabs away (fold) or reveal (unfold) them at the click of a side button labeled [+] or [-]. This kind of help makes a Stata user's life much easier than Stata's own do-file editor could as of version 10.</p>
+<p>Notepad++ is my Stata do-file editing environment. I set it up following directions from two people: <a href="http://huebler.blogspot.com/2008/04/stata.html">Friedrich Huebler</a> and <a href="http://www.econ.umd.edu/~kranker/code/notepad_to_stata.php">Keith Kranker</a>. Huebler provides the files needed for running Stata code, either as selected lines (rundolines.exe) or complete do-files (rundo.exe), directly from Notepad++, and provides excellent general directions for integrating your Stata with any other text editor you might like. I gave <a title="Crimson Editor" href="http://www.crimsoneditor.com">Crimson</a> a try before I settled on Notepad++. Kranker wrote a very nice Stata language specification -- the file that contains the directions that Notepad++ uses for recognizing Stata syntax. He also put his own spin on rundo.exe, and added a way to get Stata help from inside Notepad++, which I have not tested.</p>
+<p>There are only two things I might add.</p>
+<p>First, when you install Notepad++, you may want to check the box that says "don't use App Data". If you do so, then you can copy Kranker's userDefineLang_stata.xml file in the root of your Notepad++ installation and save it as userDefineLang.xml. Otherwise Notepad++ will look for this file in C:/Documents and Settings/YourUserName/Application Data/ which you may not have. Of course, you can create an Application Data folder if you wish. Directions for that are <a title="Notepad++ and contributed add-ons" href="http://notepad-plus.sourceforge.net/uk/download.php">here</a> (scroll down). </p>
+<p>Second, in case the problem hasn't been fixed by the time you read this, your Stata language definition sheet should include the double quotation mark " as an operator, not just as a delimiter. Otherwise your Stata syntax, under certain circumstances, will not fold properly. Why and how that happens is not that important. It can happen, but it can be easily fixed. Section 5 of the Notepad++ User Language Define System Manual <a href="http://notepad-plus.sourceforge.net/uk/site.htm">here</a> shows how to activate a new operator, with screen shots. It doesn't get any easier. Enjoy.</p>

@@ -1,0 +1,72 @@
+---
+layout: post
+title: Define local macros in one place, use them everywhere
+date: 2010-02-18 18:06:10.000000000 -05:00
+categories:
+- Stata
+tags:
+- include
+- local macros
+- program
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/cz3VSm
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>In The Stata Journal Vol. 9, No. 3, 2009 there's a Stata tip (# 77) on re-using macros in multiple do-files, by Jeph Herrin. His solution is to define any local macros in a separate do-file, say locals.do. You can call that do-file with the <code>include</code> command at the top of any do-file that might refer to some of those macros. This is useful, as the author explains, when you want to keep all your macro definitions in one easily editable place, and make them available to whatever projects can use them without having to duplicate the definitions. This is similar to how you would <code>#include</code> header files in C or C++. </p>
+<p>Unfortunately, <code>include</code> does not work well with programs. You can invoke it inside a program but <code>include</code> itself cannot be compiled, so the do-file it refers to will have to be interpreted all over again every time you call that program: see <code>help include</code> for the original reference. This negates the speed advantage that you expect when you package your Stata work into programs as opposed to simple do-files. It does not negate all the other advantages -- such as better code portability and the possibility of unit testing -- but still, speed matters. My own solution is to define locals inside an r-class program. Then other programs that need some of these locals call that program, and recover only the locals they need. Below is one example, worked first with <code>include</code> and then with my proposed alternative:<br />
+<code>
+<pre>
+// locals.do starts here
+local file_path "c:/data/my_path/"
+local file_name "file_name.dta"
+local my_file    "`file_path'`file_name'"
+// and ends here.
+</pre>
+<p></code><br />
+OK, now let's put these locals to work:<br />
+<code>
+<pre>
+// work.do starts here:
+include locals.do
+use "`my_file'"
+</pre>
+<p></code><br />
+Alright. This is not bad and it does the job that your locals are neatly separated from the rest of the work. If you use do-files to split a big job into smaller pieces, this is all you need. If, on the other hand, you want to chop the job into pieces smaller still, and encapsulate those pieces into programs, then this is inadequate, as explained above. </p>
+<p>The workaround might look like a bit more overhead, but then that's the usual cost of writing programs instead of plain do-files. Some of us, sometimes, find that overhead acceptable:<br />
+<code>
+<pre>
+capture prog drop defineMyLocals
+program defineMyLocals, rclass
+
+local file_path "c:/data/my_path/"
+local file_name "file_name.dta"
+local my_file    "`file_path'`file_name'"
+
+local things "file_path file_name my_file"
+foreach thing in `things' {
+   return local `thing' ``thing''
+}
+
+end
+</pre>
+<p></code><br />
+And now let's recover the local `my_file':<br />
+<code>
+<pre>
+defineMyLocals
+local my_file `r(my_file)'
+use "`my_file'"
+</pre>
+<p></code><br />
+That's it. Your locals.do consists of the definition of the program defineMyLocals. The overhead is obvious. First, adding new locals inside this definition requires the extra step of adding their names to the things list, so that defineMyLocals can return them. Second, using defineMyLocals is also slightly more complicated than a simple <code>include</code>, because you need to recover the locals you need explicitly, via `r()'.</p>
+<p>That said, now your locals are defined inside a program, and you can move them around faster. If you're like me and you favor programs over do-files and this isn't your solution, then I'd be curious to see your preferred alternative.</p>

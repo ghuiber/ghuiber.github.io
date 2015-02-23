@@ -1,0 +1,29 @@
+---
+layout: post
+title: How to sync two Linux machines
+date: 2011-01-22 19:31:55.000000000 -05:00
+categories:
+- Ubuntu
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/eU4mNX
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I have two Ubuntu 10.04 virtual appliances. One, Machine A, sits on my own computer; the other, B, is on the computer I got from work. I want to keep them perfectly identical, so I can move between computers as easily as if I were always on the same machine. I think I found a way.</p>
+<p>I'm not sure if what I propose here is necessary or safe, but I'm willing to experiment. I already use SpiderOak to synchronize my /home folder across these two machines. Now I'm going to make sure that they have the exact same software installed. They started out that way, as pristine machines off the same Ubuntu 10.04 installation DVD. They had no trouble staying similar enough for a while. When I installed <a href="http://www.vim.org/">Vim</a> and <a href="http://keepass.info/">KeePassX</a> on one, I made sure to immediately install both on the other. Later still I did the same with <a href="https://spideroak.com/">SpiderOak</a>, <a href="http://cran.r-project.org/">R</a> and then with a few other things. All along, I figured that there had to be a better way, and I might even get around to googling it sometime. </p>
+<p>That time came today, after I got the <a href="http://vim-latex.sourceforge.net/index.php?subject=download&title=Download">vim-latex plugin</a> and a full install of <a href="http://www.tug.org/texlive/">TeX Live</a> on Machine A. Google turned up <a href="https://help.ubuntu.com/community/Synaptic/PackageDownloadScript">these instructions</a>. They're pretty good until they go into Windows-related details that you may not care about. </p>
+<p>So, here's what I think might work:</p>
+<p>You take Machine A. Check for updates as usual, and install them. Then close the Update Manager, and open Synaptic. Select all the installed packages, mark them for re-installation, and then instead of hitting "Apply" go into the "File" menu and click on "Generate a download script". The download script is is just a list of <code>wget -c</code> commands applied to each .deb package that corresponds to everything that you have installed on Machine A. Call it something descriptive, like machine_a_packages, and copy it to Machine B inside a folder of its own. Call that folder something descriptive too, like new_downloads. Then run the download script with <code>sh</code>. </p>
+<p>Now, on Machine B you have just populated a folder with all the .deb packages you need. Open Synaptic on Machine B, and in the File menu click on "Add downloaded packages" and navigate to "new_downloads" in the dialog box/Nautilus window that opens. Hit Open, and watch the magic: Synaptic will go through all the packages, pick out only those that aren't already installed on Machine B, and announce that it will install them, unless you object. That's it. Now delete the folder "new_downloads", because it's big and you don't need it anymore, I don't think.</p>
+<p>After this, another SpiderOak run should copy any new or changed dot files from Machine A to Machine B, and that should do it. If there is a better way, I'm curious. If I wrecked anything, I'll know soon enough.</p>

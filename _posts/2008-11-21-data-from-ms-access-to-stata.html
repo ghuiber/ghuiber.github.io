@@ -1,0 +1,70 @@
+---
+layout: post
+title: Data from MS Access to Stata
+date: 2008-11-21 02:38:15.000000000 -05:00
+categories:
+- Stata
+tags:
+- global macros
+- macros
+- MS Access
+- odbc load
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/94HIdB
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>In my oldest post about the <code>odbc load</code> command I mentioned that you can pretty easily read data from MS Access into Stata, and even execute SQL commands from within Stata, but I dismissed the whole thing a bit too lightly. A recent look on Google Analytics showed that some people came here looking for that sort of information and, judging by how fast they left, they didn't find what they were looking for. So here's another try.</p>
+<p>Some context first: one of my ongoing projects is a suite of Stata do-files for helping certain daily newspapers optimize their subscriber retention, using survival analysis. I have several clients. Some of their needs are common, so they can be met with one do-file, others are not so common, so they need custom code. I use global macros as bridges between custom and common code. You need this introduction to see what I'm doing in my example below.</p>
+<p>One client is sending me a weekly snapshot of its subscriber database in the MS Access format, in a file called Submaster_YYYYMMDD.mdb. Suppose that that file resides in c:/data/my access file comes from here/. Then I must read it into Stata and save it as subsYYYYMMDD.dta in c:/data/my stata file goes here/. Now suppose that I spread this project across several do-files, so I use some internal names for these file paths in the form of global macros defined once:</p>
+<p><code><br />
+global datafrom "c:/data/my access file comes from here/"<br />
+global datato    "c:/data/my stata file goes here/"<br />
+</code></p>
+<p>Also suppose that I save the date of arrival part of the file name, YYYYMMDD, as a global macro:</p>
+<p><code><br />
+global t "YYYYMMDD"<br />
+</code></p>
+<p>Finally, I don't want my lines to be too long, so I use local macros to compress things a bit whenever that looks practical. Now let's have a look at the actual example:</p>
+<p><code><br />
+capture confirm file "${datato}subs${t}.dta"<br />
+if _rc!=0 {<br />
+</code><code><br />
+   local mdbpath  "${datafrom}"<br />
+   local mdbname "Submaster"<br />
+   local source   "MS Access Database;DBQ=`mdbpath'`mdbname'_${t}.mdb"<br />
+   capture confirm file "`mdbpath'`mdbname'_${t}.mdb"<br />
+</code><code><br />
+   if _rc==0 {<br />
+      #delimit ;<br />
+      local vars "<br />
+      ${${paper}index},<br />
+      prod_code,<br />
+      start_orig,<br />
+      last_start_date,<br />
+      last_stop_date,<br />
+      expire_date,<br />
+      rate_table,<br />
+      paper_code,<br />
+      rate,<br />
+      credit_card_usage";<br />
+</code><code><br />
+      drop _all;<br />
+      odbc load,<br />
+      exec("SELECT `vars' FROM `table' WHERE (prod_code='1D' OR prod_code='3D')")<br />
+      dsn("`source'");<br />
+      save "${datato}subs${t}", replace;<br />
+      #delimit cr<br />
+   }<br />
+}<br />
+</code></p>
+<p>First, I check if the Stata file subsYYYYMMDD.dta exists in the path ${datato} with "capture confirm file". If it does not, then I check if the Access file Submaster_YYYYMMDD.mdb exists in the path ${datafrom}. If yes, then I read it and save subsYYYYMMDD.dta. The <code>exec()</code> part of <code>odbc load</code> is for running SQL syntax. Just to make sure that you appreciate the coolness of this: any SQL line that you could execute in Access, no matter how complicated, can be put between the <code>exec()</code> parentheses. Mine is simple -- I wrote the SQL commands in all caps for clarity -- but yours needn't be. You can also combine Stata locals with SQL syntax like I did.</p>
+<p>I switch to the semicolon delimiter when it helps readability. It allows the line with SQL syntax to wrap around, and the listing of my `vars' local as one word per line. This, of course, is optional. The checks for the existence of either file are also optional. They keep my do-files from exiting with an error if I happen to run them on a day when either file does not exist -- either because the source file Submaster has not arrived yet, or because it hasn't been translated yet into Stata.</p>

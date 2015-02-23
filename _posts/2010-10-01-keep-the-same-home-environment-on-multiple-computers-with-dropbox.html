@@ -1,0 +1,53 @@
+---
+layout: post
+title: Keep the same home environment on multiple computers with Dropbox
+date: 2010-10-01 15:24:17.000000000 -04:00
+categories:
+- Ubuntu
+- Vim
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/aOKjoj
+  _wp_old_slug: ''
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The problem:</p>
+<p>I now use two laptop computers -- my own and the one I got from work. I have been wondering for a while if there was an easy way to deploy the same home environment across different physical machines given that you would need it for some reasons, but not for others. For example, if I want to write code or surf the web with synchronized Chrome instances, I want a uniform environment so I can easily pick up on one computer where I left off on the other. But it's also reasonable for a computer that I use mostly for work to have different settings from one that I use mostly for play: for example, my work computer needs hard drive encryption and remote IT assistance tools, while my home computer does not need MS Office, because for my own letter writing and bookkeeping I am happy with <a href="http://www.openoffice.org">OpenOffice.org</a>.</p>
+<p>My proposed solution:</p>
+<p>One obvious way to have a uniform home environment across computers with such different requirements is to put it inside a virtual machine. The VM's from different computers keep their common settings in a <a href="http://www.dropbox.com">Dropbox</a> folder, which is updated quietly every time you go online. Here's how that folder could be used to have the same Vim environment across multiple computers, all the time:</p>
+<p>My two VM's are Ubuntu 10.04, created in VMware Player 3.1.2 from an x86 ISO disk I burned. Each has a Dropbox folder. In it, there's a vim folder, and in it there's the vimrc.local file that I want to apply on both machines. Now in each VM's /etc/vim/vimrc file I change this:<br />
+<code>
+<pre>
+" Source a global configuration file if available
+if filereadable("/etc/vim/vimrc.local")
+  source /etc/vim/vimrc.local
+endif
+</pre>
+<p></code><br />
+to this:<br />
+<code>
+<pre>
+if filereadable("/home/username/Dropbox/vim/vimrc.local")
+  source /home/username/Dropbox/vim/vimrc.local
+endif
+</pre>
+<p></code><br />
+For this to work, your username must be the same on the two Ubuntu VM's. If by chance it's not, one easy way to fix the problem is to enable a root account on one of them, as described <a href="https://help.ubuntu.com/community/RootSudo">here</a>, log in as root, then in a terminal window do this:<br />
+<code>
+<pre>
+usermod -l newname -m -d /home/newname oldname
+</pre>
+<p></code><br />
+This has the effect that both your login name and your home folder will change from oldname to newname, as explained <a href="http://ubuntuforums.org/showthread.php?t=877246">here</a>.</p>
+<p>I wish there was a more elegant way, but I couldn't get /etc/vim/vimrc to source to $HOME, so this user name constraint seems to be binding. A slicker way to go would be if the whole /etc folder could be housed in Dropbox, and your applications knew to look for their runtime configurations there. </p>
+<p>How would you solve this problem?</p>

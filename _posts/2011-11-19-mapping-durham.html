@@ -1,0 +1,26 @@
+---
+layout: post
+title: Mapping Durham
+date: 2011-11-19 11:23:37.000000000 -05:00
+categories:
+- Stata
+tags:
+- Durham playgrounds
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: failed
+  twitter_failure_code: '401'
+  twitter_failure_reason: Invalid / expired Token
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Today, Kirstin wanted to make a grocery trip to the Whole Foods at Bull City Market, then take Kate to the nearest playground. That seems to be Oval Drive Park, but it won't be obvious from querying the <a href="http://www.ci.durham.nc.us/gis_apps/parkapp/mainmap.cfm">Durham Park Locator </a>.</p>
+<p>No worries. The Durham Park Locator gives you a pretty nice table with all 55 playgrounds as of today. You load it into Stata, hit it with <code>geocode</code> and <code>writekml</code>, and you get <a href="http://maps.google.com/maps/ms?ie=UTF&msa=0&msid=205190672353608758732.0004b22c1ad29f72ce797">this Google map</a>. Easy.</p>
+<p>On this occasion I also discovered that my <code>writekml</code>, as submitted, had a tiny bug. I submitted the fix a few minutes ago. It should be up by your next <code>update ado</code>.</p>

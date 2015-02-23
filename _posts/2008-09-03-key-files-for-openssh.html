@@ -1,0 +1,43 @@
+---
+layout: post
+title: Key files for OpenSSH
+date: 2008-09-03 23:04:12.000000000 -04:00
+categories:
+- FreeBSD
+tags:
+- FreeBSD
+- key file
+- OpenSSH
+- PuTTY
+- UNIX
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cz05aN
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My home server runs <a title="The FreeBSD Project" href="http://www.freebsd.org">FreeBSD</a> 7.0. I administer it from my Windows XP laptop, in the air-conditioned comfort of my home office, over wi-fi. The server runs <a href="http://www.openssh.com/">OpenSSH</a>. The laptop runs <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTY</a>. I wanted the added security of using SSH key files instead of password authentication. Google and the helpful bunch at the <a href="http://forums.pcbsd.org/">PC-BSD Forum</a> hooked me up in no time. Below is a FreeBSD-specific documentation of the process.</p>
+<p>There are two encrypted key files. One is public and resides on the server. The other is private and is saved on the laptop's hard drive. On the server, from the command prompt of your user account you type</p>
+<p><code>&gt; ssh-keygen -t dsa</code></p>
+<p>This will generate two DSA-encrypted key files, one called id_dsa and the other id_dsa.pub. The process is interactive. You can choose where to save them and whether you want to associate them with a passphrase (click Enter twice for the default directory  <code>/usr/home/user/.ssh </code>and no passphrase).</p>
+<p>OpenSSH, which I installed following the instructions in <a href="http://nostarch.com/freebsdserver.htm">this book</a>, has a configuration file that on a FreeBSD system goes by <code>/etc/ssh/sshd_config</code>. On a Linux machine it might be saved somewhere equally logical, but different. Anyway, that configuration file, by default, expects the file id_dsa.pub to be a line in the file <code> /usr/home/user/.ssh/authorized_keys</code>. So, the first time you set this up, just do this:</p>
+<p><code>&gt; cd /usr/home/user/.ssh<br />
+&gt; mv id_dsa.pub authorized_keys</code></p>
+<p>You may have another computer you would like to log into the server from, but don't want to use the same private key. You can repeat this ssh-keygen process and append the new id_dsa.pub file to the existing authorized_keys file like so</p>
+<p><code>&gt; cat authorized_keys id_dsa.pub &gt; authorized_keys<br />
+</code><br />
+The order matters. With authorized_keys first in the cat queue, all of its content will be preserved and that of id_dsa.pub will be appended to it, as it should be. If you reversed the order, id_dsa.pub would be written on top of the beginning of authorized_keys. You don't want that.</p>
+<p>Now that you have id_dsa.pub copied into authorized_keys file, you turn to id_dsa. This file needs to be on the client computer. You definitely don't want to e-mail it. You can save it to a USB stick and take it there or you can transfer it securely with <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">pscp.exe</a>, but explaining the workings of that would take another post. Anyway, once you got your id_dsa saved on the Win XP client computer you're still not done.</p>
+<p>PuTTY cannot read OpenSSH key files directly. You must download <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">puttygen.exe</a> and have it translate id_dsa to id_dsa.ppk. The complete instructions for doing that are <a href="http://linux-sxs.org/networking/openssh.putty.html">here</a>. You will notice that they were originally written for running OpenSSH on a Linux server. They worked for me.</p>
+<p>The best way to test your setup is to go back to <code>/etc/ssh/sshd_config</code>, set</p>
+<p><code>PasswordAuthentication no</code></p>
+<p>and save over. Then, as super-user, do</p>
+<p><code>#/etc/rc.d/sshd restart</code></p>
+<p>and try to connect via PuTTY. If your key file is recognized and you didn't set a passphrase you will be let right in, without being prompted for any password. Your connection is both secure and convenient.</p>

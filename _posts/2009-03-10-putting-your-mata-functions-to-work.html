@@ -1,0 +1,61 @@
+---
+layout: post
+title: Putting your Mata functions to work
+date: 2009-03-10 14:58:16.000000000 -04:00
+categories:
+- Stata
+tags:
+- Mata
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/dz8Spw
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Yesterday I showed you how to write Mata functions. Today we will look at how they work with Stata.</p>
+<p>In interactive mode, a Mata function like <a href="http://enoriver.net/index.php/2009/03/09/finally-dabbling-in-mata/">mymulti()</a> is called simply as </p>
+<p><code>mata: mymulti(st_matrix("first"),st_matrix("second"))</code></p>
+<p>This assumes that the two matrices are Stata matrices previously declared and currently in memory. Mata and Stata matrices are different things. Mata needs this translator function, st_matrix(), to read Stata matrices. The call above will output to screen the matrix resulting from multiplying the two matrices, if they're conformable, or will give you an error message if they're not.</p>
+<p>What if you want to save this result into a proper Stata matrix? You will want to set up a shell matrix of the correct size, using the J() matrix function, as in</p>
+<p><code>matrix third=J(`r',`c',0)</code></p>
+<p>The `r' and `c' locals will have to be right -- `r' will be the number of rows of <code>first</code>, `c' the number of columns of <code>second</code>. Once that's in place, Mata will replace the zeroes with all the right figures like so:</p>
+<p><code>mata: st_matrix("third",mymulti(st_matrix("first"),st_matrix("second")))</code></p>
+<p>As you guessed, Mata uses the same st_matrix() translation function for two different jobs: if you call it with a string argument it will attempt to read the Stata matrix with that name. If you call it with two arguments separated by a comma, it will replace the Stata matrix named as in the first argument with the contents of the matrix resulting from the second argument -- which can either be a currently existing matrix, or it can be a result derived from a function like mymulti().</p>
+<p>Then there all the other things you can already do with Stata's programming capabilities. You could, for example, encapsulate all the Mata business into programs that your clients can use blissfully oblivious that there's Mata stuff under the hood, like so:<br />
+<code><br />
+capture prog drop matrixMultiplication<br />
+prog def matrixMultiplication<br />
+</code><code><br />
+version 10<br />
+args first second<br />
+mata: mymulti("`first'","`second'")<br />
+</code><code><br />
+end<br />
+</code><br />
+I kept the same argument names for convenience, but you probably figured out already that they're local to the Mata function and the Stata program respectively. You could have defined the program above as<br />
+<code><br />
+capture prog drop matrixMultiplication<br />
+prog def matrixMultiplication<br />
+</code><code><br />
+version 10<br />
+args foo bar<br />
+mata: mymulti("`foo'","`bar'")<br />
+</code><code><br />
+end<br />
+</code><br />
+And it would have worked just the same. Finally, if the client's matrices are called A and B, that's fine. They can be multiplied either with<br />
+<code><br />
+mata: mymulti(st_matrix("A"),st_matrix("B"))<br />
+</code><br />
+or with<br />
+<code><br />
+matrixMultiplication A B<br />
+</code><br />
+That is the beauty of encapsulation. Locals are local to whatever function or program definition uses them. You can call them any names you want outside those definitions, and they will still work. This is very helpful if you write numerous pieces of separate code that need to work with each other -- or if you have several people working on the same project. They only have to share their functions' and programs' names and syntax and need not worry about any of the guts.</p>

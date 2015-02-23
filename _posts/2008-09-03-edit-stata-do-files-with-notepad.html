@@ -1,0 +1,24 @@
+---
+layout: post
+title: Edit Stata do-files with Notepad
+date: 2008-09-03 23:14:30.000000000 -04:00
+categories:
+- Stata
+tags:
+- do-files
+- text editors
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/9TNSnA
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>If you right-click on a do-file under Windows XP, you can either open it or edit it. Opening it means that Stata will launch and attempt to execute it. The editing, by default, will also trigger a Stata launch, under the assumption that you want to edit the do-file inside Stata's own do-file editor. That may not be your best choice. Notepad, for example, is lightweight. There is little reason to deploy all the Stata gear -- GUI, check for updates, maybe a launch of your profile.do that automatically allocates 1.5G of your RAM to Stata -- for a simple editing job of what is essentially a text file.</p>
+<p>You can set Notepad as your default do-file editor as follows: open Windows Explorer, say My Documents. The last item under the Tools menu is "Folder Options..." In the File Types tab there is a list of all the file extensions that your Windows XP installation knows of. Highlight the .do extension and click the Advanced button. There are two actions you can take with do-files: open and edit. Either can be edited. I know it's ambiguous, but when you're editing "edit" you're simply telling Windows what program to launch for editing. By default, Stata's installation instructs Windows to open your w[...]stata.exe and orders it to "doedit %1". You can change the Edit entry to "C:\WINDOWS\notepad.exe" "%1". That tells Windows that you want to edit your do-files with Notepad. Click "OK" and you're all set.</p>

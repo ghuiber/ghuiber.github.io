@@ -1,0 +1,30 @@
+---
+layout: post
+title: I've got Samba!
+date: 2009-01-04 01:44:39.000000000 -05:00
+categories:
+- FreeBSD
+tags:
+- Samba
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/bItKLz
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I finally got around to configuring the Samba server on the FreeBSD machine. The instructions are <a href="http://www.nostarch.com/freebsdserver.htm">here</a> and they couldn't be clearer. One thing didn't work the way the book described it, not big enough to be worth investigating. That's the syntax of Samba commands. Rather than<br />
+<code><br />
+# smbpasswd -a <em>username</em><br />
+</code><br />
+I had to do<br />
+<code><br />
+# /usr/local/bin/smbpasswd -a <em>username</em><br />
+</code><br />
+But other than that, the thing was a breeze. Buy the book if you're thinking of building a server with FreeBSD. It's well worth the price.</p>

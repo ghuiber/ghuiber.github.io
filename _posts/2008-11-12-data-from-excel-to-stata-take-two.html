@@ -1,0 +1,64 @@
+---
+layout: post
+title: Data from Excel to Stata, take two
+date: 2008-11-12 00:49:49.000000000 -05:00
+categories:
+- Stata
+tags:
+- Excel
+- odbc load
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  _wp_old_slug: data-from-excel-to-stata-take-2
+  yourls_shorturl: http://bit.ly/9a3rRR
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I don't like spreadsheets. I like data sets and matrices. But I get data in Excel workbooks all the time, and it's a pain in the neck. This will never go away altogether, but if my Stata-using colleagues could be persuaded to quit sending me spreadsheets, that would at least cut down on the volume. I've tinkered with all kinds of ways to make data extraction from spreadsheets into Stata easier. This is the latest:<br />
+<code><br />
+clear<br />
+set mem 10m<br />
+set more off<br />
+set type double<br />
+</code><code><br />
+local here "`c(pwd)'/"<br />
+</code><code><br />
+// declare name and date of Excel file to read from<br />
+local xlsfile  "revised PriceIncr20080815-TargetTempl.xls"<br />
+local filedate "20081110"<br />
+</code><code><br />
+// list the worksheets of interest<br />
+local sheets ""Move these data" "And these too""<br />
+</code><code><br />
+// Extract data from Excel to Stata. Leave this part alone.<br />
+local sheetno: list sizeof sheets<br />
+forvalues i=1/`sheetno' {<br />
+   local k: word `i' of `sheets'<br />
+   local my_path     "`here'`xlsfile'"<br />
+   local my_sheet    "`k'"<br />
+   local source "Excel Files;DBQ=`my_path'"<br />
+</code><code><br />
+   clear<br />
+   odbc load, dsn("`source'") table("`my_sheet'$")<br />
+</code><code><br />
+   unab varz: _all<br />
+   foreach z in `varz' {<br />
+      local lower=lower("`z'")<br />
+      if "`lower'"!="`z'" {<br />
+         rename `z' `lower'<br />
+      }<br />
+   }<br />
+</code><code><br />
+   describe<br />
+   compress<br />
+   save "`here'`k'`filedate'.dta", replace<br />
+}<br />
+</code><br />
+Notice the c(pwd) function. It returns the path to the working directory. Essentially, the do-file above translates the worksheets listed in the local `sheets' into Stata files saved in the same directory as the do-file is in. The original Excel file may be in the same directory, as in this example, or it may be somewhere else. The `filedate' local is optional. Also optional, of course, is the loop that turns variable names to lower case. I just like mine that way.</p>

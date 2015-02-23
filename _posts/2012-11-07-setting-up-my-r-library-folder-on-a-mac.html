@@ -1,0 +1,70 @@
+---
+layout: post
+title: Setting up my R library folder on a Mac
+date: 2012-11-07 15:29:02.000000000 -05:00
+categories:
+- R
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My understanding is that there are three kinds of R packages: base, recommended, and everything else. You can tell which is which by inspecting the output of <code>installed.packages()</code>. That is easiest done in <a href="http://www.rstudio.com/ide/">RStudio</a> by sending that output to a data frame, like this</p>
+<pre><code>
+packs <- as.data.frame(installed.packages())
+</code></pre>
+<p>You can see that this data frame has a column named <code>Priority</code>. The output of <code>table(packs$Priority, exclude=NULL)</code> shows that I have 14 base packages, 15 recommended ones, and 70 of the other kind -- user-contributed kit that I installed over time as I bumbled my way through learning and using R. </p>
+<p>Looking at <code>packs</code> in the top left pane of Rstudio also shows that the rows are named after the packages. This means that you can collect the names of base and recommended packages easily:</p>
+<pre><code>
+> names(subset(packs, Priority=="recommended")$Package)
+ [1] "boot"       "class"      "cluster"    "codetools"  "foreign"    "KernSmooth"
+ [7] "lattice"    "MASS"       "Matrix"     "mgcv"       "nlme"       "nnet"      
+[13] "rpart"      "spatial"    "survival" 
+</code></pre>
+<p>Having all the R packages in the same default library, which is <code>/Library/Frameworks/R.framework/Versions/2.15/Resources/library</code> as of this writing, comes with the disadvantage that when I upgrade to the next version of R I will have to re-install the 70 packages of the third kind.</p>
+<p>It would be nice if I could set them aside in a different library, and any future version of R will know to look for them there and update them as needed.</p>
+<p>There are two steps to this job: one is the actual moving of package folders; the other is to show R where to look for them.</p>
+<p>First, I created a new folder called Rlibs. Then I moved the folders around with this Bash script, which I called movePacks.sh:</p>
+<pre><code>
+#!/bin/bash
+
+# declare an array with the names of the base packages
+basepacks=("base" "compiler" "datasets" "graphics" "grDevices" "grid" "methods" "parallel" "splines" "stats" "stats4" "tcltk" "tools" "utils")
+
+# and another with the names of the recommended ones
+recpacks=("boot" "class" "cluster" "codetools" "foreign" "KernSmooth" "lattice" "MASS" "Matrix" "mgcv" "nlme" "nnet" "rpart" "spatial" "survival")
+
+# and now concatenate them
+allpacks=("${basepacks[@]}" "${recpacks[@]}")
+
+# where you're moving from
+oldLib="/Library/Frameworks/R.framework/Versions/2.15/Resources/library"
+
+# where you're moving to
+newLib="/Users/ghuiber/Rlibs"
+
+# first, move everything over
+mv ${oldLib}/* ${newLib}
+
+# then move the base and recommended packages back to their default location
+for i in "${allpacks[@]}"
+do
+   mv ${newLib}/${i} ${oldLib}
+done
+</code></pre>
+<p>Finally, to point R to the library folders, I created this <code>.Renviron</code> file as instructed by Christophe Lalanne in the comments to my <a href="http://enoriver.net/index.php/2012/08/02/the-r-library-folder-on-a-mac/">earlier post</a> on the topic:</p>
+<pre><code>
+R_PAPERSIZE=letter
+R_LIBS=/Users/ghuiber/Rlibs
+EDITOR=vim
+</code></pre>
+<p>The ideas for the R_PAPERSIZE and EDITOR environment variables came from <a href="http://www.biostat.wisc.edu/~kbroman/Rintro/">here</a>.</p>

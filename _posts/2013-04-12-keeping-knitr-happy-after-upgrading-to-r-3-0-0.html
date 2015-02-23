@@ -1,0 +1,37 @@
+---
+layout: post
+title: Keeping knitr happy after upgrading to R 3.0.0
+date: 2013-04-12 19:35:40.000000000 -04:00
+categories:
+- R
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>As noted <a href="http://www.r-bloggers.com/r-3-0-0-is-released-whats-new-and-how-to-upgrade/">here</a>, after upgrading to R 3.0.0 you must run </p>
+<pre><code>
+update.packages(checkBuilt=TRUE)
+</code></pre>
+<p>This is because a bunch of packages have to be to rebuilt under R 3.0.0 in order to keep working. </p>
+<p>So I did, but that was not enough for <a href="http://www.lyx.org/">LyX</a> to be able to compile my pdf's from <a href="http://yihui.name/knitr/">knitr</a> like it used to only a week ago. What I had to do besides was this:</p>
+<pre><code>
+remove.packages("tikzDevice")
+install.packages("/Users/ghuiber/Downloads/tikzDevice_0.6.3.tar.gz", repos = NULL, type="source")
+</code></pre>
+<p>That is right. The package <code>tikzDevice</code> can no longer be installed directly from R-forge as a binary, as in<br />
+<code>
+<pre>
+install.packages("tikzDevice", repos="http://R-Forge.R-project.org")
+</pre>
+<p></code><br />
+Also, the source files are only available as a .tar.gz archive. To install from it on a Windows machine, you must have <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> installed first.</p>

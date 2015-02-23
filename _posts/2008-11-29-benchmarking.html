@@ -1,0 +1,87 @@
+---
+layout: post
+title: Benchmarking
+date: 2008-11-29 12:33:24.000000000 -05:00
+categories:
+- Stata
+tags:
+- benchmarking
+- reshape
+- seq()
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/a66dTx
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>In my previous post I cautioned against looping across observations, then showed how to do it anyway, using the example of reshaping a list from long to wide. A reader suggested, not unreasonably, that one might want to use <code>reshape</code> for that. He then proceeded with a code example, under the reservation that he did not know if it would be any faster. This brings me to the topic of benchmarking.</p>
+<p>I seldom compare the speed of execution of alternative solutions for the same problem. It's something that's done all the time in general-purpose programming, but in run-of-the-mill statistics and data management this is not a pressing concern. You want to write clear, reproducible code. How long that takes to run is less important than how easy it is to follow and replicate, because it typically doesn't have to run more than once: you write your paper, send it to the publisher, and you're done.</p>
+<p>But I don't publish for a living. Instead, I write code that does have to run over and over again, so it's about time that I put some thought in how to measure its performance. If you already have a favorite way of doing that, I am curious. Below is my attempt: a comparison of my initial solution (looping across observations) and Phil's (using <code>reshape</code> and a couple of other clever Stata functions) for a data set of 1,000,000 observations.<br />
+<code><br />
+clear<br />
+set mem 100m<br />
+</code><code><br />
+set obs 1000000<br />
+gen x=uniform()<br />
+</code><code><br />
+// using the egen function seq()<br />
+capture prog drop phil<br />
+prog def phil<br />
+</code><code><br />
+local myvar `1'<br />
+count<br />
+local n=r(N)<br />
+egen i=seq(), from(1) to(`n') block(2)<br />
+gen j=mod(_n,2)+1<br />
+reshape wide `myvar', i(i) j(j)<br />
+destring `myvar'1, replace<br />
+</code><code><br />
+end<br />
+</code><code><br />
+// looping across observations<br />
+capture prog drop gabi<br />
+prog def gabi<br />
+</code><code><br />
+local myvar `1'<br />
+count<br />
+local obs=r(N)/2<br />
+gen var2=.<br />
+</code><code><br />
+forvalues i=1/`obs' {<br />
+  local there=`i'*2<br />
+  local here=`there'-1<br />
+  replace var2=`myvar'[`there'] in `here'<br />
+}<br />
+</code><code><br />
+end<br />
+</code><code><br />
+// speed comparison<br />
+foreach k in phil gabi {<br />
+  preserve<br />
+  di c(current_time) // check the clock<br />
+  di "`k''s solution"<br />
+  quietly `k' x<br />
+  di c(current_time) // check again<br />
+  restore<br />
+}<br />
+</code><br />
+The idea is to compare the time posted on screen before and after running each program. On my machine (Dell Latitude D600, Intel Core 2 Duo, 2.0GHz, 2G of RAM) I found this:<br />
+<code><br />
+11:26:20<br />
+phil's solution<br />
+11:26:29<br />
+11:26:29<br />
+gabi's solution<br />
+11:26:44<br />
+</code><code><br />
+.<br />
+end of do-file<br />
+</code><br />
+Clearly, <code>reshape</code> beats looping across observations: 9 seconds vs. 15.</p>

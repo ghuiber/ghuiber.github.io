@@ -1,0 +1,36 @@
+---
+layout: post
+title: Do-file rules -- a justification
+date: 2009-01-03 02:54:21.000000000 -05:00
+categories:
+- Stata
+tags:
+- do-files
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/dfHRl6
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>There's apparently a programming principle going by the acronym DRY -- Don't Repeat Yourself. Somebody needs to teach it to Stata users.</p>
+<p>See, Stata is so flexible and easy to use that it's perverse in a way. Take for example the ability to generate new variables on the fly, either in interactive mode or wherever in your do-file fancy strikes. You would, of course, use Stata's <code>generate</code> command, or your favorite short version of it, as in<br />
+<code><br />
+gen my_new_variable<br />
+</code><br />
+You couldn't do this in SAS. First, there's no such thing as interactive mode, and second, you'd have to be in the data step. SAS will impose a modular structure on your code, and if that's not your style, too bad. You'll find it awkward but you'll either have to live with it, or hire a SAS programmer. There is, by the way, such a job title. I just put "SAS programmer" in the search box at <a href="http://www.simplyhired.com">simplyhired.com</a> and got 518 hits. And what did "Stata programmer" get me? This:</p>
+<blockquote><p><strong><span style="color: #808080; font-size: 1.5em">Dang. We didn't find anything for you.</span></strong><span style="color: #808080; font-size: .8em"><br />
+We couldn't find any jobs for "Stata programmer".<br />
+You're probably a good speller, but check the keyword terms you entered.<br />
+You can also try using some other keywords, or enter fewer words to expand your search.<br />
+It's also possible we made an error somewhere.<br />
+Sometimes computers are human too... just shinier.</span></p></blockquote>
+<p>This might look like a digression, but it's not. Where I was going is this: robust, friendly, and well-designed tools like Stata make programmers out of all of us. That's the upside. The downside is that while we might be fine social scientists, or epidemiologists, or what have you, we'll be almost sure to be pretty lousy programmers, because ease of use breeds incompetence.</p>
+<p>Back to DRY: if you can do anything at any point in your do-file, you will not resist repeating yourself, because that's the most expedient thing to do sometimes. Worse, you will do the same thing but with slight variations, like spelling <code>2</code> in one place and <code>`two'</code> in another. That will produce ugly, unmaintainable code.</p>
+<p>Yet DRY is as feasible in Stata as in the least user-friendly of its alternatives (I'm not saying that's SAS, by the way; machine code might be worse). You just need to set up and keep some sensible rules of your own for what's acceptable when writing a do-file. I will follow up with some suggestions over the next couple of days.</p>

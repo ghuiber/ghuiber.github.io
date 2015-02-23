@@ -1,0 +1,26 @@
+---
+layout: post
+title: Do-file rules, revisited
+date: 2012-05-22 14:06:04.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Back in 2009 I wrote <a href="http://enoriver.net/index.php/2009/01/03/do-file-rules-one-suggestion/">this post</a>, detailing what at the time I thought would be a good way to write do-files. Some of the ideas there have stood the test of time. Others haven't. The changes are driven by Stata's evolution, by new things I've learned and by ways that my work changed. This is a quick review.</p>
+<p>First, as of Stata 12, you don't need to <code>set memory</code> anymore. Second, <code>clear</code> should now be replaced by <code>clear all</code>. In addition, J. Scott Long recommends that you type <code>macro drop _all</code> right after it. I know this because I'm reading his <a href="http://www.stata.com/bookstore/workflow-data-analysis-stata/">Workflow</a> book right now. I know I'm three years late (two if you count from where one of this blog's readers recommended it to me for the first time). I'm still finding useful stuff there. Next, as Jess suggested in the comments thread to the original post, I now use <code>set varabbrev off</code>. </p>
+<p>Finally, my do-files no longer have a Globals section. Instead, there's now a program that defines all macros in one place as local macros and returns them. I first started doing this back in 2010, as detailed <a href="http://enoriver.net/index.php/2010/02/18/define-local-macros-in-one-place-use-them-everywhere/">here</a>. At the time it seemed like a slick thing to do. I just assumed, wrongly, that this would be faster at execution time than the original solution that gave me the idea (using a separate do-file, called with <code>include</code>).</p>
+<p>The staying power of having a program for defining locals came not from its execution speed, but from its versatility. You can define all the locals you want inside a program you call, say, <code>setLocals</code>. If you need more locals as the requirements for your code grow, you just pile them on inside this program, and remember to also return them. </p>
+<p>Then, whenever any specific local macro is needed, you call setLocals and only recover the `r()' value that you need then. Locals can be substituted for the obvious things -- like operating system-specific file paths or hard-coded numbers -- and also for names of programs you define somewhere else. This will also spare you the inconvenience of reading a do-file where <code>`this'</code> local shows up all of a sudden and if it's not obvious what it holds, you must work your way up to see where it was defined: if all locals are defined in setLocals, you will always know where to look. </p>
+<p>This is probably a terrible way to use memory, but the convenience of having all my locals defined in one place and any arbitrary subset of them available with the same simple call to setLocals is well worth it. You can extend this model in all sorts of ways, with some care. You can, for example, give setLocals an optional argument (using something as flexible as <code>syntax [anything]</code>) so its behavior is changed according to whether the argument is present. For example, a call to <code>setLocals</code> on its own will return a default set of local macros that apply everywhere; a call to <code>setLocals andAlsoTheseOtherLocals</code> will return the default macros plus a set defined inside a second program, andAlsoTheseOtherLocals, to be used in some specific context.</p>

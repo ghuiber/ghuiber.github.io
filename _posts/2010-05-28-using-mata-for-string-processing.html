@@ -1,0 +1,58 @@
+---
+layout: post
+title: Using Mata for string processing
+date: 2010-05-28 21:29:46.000000000 -04:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/bTiHBs
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My friend <a href="http://faculty.fuqua.duke.edu/home/blanc004/data_programming/">Dan Blanchette</a> showed me a little Mata function yesterday that he wrote for changing the case -- lower, upper, proper -- for strings longer than 244 characters. It was fresh in my head today as I went looking for something while babysitting my daughter -- can't remember what; babysitting requires undivided attention -- and ended up <a href="http://codeandculture.wordpress.com/2010/04/29/grepmerge/">here</a>. </p>
+<p>This post is the result of the conversation I started in the comment thread with Gabriel Rossman. I will attempt to use Mata for string processing within a suitably large text file, as opposed to just a blob of text you can call as a local. </p>
+<p>Step 1: google "very large text file". This took me to <a href="http://www.textfiles.com/">a magical place</a> where the 1980's are preserved in perpetuity. I went through the categories, and picked <a href="http://www.textfiles.com/programming/dostech.pro">this one</a>. At exactly 12,133 lines, it should do nicely.</p>
+<p>Step 2: get the Mata book -- because I still run Stata 10 at home, so no pdf documentation yet. </p>
+<p>Step 3: muck around. Eventually I came up with this thing:</p>
+<p><code>
+<pre>
+mata
+real scalar checkmatch(string scalar theFile, string scalar thePattern)
+{
+   real scalar n,i,check
+   string matrix A
+   A=cat(theFile)
+   n=rows(A)
+   check=0
+   for(i=1; i<=n; i++) {
+      if(strmatch(A[i,1],thePattern)) {
+         check=1
+         return(check)
+      }
+   }
+   return(check)
+}
+end
+</pre>
+<p></code><br />
+This is a Mata function that returns 1 if a string pattern is found anywhere in a given text file, and 0 otherwise. It makes use of Mata's built-in cat() function, which reads an ASCII file of n lines into a column vector of n string elements, one for each line in the original file. I want checkmatch() to exit with 1 as soon as it first finds the string pattern it's looking for. I'm guessing that the first return(check), inside the if clause, does it, but I'm not sure. </p>
+<p>With a text file this big, the 0 case might be the harder one to test, but if you're fishing for patterns you're unlikely to find in an English-language document no matter how big, a Hungarian word is a pretty good bet. So, this is the output:<br />
+<code>
+<pre>
+. mata: checkmatch(`"dostech.pro"',`"*BIOS*"')
+  1
+. mata: checkmatch(`"dostech.pro"',`"*Kolozsvar*"')
+  0
+</pre>
+<p></code><br />
+Now for a real illustration of Mata's string and file processing capabilities, see <a href="http://www.stata-journal.com/article.html?article=pr0049">here</a>. </p>

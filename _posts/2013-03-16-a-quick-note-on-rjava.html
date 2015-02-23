@@ -1,0 +1,23 @@
+---
+layout: post
+title: A quick note on rJava
+date: 2013-03-16 11:36:34.000000000 -04:00
+categories:
+- R
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I recently had to set up a PC with similar kit as I have on my Mac. On this PC the OS is Windows 7 64-bit but the browser is IE8 32-bit. This causes <code>jucheck.exe</code> to install (and occasionally update) 32-bit Java. This is unfortunate if you use 64-bit R, because it breaks the <code>rJava</code> package, which in turn breaks the <code>xlsx</code> package, with the practical consequence that you cannot read Excel worksheets into R. </p>
+<p>There is a workaround. First, install Oracle's manual download of 64-bit Java. As of this writing, its Windows 7 home will be in <code>C:\Program Files\Java\jre7</code>. You should add this to the <code>%path%</code> environment variable. In addition, the <code>rJava</code> package depends on <code>jvm.dll</code>, and R might be looking for it in the wrong spot. It won't hurt, then, to add this to your <code>%path%</code> as well: <code>C:\Program Files\Java\jre7\bin\server</code>. There's more on this, as usual, on <a href="http://stackoverflow.com/questions/7019912/using-the-rjava-package-on-win7-64-bit-with-r">StackOverflow</a>.</p>
+<p>As <a href="http://www.java.com/en/download/faq/java_win64bit.xml">Oracle warns</a>, your manually-installed 64-bit Java will not be automatically updated. That is a problem when security flaws hit Java, but I find being able to read Excel files into R so useful that I'm willing to just live with this risk, though I don't have a good idea how to best manage it. I'll just keep an eye on <a href="http://arstechnica.com/">ArsTechnica</a> for bug news. If anybody has a better way, I'm all ears.</p>

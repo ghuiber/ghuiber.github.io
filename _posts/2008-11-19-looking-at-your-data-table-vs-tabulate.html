@@ -1,0 +1,37 @@
+---
+layout: post
+title: 'Looking at your data: table vs. tabulate'
+date: 2008-11-19 12:01:51.000000000 -05:00
+categories:
+- Stata
+tags:
+- table
+- tabulate
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/du4PC5
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Last night I got an e-mail from a reader, asking how to keep Stata from clipping long string values in two-way tables. This is his code:<br />
+<code><br />
+clear<br />
+set obs 10<br />
+</code><code><br />
+gen a = ""<br />
+replace a = "a123456789b123456789c123456789" if _n&lt;5<br />
+replace a = "987654321x987654321y987654321z" if _n&gt;=5<br />
+gen b = "value " + string(int(_n/4))<br />
+</code><code><br />
+tab a b<br />
+tab a</code></p>
+<p>You can see that the a values are clipped in the two-way table. There's an easy way to fix that, but first, here's a little digression on how Stata does things; <code>tabulate</code> is one of the commands that have been around since Stata was born. It is written in C and it is part of the executable -- unlike the commands written in the interpreted ado language, such as <code>table</code>, whose source files are stored in the /base folder. When you type the first few letters of C commands, Stata assumes that you want the C commands, so you can use abbreviations -- "tab" for "tabulate", "di" for "display", etc. Stata won't presume to call the command "table" instead of "tabulate" in response to your order of "tab". In this case, though, "table" is the one you want. Namely,</p>
+<p><code>table a b, stubwidth(32)</code></p>
+<p>Setting the stub width to something suitably large will prevent the clipping of a.</p>

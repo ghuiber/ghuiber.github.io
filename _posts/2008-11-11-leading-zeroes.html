@@ -1,0 +1,43 @@
+---
+layout: post
+title: Leading zeroes
+date: 2008-11-11 16:23:56.000000000 -05:00
+categories:
+- Stata
+tags:
+- date and time functions
+- leading zeroes
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/apE2US
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I am working on a project where occasionally I need to keep time using dates in the format YYYYMMDD. I sometimes also need to move back and forth between these dates and numeric year, month, day, which requires things like turning the numeric month 1 into the string "01".</p>
+<p>The general syntax for turning numbers to strings with leading zeroes is easy enough. Here's an example with social security numbers:</p>
+<p><code>gen str9 ssn_string=string(ssn_numeric, "%09.0f")</code></p>
+<p>For dates, this syntax would translate like so:</p>
+<p><code><br />
+local when `c(current_date)'<br />
+display "`when'"<br />
+</code><code><br />
+local pieces "year month day"<br />
+local length "4 2 2"<br />
+forvalues i=1/3 {<br />
+local w: word `i' of `pieces'<br />
+local k: word `i' of `length'<br />
+local `w'=string(`w'(date("`when'","DMY")),"%0`k'.0f")<br />
+}<br />
+local when="`year'`month'`day'"<br />
+display "`when'"<br />
+</code></p>
+<p>Of course, you don't need to use the string type. Getting back to Stata's original social security number example, if you want leading zeroes but you also want to keep the numeric type, you can simply say</p>
+<p><code>format ssn %09.0f</code></p>
+<p>See the Stata help for <code>format</code>.</p>

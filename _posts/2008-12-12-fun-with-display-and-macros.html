@@ -1,0 +1,45 @@
+---
+layout: post
+title: Fun with display and macros
+date: 2008-12-12 16:14:53.000000000 -05:00
+categories:
+- Stata
+tags:
+- date and time functions
+- macros
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/d1uD4l
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Turns out anything you can <code>display</code> -- or <code>di</code> -- on the screen, you can also send to a macro to use later. How useful is that? Well, sometimes you need to say the same thing in different ways. The macro may be set to capture either the form or the substance, depending on which one you need.</p>
+<p>I don't usually use macros that way (OK, I wasn't even aware of the possibility until today) but today that need arose, so here's what I learned.</p>
+<p>One example of the difference between a thing's looks and substance would be this:<br />
+<code><br />
+di c(current_date)<br />
+</code><br />
+What you see on the screen -- today that would be the string "12 Dec 2008" -- is different from what's behind it -- the value 17878, <em>i.e.</em>, the number of days since January 1, 1960.</p>
+<p>So you could simply do<br />
+<code><br />
+local mydate c(current_date)<br />
+di "`mydate'"<br />
+</code><br />
+This looks useful, and maybe it is. The local macro `mydate' above has stored the look of c(current_date), but it knows nothing about its content. You could change that if you defined that macro like this:<br />
+<code><br />
+local mydate=date(c(current_date),"DMY")<br />
+di `mydate'<br />
+</code><br />
+So `mydate' is now a number, not a string. Specifically, it's an actual date -- from which you can derive things like <code>week(`mydate')</code> or <code>dow(`mydate')</code> or what have you.</p>
+<p>But a look of this content, as opposed to the content itself, might be exactly what you want. For example, you may want the YYYYMMDD equivalent of today's date. Easy:<br />
+<code><br />
+local mydate: di %tdCYND date(c(current_date),"DMY")<br />
+di `mydate'</code></p>
+<p>So much about that. It's Friday, can't work too hard.</p>

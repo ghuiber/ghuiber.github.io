@@ -1,0 +1,86 @@
+---
+layout: post
+title: All the SAS you need
+date: 2011-07-01 14:12:59.000000000 -04:00
+categories: []
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/jf2CeF
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>You may find yourself on a job where people use SAS, but you would rather use Stata. If you have both SAS and Stata installed on your computer, you can simply put Dan Blanchette's <a href="http://www.cpc.unc.edu/research/tools/data_analysis/sas_to_stata/transfer-tools/usesas.html"><code>usesas</code></a> to work. That's all you need. </p>
+<p>If you don't have SAS installed, make your colleagues' lives easier and give them a script that lets them send data from SAS format to csv in bulk. Below is an example. You could call it gimmedata.sas. </p>
+<p>The script starts by defining some lists of stubs for file names that follow the pattern "stub_2011mmdd.sas7bdat". You can alter these lists to suit your situation. It then loops through them and turns SAS data sets into .csv files:</p>
+<pre><code>
+%let theuser  =Gabi;
+%let thepath  =C:/Users/&theuser/myproject/;
+%let datain   =&thepath.sas_data/;
+%let csvout   =&thepath.sas_to_csv/;
+%let stubs    =dw dw_mean hm matrix pop fore;
+%let days05   =05 13 20 27; /* dates in May */
+%let days06   =03 09 16 22; /* dates in June */
+
+libname  mylib "&datain";
+title;
+
+*options mcompilenote=all; /* default is none */
+*options mprint mlogic; 
+
+/* check if a data set exists, send it out as csv */
+%macro getfile(stub,month,day);
+	%local thefile;
+	%let thefile=&stub._2011&month.&day;
+	%if %sysfunc(exist(mylib.&thefile.)) %then %do; 
+		PROC EXPORT DATA=mylib.&thefile.
+        	OUTFILE="&csvout.&thefile..csv"
+        	DBMS=CSV REPLACE;
+    		PUTNAMES=YES;
+		RUN;
+	%end;
+	%else %put Data set &thefile does not exist.; 
+%mend getfile;
+
+/* files come in every week, at dates listed 
+in &&days&month. so, run the %getfile macro 
+through all of those dates */
+%macro getfiles(stub,month);
+	%local thelist;
+	%local count;
+	%let thelist=&&days&month; /* going through days this month */
+	%let count=0;	
+	%do %while(%qscan(&thelist.,&count.+1,%str( )) ne %str());
+		%let count=%eval(&count.+1);
+		%let day=%scan(&thelist.,&count.);	
+		%getfile(&stub,&month,&day);
+	%end;
+%mend getfiles;
+
+/* weekly files come with names that start 
+with the stubs listed in &stubs. so, run 
+getmonth through all those stubs */
+%macro getmonth(month);
+	%local thelist;
+	%local count;
+	%let thelist=&stubs; /* going through file name stubs */
+	%let count=0;	
+	%do %while(%qscan(&thelist.,&count.+1,%str( )) ne %str());
+		%let count=%eval(&count.+1);
+		%let stub=%scan(&thelist.,&count.);	
+		%getfiles(&stub,&month);
+	%end;
+%mend getmonth;
+
+/* now call your macros */
+%getmonth(05);
+%getmonth(06);
+</code></pre>

@@ -1,0 +1,42 @@
+---
+layout: post
+title: OpenSSH, take two
+date: 2008-10-08 18:08:17.000000000 -04:00
+categories:
+- FreeBSD
+tags:
+- cp
+- mount
+- OpenSSH
+- ssh
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/dbwP3d
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Today I had to re-generate my key files for OpenSSH authentication. Between August and now I had forgotten how exactly that is done. So for next time this happens, here are detailed step-by-step instructions:</p>
+<p>1) plug FAT32-formatted USB stick into PC-BSD laptop; it will be automatically mounted as /media/fattie</p>
+<p>2) from terminal window, do this:</p>
+<p><code>% ssh-keygen -t dsa</code></p>
+<p>keep default names (id_dsa, id_dsa.pub) and path (/usr/home/myusername/.ssh).</p>
+<p>3) copy id_dsa.pub to the USB stick:</p>
+<p><code>% cp /usr/home/my_laptop_username/.ssh/id_dsa.pub /media/fattie</code></p>
+<p>4) move this file to the server; will have to mount the USB stick like so:</p>
+<p><code># mount_msdosfs /dev/da0s1 /mnt</code></p>
+<p>5) overwrite this file onto the authorized_keys file:</p>
+<p><code># mv /mnt/id_dsa.pub /usr/home/my_server_username/.ssh/authorized_keys</code></p>
+<p>6) unmount USB stick and you're done:</p>
+<p><code># umount /mnt</code></p>
+<p>Now, to test the connection, get back to the laptop and connect from a terminal window:</p>
+<p><code>% ssh my_server_username@myserver.homeip.net</code></p>
+<p>And all is well. Now you need to set up the Windows XP laptop, both PuTTY (done it before) and Cygwin (that's a new one). Use same id_dsa private key for convenience, so while still on the PC-BSD laptop, plug the USB stick back in and copy the private key:</p>
+<p><code>% cp /usr/home/my_laptop_username/.ssh/id_dsa /media/fattie<span style="font-family: 'Lucida Grande';"> </span></code></p>
+<p>OK, on to the Windows laptop. Plug in the USB stick and do two things: first, use puttygen.exe to convert the id_dsa file into PuTTY's own .pkp format, so you can connect to the server with PuTTY. Second, save id_dsa as-is in the Cygwin .ssh folder (/home/my_Windows_username/.ssh) so you can connect from Cygwin as you would from the PC-BSD laptop, with the ssh command.</p>

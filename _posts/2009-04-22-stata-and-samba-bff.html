@@ -1,0 +1,34 @@
+---
+layout: post
+title: Stata and Samba, BFF
+date: 2009-04-22 13:21:12.000000000 -04:00
+categories:
+- FreeBSD
+- Stata
+tags:
+- R
+- UNIX
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cvpkvv
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>What can a Stata user do with a Samba server? Pretty much the same thing you would do with any computer. My Stata is installed on my Windows PC. Now Samba allows me to store either do-files or data on the remote FreeBSD server and access them easily.</p>
+<p>Suppose that the remote box were called myUnix. Also suppose that I had a folder there with do-files, called myDofiles and another, with data sets, called myDtafiles.</p>
+<p>This is how I would make Stata run a do-file saved on the server:<br />
+<code><br />
+run \\myUnix\myDofiles\myFile.do<br />
+</code><br />
+And this is how I can load into the PC's memory a .dta file stored on the FreeBSD hard drive:<br />
+<code><br />
+use \\myUnix\myDtafiles\myFile.dta<br />
+</code></p>
+<p>If one of these days I can find the time to experiment with how Stata could hook up with R and to what profit, I will do that across the two computers, for a bit of extra educational benefit. But I can't be bothered right now.</p>

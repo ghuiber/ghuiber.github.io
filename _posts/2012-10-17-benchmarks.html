@@ -1,0 +1,26 @@
+---
+layout: post
+title: Benchmarks
+date: 2012-10-17 16:19:42.000000000 -04:00
+categories:
+- R
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  has_been_twittered: 'yes'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I went googling for some examples of quadratic programming done in Mata, and stumbled across a fairly recent Statalist discussion. The original question is <a href="http://www.stata.com/statalist/archive/2012-07/msg00707.html">here</a> and the official response, typically prompt, is <a href="http://www.stata.com/statalist/archive/2012-07/msg00749.html">here</a>. I tested Patrick Roland's code on my own machine (2011 MacBook Pro Core2 i5) but with <a href="http://www.gnu.org/software/octave/">Octave</a> instead of MATLAB, and with R in addition. Octave took about 2 seconds. My R code is </p>
+<pre><code>
+system.time(chol2inv(matrix(rnorm(2000^2),2000,2000)))
+</code></pre>
+<p>This took about 4 seconds to run, whether in RStudio or in command-line R 2.15.1. Mata, meanwhile, still takes about 30 seconds. I run Stata 12MP, all up to date. I'd be curious how SAS/IML does. I don't have it.</p>

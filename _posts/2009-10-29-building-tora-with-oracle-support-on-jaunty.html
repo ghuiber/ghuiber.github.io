@@ -1,0 +1,32 @@
+---
+layout: post
+title: Building TOra with Oracle support on Jaunty
+date: 2009-10-29 12:55:00.000000000 -04:00
+categories:
+- Ubuntu
+tags:
+- odbc load
+- SQL
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/3ObYUT
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>Today I had to install <a href="http://torasql.com/">TOra</a> with Oracle support. That was interesting. TOra is on the Synaptic list, but if you install it from there you only get PostgreSQL support. For anything else you need to build TOra from source. Instructions are <a href="http://www.pythian.com/news/3869/installing-tora-with-oracle-support-on-ubuntu-904-jaunty-jackalope">here</a>, courtesy of Brad Hudson.  Follow them. In particular, do not skip installing the prerequisite packages on his list. Use his code to get them all in one step.</p>
+<p>You also need to download the Oracle Instant Client. Download all three rpm files -- basiclite, devel and sqlplus -- not just the first. You do need all three. Finally, the <code>./configure [...]</code> line in <code>debian/rules</code> took some fiddling. I read <a href="http://setdosa.blogspot.com/2008/02/installing-database-client-tora-in.html">this</a> post by Arun Mallikarjunan and, emboldened, I tried a few variations of my own. This is what worked:</p>
+<pre><code>
+./configure --prefix=/usr --with-oracle=/usr/lib/oracle/11.2/client
+--with-instantclient --without-rpath --disable-new-check --without-kde
+--with-oracle-includes=/usr/include/oracle/11.2/client
+--with-oracle-libraries=/usr/lib/oracle/11.2/client/lib --enable-libsuffix=
+</code></pre>
+<p>The above is all on one long line. Incidentally, Arun commented <a href="http://www.pythian.com/news/1419/installing-tora-with-oracle-support-on-ubuntu-804lts-hardy-heron#comment-329233">here</a> that in addition to the prerequisites Brad listed, you need a few others. Brad disagreed <a href="http://www.pythian.com/news/1419/installing-tora-with-oracle-support-on-ubuntu-804lts-hardy-heron#comment-330809">here</a>. He is right that the extra packages on Arun's list not are required. But if you install them, you also get MySQL and ODBC support enabled, so I did. One time last year I had to <code>odbc load</code> some data from a MySQL database into Stata (I found help for that <a href="http://www.ats.ucla.edu/stat/Stata/faq/odbc.htm">here</a>) and I figured the need might come up again. Finally, I cleaned up after myself with help from <a href="http://maketecheasier.com/8-ways-to-maintain-a-clean-lean-ubuntu-machine/2008/10/07">here</a>.</p>

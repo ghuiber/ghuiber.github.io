@@ -1,0 +1,48 @@
+---
+layout: post
+title: Set theory and the extended macro function list
+date: 2009-02-19 16:37:51.000000000 -05:00
+categories:
+- Stata
+tags:
+- extended macro function
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cr14jg
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I have a project where I need to do some things to all files whose names start with "sub" but not "subs". The former are files I receive, the latter are files I produce. When it occurred to me that their common file name root might cause problems, I rewrote my code to name the files formerly known as "subs" to something different but (to me) still descriptive, and I picked "snap".</p>
+<p>The program that presents this little problem cleans up after itself. Every week, if it's Friday, it deletes whatever "sub", "subs", "snaps" or what have you files it finds that are older than <em>n</em> weeks. So, eventually, after the change above, all the "subs" files will disappear. There will only be "snap" files left in their place, and the ambiguity between "sub" and "subs" will no longer be an issue.</p>
+<p>In the meantime, though, I need a piece of code that lists file names that start with "sub" but not with "subs", which is easy enough. But it needs to work even after the last "subs" file will have left the disk. I also want it to make use of things already declared elsewhere. I basically want to be free to forget I ever wrote it long after it outlived its usefulness but, should it turn up to be needed again for some reason, I want it to pick up where it left off.  So here's how the - (minus) operator of the extended macro function <code>list</code> can handle that:</p>
+<p>Right now, in the directory in question, there are four strings that file names can start with: "rat", "sub", "subs" and "snap". The first two are file names I don't want to change. Every week there will be a new file starting with either string in that directory. The last two, like I mentioned, I have more control over. The set of file names that start with "snap" is empty now but will fill up over time, and the set of file names that start with "subs" is not empty yet, but it's headed that way. I don't care about the "rat" files for this particular purpose, but whatever is irrelevant should not have to be explicitly excluded. Here's the code:<br />
+<code><br />
+local from=strlower("`c(pwd)'")<br />
+local whichfiles "rat sub subs snap"<br />
+foreach name in `whichfiles' {<br />
+    local `name'list: dir "`from'" files "`name'*"<br />
+//  local `name'count: list sizeof `name'list<br />
+//  di "`name' count is ``name'count'"<br />
+}<br />
+local sub sub                        // (1)<br />
+local dropthese: list whichfiles-sub // (2)<br />
+di "`dropthese'"<br />
+foreach name in `dropthese' {<br />
+//  di "`name'"<br />
+    local sublist: list sublist-`name'list<br />
+//  local subcount: list sizeof sublist<br />
+//  di "now sub count is `subcount'"<br />
+}</code></p>
+<p>This assumes that your directory of interest is c(pwd) -- type <code>creturn list</code> in Stata if this makes no sense. Notice that you have to declare the string "sub" as a local in order for the list operator minus to work -- see lines commented (1) and (2).</p>
+<p>The beauty of the minus operator is that it acts the way you would expect it to from set theory. It will leave `sublist' unchanged if:</p>
+<p>a) ``name'list' is empty (as in the file names that start with "subs" after the last such file will have been deleted) or</p>
+<p>b) ``name'list' is not a proper subset (as in the file names that start with "rat", right now) or</p>
+<p>c) both (the case of the file names that start with "snap" right now; remember I don't yet have any such files).</p>
+<p>So I don't need to declare a `whichfiles' list with strictly the file names of interest now -- "sub" and "subs". The minus operator will gracefully handle everything. If I happen to have saved a more expansive `whichfiles' list in some other spot, for some other reason, then I can just use it from there. The lines I commented out were useful for testing, but will be a nuisance when this is live. I could have equally well enclosed the whole thing in <code>quietly {}</code>. Come to think of it, that would have been more elegant.</p>

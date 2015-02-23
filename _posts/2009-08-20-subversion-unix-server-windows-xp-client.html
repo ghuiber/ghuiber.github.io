@@ -1,0 +1,36 @@
+---
+layout: post
+title: 'Subversion: UNIX server, Windows XP client'
+date: 2009-08-20 01:44:39.000000000 -04:00
+categories:
+- FreeBSD
+tags:
+- Subversion
+status: publish
+type: post
+published: true
+meta:
+  yourls_tweeted: '1'
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/GQCNY
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>It took me long enough to figure this out to be worth documenting. If you use Windows, you can use <a href="http://tortoisesvn.net/">TortoiseSVN</a> with a local repository, installed by default on C:\svn. But you can also use TortoiseSVN to connect to a remote UNIX repository. They hook up through PuTTY, and the protocol is svn+ssh://.</p>
+<p>There are several pieces to this. Let's say your UNIX machine runs FreeBSD. If so, you're in luck. You can install OpenSSH using instructions from <a href="http://www.freebsd.org/doc/en/books/handbook/openssh.html">here</a> or <a href="http://nostarch.com/freebsdserver.htm">here</a>. Then you can install Subversion. Instructions for that are <a href="http://enoriver.net/index.php/2009/03/01/ive-got-subversion/">right here</a>. Now you need to get TortoiseSVN to talk to it from your Windows machine. Instructions for that are <a href="http://tortoisesvn.net/ssh_howto">here</a>.</p>
+<p>Now here's what didn't work, and how I fixed it: as soon as I had everything in place, I went to the first random Windows Explorer entry and right-clicked it so I'd get to the TortoiseSVN menu, then Repo-browser. I was anxious to browse this:</p>
+<p><code>svn+ssh://gabi@192.168.10.2/usr/home/svn/repos</code></p>
+<p>But I was out of luck. By default, TortoiseSVN uses TortoisePlink to connect to a UNIX box. This simply is a version of <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">Plink</a> that will not open a command line, because you don't need one. Normally, this works. For me it didn't. First, it kept inviting me over and over again to enter my user name. This is a known problem and it has a <a href="http://tortoisesvn.net/node/35">solution</a>, but I did not like it. Then I tried to set PuTTY as the ssh client (as explained further down below), but then my connection to the server would close immediately, as if the ssh daemon had rejected my credentials.</p>
+<p>So, first I logged into the FreeBSD with PuTTY to make sure that my key worked. Then I opened Cygwin and ran</p>
+<p><code>svn list svn+ssh://gabi@192.168.10.2/usr/home/svn/repos</code></p>
+<p>This was to make sure that I actually did have access to the Subversion server through the svn+ssh:// protocol. When this returned the list of directories I had added yesterday from the Ubuntu box, I knew that all was well, and the trouble was contained to TortoiseSVN.</p>
+<p>It was actually contained to the PuTTY default settings. TortoisePlink can establish a PuTTY session if the default settings contain the path to the private key. If you just installed PuTTY and established a named SSH connection that works (as explained <a href="http://tortoisesvn.net/ssh_howto">here</a>), then you know that you have a working key and you know where it is, but your default settings are still pristine. Let's call this named SSH connection MyConnection and let's suppose that you also saved an "Auto-login username" to go with it (that's in Connection -&gt; Data; refer back to <a href="http://tortoisesvn.net/ssh_howto">the instructions</a> if needed).</p>
+<p>Now "Load" the Default Settings just to make sure that all the boxes are cleared. Then in the left pane navigate to SSH, then to Auth. Then, in the "Private key for authentication" text box, browse to where you stored your .ppk file. Next, "Save" your Default Settings. They're now as empty as before, with the one exception of the path to the .ppk file. This worked for me. I was able to browse my existing repository both via</p>
+<p><code><code>svn+ssh://gabi@192.168.10.2/usr/home/svn/repos</code></code></p>
+<p>and via</p>
+<p><code>svn+ssh://MyConnection/usr/home/svn/repos</code></p>
+<p>Finally, to ensure that TortoiseSVN uses its own TortoisePlink as a ssh client, find the Settings entry at the bottom of the TortoiseSVN menu in Windows Explorer. Then go to the Network tab, and check that the "ssh client" box is empty. This, by the way, is where you could set the ssh client to PuTTY instead, if you wanted to, but that did not work for me.</p>

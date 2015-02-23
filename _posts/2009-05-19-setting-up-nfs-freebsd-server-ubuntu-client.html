@@ -1,0 +1,89 @@
+---
+layout: post
+title: 'Setting up NFS: FreeBSD server, Ubuntu client'
+date: 2009-05-19 13:21:34.000000000 -04:00
+categories:
+- FreeBSD
+- Ubuntu
+tags:
+- NFS
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/5Z7Gxl
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I set up Samba a while back, and that turned out to be a great way to get stuff I used to keep on separate Windows computers all in one place on the FreeBSD box, as readily accessible as if they were still on the original local hard drives. Now I'd like to do the same with a couple of Ubuntu boxes I set up around the house. For that, I will need NFS.</p>
+<p>As in Samba's case, there are some changes to be made to the server, and some to the client. I want to share files across all the computers on my home network. The usual wild card for multiple client computers is [network gateway IP]/[mask]. I use my own network gateway IP, 192.168.10.0, as an example. Different router makers use different numbers after the 192.168 part. The mask is 255.255.255.0.</p>
+<p>There are four main steps to setting up NFS on the server side. First you enable packet filtering, then you edit three system files: /etc/exports, /etc/hosts.allow, and /etc/rc.conf.</p>
+<p>The first step, enabling packet filtering, has three sub-steps of its own, detailed below.</p>
+<p>First, you write an /etc/pf.conf file. I wrote mine using Ian Robinson's instructions posted <a href="http://forums.bsdnexus.com/viewtopic.php?id=2046">here</a>:<br />
+<code><br />
+# my /etc/pf.conf file<br />
+# /24 in 192.168.10.0/24 is equal to saying the netmask is 255.255.255.0<br />
+# 1. define macros for local network NIC and IP address<br />
+nic_1 = "fxp0"<br />
+lan = "192.168.10.0/24"<br />
+# 2. write pf commands to pass all traffic to and from local network<br />
+# the macros from above are used and are prefixed with a "$"<br />
+pass in on $nic_1 from $lan to any keep state<br />
+pass out on $nic_1 from $lan to any keep state<br />
+</code><br />
+Second, you edit /etc/rc.conf with this line:<br />
+<code><br />
+pf_enable="YES"<br />
+</code><br />
+Third, you start the pf daemon:<br />
+<code><br />
+/etc/rc.d/pf start<br />
+</code><br />
+You can check that your packet filtering rules are live:<br />
+<code><br />
+pfctl -sr<br />
+</code><br />
+If you already had packet filtering, and instead of writing an /etc/pf.conf file from scratch you just had to edit your existing one, then you will skip the two steps above and instead activate your new rules like so:<br />
+<code><br />
+pfctl -nf /etc/rc.conf // this is to check the edited file for problems<br />
+pfctl -f /etc/rc.conf  // to activate the new rules, remove the -n flag<br />
+</code><br />
+That's it for packet filtering. Next, write your /etc/exports file. I wanted to make my server home directory /usr/home/gabi available to the root user of any client computer on my home network. So, my /etc/exports file looks like this:<br />
+<code><br />
+/usr/home/gabi -network 192.168.10 -mask 255.255.255.0<br />
+</code><br />
+There is an extra option you could add at the end of the line above. You can direct the root user of the client server to adopt the server privileges of any user registered there, based on that user's ID number (known as UID in the manual's parlance). For example, typing -maproot=1001 at the end of the line will give the root user on the client computer the privileges of the user identified on the server by the UID 1001. This is useful, for example, if you want to grant the remote user specific server privileges. By default, FreeBSD is conservative: not using a -maproot instruction will map the remote user to <code>nobody:nobody</code>. As you might have guessed, this guy can't do much. We'll get back to this part later.</p>
+<p>Moving on to step 3: adjust the /etc/hosts.allow settings. This amounts to letting a few daemons loose on the local network and restricting them everywhere else:</p>
+<p><code><br />
+rpcbind : 192.168.10.0/255.255.255.0 : allow<br />
+rpcbind : ALL : deny<br />
+portmap : 192.168.10.0/255.255.255.0 : allow<br />
+portmap : ALL : deny<br />
+mountd : 192.168.10.0/255.255.255.0 : allow<br />
+mountd : ALL : deny<br />
+statd : 192.168.10.0/255.255.255.0 : allow<br />
+statd : ALL : deny<br />
+</code><br />
+The fourth and final step is to edit /etc/rc.conf to enable these daemons:<br />
+<code><br />
+rpcbind_enable="YES"<br />
+nfs_server_enable="YES"<br />
+mountd_flags="-r"<br />
+rpc_lockd_enable="YES"<br />
+rpc_statd_enable="YES"<br />
+</code></p>
+<p>On the client computer things are easier. Ubuntu comes with the wonderful Synaptic Package Manager (in Gnome, find it in the System/Administration menu). Search for the string "nfs" and mark the packages "nfs-common" and "portmap" for installation. Synaptic will suggest some dependencies and ask for permission to install some other packages as well. Let it.</p>
+<p>That's all. Now in a terminal window on the client you can set up a mount point, e.g.<br />
+<code><br />
+$ mkdir ~/from_server<br />
+</code><br />
+And then you can mount any of the server directories listed in your /etc/exports file onto it, like so:<br />
+<code><br />
+$ sudo mount your_server_IP:/your/remote/directory /home/you/from_server<br />
+</code></p>
+<p>Note that Ubuntu, by default, does not come with a root user. Instead, the user who installs the Ubuntu OS is granted some administrative privileges that make him/her a kind of quasi-root. This is to make Ubuntu systems safe for beginner UNIX-ers. The -maproot=UID directive can work with that. Leaving the /etc/exports file without a -maproot=UID instruction showed the content of my /usr/home/gabi folder on the FreeBSD server in the /home/gabi/from_server mount point on the client computer but the files were read-only. On the other hand, adding "-maproot=UID" to the last line of the /etc/exports file on the server did what I wanted: the Ubuntu user gabi received the same rights to the /home/gabi/from_server folder on the client as the FreeBSD user gabi had to the /usr/home/gabi folder on the server. In other words, I now can read/write/navigate my server home directory as if it were on my client computer.</p>

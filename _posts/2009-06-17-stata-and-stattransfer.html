@@ -1,0 +1,64 @@
+---
+layout: post
+title: Stata and StatTransfer
+date: 2009-06-17 18:44:27.000000000 -04:00
+categories:
+- Stata
+tags:
+- SAS
+- Stat/Transfer
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/c0kikR
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>If you collaborate with people who use other statistical software with proprietary data file formats, you will find <a href="http://www.stattransfer.com/">Stat/Transfer</a> useful for converting between Stata and said software. How to do that using the Stat/Transfer GUI is easy enough to figure out. But you can also run Stat/Transfer from within Stata. If you are on a Windows machine, here's one example:</p>
+<pre><code>
+local from  "D:\original files"
+local to    "D:\sas files"
+</code><code>
+// add file names here as needed
+local txt_files "BPALL"
+local xls_files "BO"
+</code><code>
+// transfer to SAS format. see Stat/Transfer command file help
+// sasx is for SAS Transport files. Change as needed on line 35 below. Options are:
+/*
+SAS V6 for Windows and OS/2          -- sas2
+SAS V7, V8 and V9 for Windows        -- sas
+SAS V6 for Mac, Unix - HP, Sun, IBM  -- sas1
+SAS V6 for Unix - DEC                -- sas4
+SAS Transport Files                  -- sasx
+*/
+// other options:
+// /Y means "yes, overwrite as needed"
+// /V means "verbose output"
+tempname fh_out
+local foo set path="C:\Program Files\StatTransfer7\";%path%
+local myfileout "`from'\convert.bat"
+file open `fh_out' using "`myfileout'", replace write
+file write `fh_out' `"`foo'"' _n
+foreach filetype in txt xls {
+  foreach filename in ``filetype'_files' {
+    local input_file   `from'\`filename'.`filetype'
+    local output_sas   `to'\`filename'.dat
+    capture confirm file "`output_sas'"
+    if _rc!=0 {
+      local bar st "`input_file'" sasx "`output_sas'" /Y /V
+      file write `fh_out' `"`bar'"' _n
+    }
+  }
+}
+file close `fh_out'
+winexec "`myfileout'"
+</code></pre>
+<p>There you have it. This works with Stata 9.2 and Stat/Transfer 7. I don't have either. I wrote this for a client and tested in on their machine.</p>
+<p>Update: still unclear why indentation isn't working like it used to, but there's a workaround: using the &lt;pre&gt;&lt;/pre&gt; HTML tags. Having a graphical interface like WordPress for blogging should in theory make it unnecessary to revert to HTML, but it's only one pair of tags and I like the result. I'll live with it. As to a non-Windows version of the code above, check Eric's comment below.</p>

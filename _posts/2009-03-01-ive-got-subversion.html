@@ -1,0 +1,24 @@
+---
+layout: post
+title: I've got Subversion!
+date: 2009-03-01 12:05:43.000000000 -05:00
+categories:
+- FreeBSD
+tags:
+- Subversion
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cHr9HL
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>It was about time, too. I'm an economist by trade and that harms my programming habits. But the more I program, the more I'm aware of that, so I guess all hope is not lost. I've been meaning to adopt some sort of version control for a long time now. I had already installed Subversion and TortoiseSVN on my Windows XP laptop (with help from <a href="http://lifehacker.com/software/subversion/hack-attack-using-subversion-with-tortoisesvn-192367.php">here</a>), but I wanted it on the FreeBSD box as well. I wanted a proper Subversion server for a team of programmers working from different locations, just because I thought the need might arise one of these days.</p>
+<p>First of all, as always, I did <code>portsnap fetch update</code>. Next, the <code>whereis subversion</code> and <code>make install clean</code> parts were easy enough. But the install aborted with a protest that my devel/apr port didn't have db4 support, whatever that is. OK, so then I went <code>whereis apr</code>, found it, cd'd to it, googled around a bit, and figured that <code>make deinstall reinstall</code> wouldn't do any harm.  It might even bring up a dialog menu where support for Berkeley DB could be chosen. I was right on both counts. Bonus: the Berkeley DB option was checked by default.</p>
+<p>After the APR port was duly deinstalled and reinstalled, I went back to the Subversion port: <code>make deinstall reinstall</code> did the same magic, and now I've got Subversion. I bought <a href="http://tinyurl.com/abq9nj">the book</a> from <a href="http://www.alibris.com">Alibris</a> a while back and next week is spring break. I'm going to figure this thing out right and proper.</p>

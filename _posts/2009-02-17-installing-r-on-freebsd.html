@@ -1,0 +1,55 @@
+---
+layout: post
+title: Installing R on FreeBSD, part one
+date: 2009-02-17 14:35:43.000000000 -05:00
+categories:
+- FreeBSD
+tags:
+- R
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/9wahIW
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>My installation of R 2.8.1-1 is in progress as I write this. The original instructions for installing R on FreeBSD are at the <a href="http://wiki.r-project.org/rwiki/doku.php?id=getting-started:installation:freebsd">R Wiki</a>, but before you dash there, you may want to know that I had to make some changes. They are listed below:</p>
+<p>First, the good news: on my FreeBSD 7.0 installed in February of 2008, I did not need to make any changes to the PATH, nor did I have to set the symbolic links mentioned in the instructions right after the paragraph that begins with "A word of warning [...]". You may have to, but check first:<br />
+<code><br />
+# whereis make<br />
+# whereis sed<br />
+</code><br />
+If your system is anything like mine, make and sed are in /usr/bin. Next, you need to check and see if the PATH includes /usr/bin, like so:<br />
+<code><br />
+# echo $PATH<br />
+</code><br />
+If the answer is yes, you're OK. If the answer is no, before you make changes to the PATH, check which shell you're using, like so:<br />
+<code><br />
+# echo $SHELL<br />
+</code><br />
+The instructions use the "export PATH" command, which is for the bash shell. The csh equivalent of that command is "setenv PATH". Finally, the symlinks mentioned in the instructions map your gsed to sed, but I have no such thing. I have psed instead. You can check what kind of stream editor you have like so:<br />
+<code><br />
+# ls /usr/local/bin | grep sed<br />
+</code><br />
+Next, I had to make changes to two files: /etc/login.conf and /boot/loader.conf.</p>
+<p>The latter was easy. It used to be empty, and it now contains one line:<br />
+<code><br />
+kern.maxdsiz="734003200"<br />
+</code></p>
+<p>In the former, I had to comment out the settings that forwarded the standard user settings to the default, then de-comment the example settings for the standard user, and increase the datasize to 700M. The idea is that by default, the datasize is unlimited. You need to cap it to 700M for the standard user, in order for the gfortran43 port, on which the R port depends, to install with Java support, whatever that is.</p>
+<p>I wouldn't have done any of this, but my first attempt at installing R aborted with all kinds of error messages that after a bit of googling pointed me this way. To be safe, before editing /etc/login.conf and /boot/loader.conf I copied them to /etc/login.conf_original and /boot/loader.conf_original. If I screwed anything up, I'll just de-install R and revert to those until I figure out what's wrong.</p>
+<p>When you open /etc/login.conf for editing you will see some comments that instruct you to do<br />
+<code><br />
+# cap_mkdb /etc/login.conf<br />
+</code><br />
+after you've done your edits. I did. To make sure that the new settings took place, I also restarted the server. That's<br />
+<code><br />
+# shutdown -r now<br />
+</code><br />
+And now, like I said, the thing's in progress. It's taking a long time too.</p>

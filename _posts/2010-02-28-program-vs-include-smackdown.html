@@ -1,0 +1,188 @@
+---
+layout: post
+title: Program vs. include smackdown
+date: 2010-02-28 22:25:11.000000000 -05:00
+categories:
+- Stata
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_tweeted: '1'
+  yourls_shorturl: http://bit.ly/djVaV1
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>When it comes to defining local macros in a different place from where you use them, you have two options: a do-file you <code>include</code> as needed or an r-class program that you call as needed. I talked about it <a href="http://enoriver.net/index.php/2010/02/18/define-local-macros-in-one-place-use-them-everywhere/">here</a> and said that a program is a better choice, without any evidence to back up that claim. A reader called me on it, so I went and checked. Turns out he's right. Below is how I went about it:</p>
+<p>I wrote a do-file, called work.do, that just uses a dataset, nothing more. That data set's name is handled by a local macro, defined in a separate do-file, called locals.do, which work.do includes. Then I wrote locals_program.do which does the same job via a program, which then work_program.do calls by name. Finally, I wrote a profiler.do file that called all four files a few times, and measured the time they all took doing their thing. According to profiler.do, an include is usually faster than a program. Below is the code:</p>
+<p><code>
+<pre>
+// work.do starts here:
+include locals.do
+use "`my_file'"
+</pre>
+<p></code><br />
+<code>
+<pre>
+// locals.do starts here
+local file_path "C:/work/romanian papers circulation figures/data/"
+local file_name "file_combined.dta"
+local my_file   "`file_path'`file_name'"
+</pre>
+<p></code><br />
+<code>
+<pre>
+// this is locals_program.do
+capture prog drop defineMyLocals
+program defineMyLocals, rclass
+
+local file_path "C:/work/romanian papers circulation figures/data/"
+local file_name "file_combined.dta"
+local my_file   "`file_path'`file_name'"
+
+local things "file_path file_name my_file"
+foreach thing in `things' {
+   return local `thing' ``thing''
+}
+
+end
+</pre>
+<p></code><br />
+<code>
+<pre>
+// this is work_program.do
+defineMyLocals
+local my_file `r(my_file)'
+use "`my_file'"
+</pre>
+<p></code><br />
+<code>
+<pre>
+// and finally, this is profiler.do
+
+set more off
+
+cd "c:/work/programming/putterin/profiler"
+
+// SECTION 1: OVERVIEW
+/*
+   1. What's going on:
+   "program" vs. "include" profiler. this do-file defines
+   two programs that will measure the performance difference
+   in defining locals separately using two alternate ways
+   (1) locals are defined in a do-file called with include
+   (2) they are defined in a program called by name
+
+   The exercise is to "use" a file. This file is called via
+   a handle defined as a local macro. That definition can be
+   either in a do-file included (1) or in a program called
+   by name (2).
+
+   2. Programs defined here and their dependencies:
+   runProfile1
+      defineMyLocals // defined in locals_program.do
+   runProfile2
+*/
+
+// SECTION 2: GLOBALS
+
+// SECTION 3: PROGRAM DEFINITIONS
+
+// ### programs defined elsewhere and called via "run"
+// ### locals_program.do defines the program named
+// ### defineMyLocals, which returns a file handle
+// ### as an r() local.
+run locals_program.do
+
+// ### work_program.do uses a file whose handle 
+// ### comes from calling defineMyLocals and 
+// ### retrieving an r() local.
+capture prog drop runProfile1
+program runProfile1
+
+args counter
+
+local time_start=tc("`c(current_date)'" "`c(current_time)'")
+forvalues i=1/`counter' {
+	run work_program.do
+}
+drop _all
+local time_end=tc("`c(current_date)'" "`c(current_time)'")
+di ""
+di "Profile 1 (program), `counter' reps"
+di "Time elapsed (ms): "`time_end'-`time_start'
+
+end
+
+// ### work.do includes locals.do, which
+// ### defines a file handle as a local.
+// ### work.do uses that file by calling
+// ### that local.
+capture prog drop runProfile2
+program runProfile2
+
+args counter
+
+local time_start=tc("`c(current_date)'" "`c(current_time)'")
+forvalues i=1/`counter' {
+	run work.do
+}
+drop _all
+local time_end=tc("`c(current_date)'" "`c(current_time)'")
+di ""
+di "Profile 2 (include), `counter' reps"
+di "Time elapsed (ms): "`time_end'-`time_start'
+
+end
+
+// SECTION 4: PROGRAM CALLS
+
+local cycles "100 200 500 1000 1500"
+foreach cycle in `cycles' {
+	forvalues i=1/2 {
+   		runProfile`i' `cycle'
+	}
+}
+</pre>
+<p></code><br />
+And that's it. Put all five files into the same directory, make the profiler <code>cd</code> to it, change the path and name locals to your own data set, and see what you get on your machine. Below is my output:<br />
+<code>
+<pre>
+Profile 1 (program), 100 reps
+Time elapsed (ms): 2000
+
+Profile 2 (include), 100 reps
+Time elapsed (ms): 2000
+
+Profile 1 (program), 200 reps
+Time elapsed (ms): 4000
+
+Profile 2 (include), 200 reps
+Time elapsed (ms): 3000
+
+Profile 1 (program), 500 reps
+Time elapsed (ms): 9000
+
+Profile 2 (include), 500 reps
+Time elapsed (ms): 8000
+
+Profile 1 (program), 1000 reps
+Time elapsed (ms): 18000
+
+Profile 2 (include), 1000 reps
+Time elapsed (ms): 17000
+
+Profile 1 (program), 1500 reps
+Time elapsed (ms): 26000
+
+Profile 2 (include), 1500 reps
+Time elapsed (ms): 26000
+
+</pre>
+<p></code></p>

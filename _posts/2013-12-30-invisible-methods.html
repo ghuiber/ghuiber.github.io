@@ -1,0 +1,63 @@
+---
+layout: post
+title: Invisible methods
+date: 2013-12-30 14:38:55.000000000 -05:00
+categories:
+- R
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>R objects come with various methods that make them useful. I tend to stumble over these by googling something I want to do, and finding some code example on StackOverflow. But today I learned (from <a href="https://twitter.com/RLangTip">@RLangTip</a>) that there is a straightforward way to list them all: you simply call e.g., <code>methods(class='lm')</code>.</p>
+<p>That's nice, but mileage varies and I don't have a good explanation for it. Take <a href="http://gking.harvard.edu/zelig">Zelig</a> for example. It has this <code>sim()</code> function which produces a simulation object with some methods of its own. One of these is <code>plot.ci()</code>, illustrated <a href="http://rpubs.com/ghuiber/zelig">here</a>. Unfortunately, you won't find it with the <code>methods()</code> call:</p>
+<pre><code>
+> library("Zelig", lib.loc="C:/Program Files/R/library")
+Loading required package: boot
+Loading required package: MASS
+Loading required package: sandwich
+ZELIG (Versions 4.2-2, built: 2013-10-22)
+
++----------------------------------------------------------------+
+|  Please refer to http://gking.harvard.edu/zelig for full       |
+|  documentation or help.zelig() for help with commands and      |
+|  models support by Zelig.                                      |
+|                                                                |
+|  Zelig project citations:                                      |
+|    Kosuke Imai, Gary King, and Olivia Lau.  (2009).            |
+|    ``Zelig: Everyone's Statistical Software,''                 |
+|    http://gking.harvard.edu/zelig                              |
+|   and                                                          |
+|    Kosuke Imai, Gary King, and Olivia Lau. (2008).             |
+|    ``Toward A Common Framework for Statistical Analysis        |
+|    and Development,'' Journal of Computational and             |
+|    Graphical Statistics, Vol. 17, No. 4 (December)             |
+|    pp. 892-913.                                                |
+|                                                                |
+|   To cite individual Zelig models, please use the citation     |
+|   format printed with each model run and in the documentation. |
++----------------------------------------------------------------+
+
+
+
+Attaching package: ‘Zelig’
+
+The following object is masked from ‘package:utils’:
+
+    cite
+
+> methods(class='sim')
+[1] plot.sim*   print.sim*   repl.sim*   simulation.matrix.sim*
+[5] summary.sim           
+
+   Non-visible functions are asterisked
+</code></pre>
+<p>See that? There's a non-visible <code>plot()</code> method listed, but no <code>plot.ci()</code> method, yet it exists and it works. I wonder why that is. Is it maybe that <code>plot.ci()</code> is some kind of child of <code>plot()</code>? If so, how do you list such children?</p>

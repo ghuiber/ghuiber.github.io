@@ -1,0 +1,40 @@
+---
+layout: post
+title: Slashes, shell and Windows XP
+date: 2008-12-08 23:01:15.000000000 -05:00
+categories:
+- Stata
+tags:
+- backslash
+- shell
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/aB6Plc
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>In my <a href="http://enoriver.net/index.php/2008/09/03/a-way-to-handle-runaway-project-scopes/">very first</a> post I advocated using forward slashes for file paths if you use Stata under Windows. The idea is not mine. I picked it up off the Statalist long ago, though the original author of that advice, Nick Cox of the other Durham, found it worth repeating in the most recent <a href="http://www.statajournal.com/">Stata Journal</a> (8.3, p. 65).</p>
+<p>It's a good idea, however, to have more than a cursory understanding of your kit. I thought that Windows didn't care which way the slashes tilted and neither did Stata. Since there was a chance that sometimes your backward slashes might be misread as escape characters, it sounded like a sensible plan that you wouldn't tempt fate, and just used forward slashes always.</p>
+<p>As it turns out, Windows does care. It's out of pure Stata goodness that you can go either way, and trust that Stata will tilt your slashes the way they're supposed to go for the OS you're using; but it can only do so much. Should you ever have to take a brief detour to the shell, you will have to use proper Windows syntax.</p>
+<p>Today I had to build a do-file that cleaned up a little after a project that has managed to hog 70G of disk space since June. Across a myriad of subfolders that keep the whole thing nice and organized, there were some 300 files that I had to move from that disk to a network-attached storage device; each file had to pass some checks to be eligible, and this do-file was supposed to be a component of a bigger process I run weekly. So the whole code is rather elaborate, but the part that matters looks a bit like this:<br />
+<code><br />
+local root      "c:\work\big project\\"<br />
+local archive   "\\archive_server\my archive\\"<br />
+local to_path   "`archive'source files\\" <br />
+local from_path "`root'source files\\"<br />
+local move_this "example_list.txt"<br />
+</code><code><br />
+!move "`from_path'`move_this'" "`to_path'`move_this'"<br />
+dir "`to_path'"<br />
+dir "`from_path'"</code></p>
+<p>So here's the deal: <code>move</code> is not a Stata command. It's a DOS shell command. You can get Stata to run such commands either with the <code>!</code> or the <code>shell</code> modifier, as in <code>shell move</code>. But once you send Stata to the command line, it needs to play by the rules there. That's how I discovered that Windows did care which way the slashes went: when I declared my two _path local macros with forward slashes, <code>!move</code> had no effect. My `move_this' file didn't budge.</p>
+<p>This presented a problem. Backslashes, true to Stata's C roots, are escape characters when followed by characters with special meaning -- as in \n, \t, \0, \' or \`. A backslash ahead of the apostrophe that closes your local macro name will make Stata ignore that apostrophe, and therefore ignore your local macro's content. It makes sense, but I didn't figure this out all by myself. I did get to the part that when in the DOS shell, you need to use backslashes. But my file paths still wouldn't work, and I had no idea why. Statalist -- specifically user Kieran McCaul of Perth, Australia -- came to the rescue in about 10 minutes.</p>
+<p>Now have a look at the workaround you need with backslashes: if they're before any ` or ', you need to double them up. This way the first backslash escapes the second, and then \' or \` can be read properly, as two distinct characters.</p>
+<p>My archive disk was in the network, but not on the same computer. So the double backslash in "\\archive_server" has nothing to do with the escape problem. It's just Windows file path syntax on a local network. Between \\ in front because of this, and \\ at the back because of the escape problem, these backslashes can be a confusing mess. The good news is that you very seldom have to use them. When was the last time you had to <code>shell</code> out of Stata?</p>

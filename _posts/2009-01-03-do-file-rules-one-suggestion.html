@@ -1,0 +1,47 @@
+---
+layout: post
+title: Do-file rules -- one suggestion
+date: 2009-01-03 23:05:42.000000000 -05:00
+categories:
+- Stata
+tags:
+- code recycling
+- do-files
+- global macros
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/cYdyNQ
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>I've gone through several iterations with my idea of best do-file practices, and I'm sure I'll go through some more before I retire. But right now, here's where I stand:</p>
+<p>My do-files start with a handful of header commands that I found useful at various times. They might look something like this:<br />
+<code><br />
+clear<br />
+set more off<br />
+set type double<br />
+set mem 100m<br />
+pause on<br />
+</code><br />
+This stuff varies a bit occasionally (I may <code>set matsize</code> or specify the <code>version</code>) but it's a bit like a cover sheet, in that it's almost always the same thing. I could have equally well put all of this in <code>profile.do</code>.</p>
+<p>Next come the main sections of the do-file:</p>
+<p>   Overview<br />
+   Globals<br />
+   Program definitions<br />
+   Program execution</p>
+<p>The <em>Overview</em> section is all comments. It's got a structure of its own. It always consists of three parts. The first is just a list of the names of the programs defined in this do-file. The second describes what each program does, in one paragraph per program. The third describes which programs are called explicitly (because some programs on the list can be components of others) and in what order. The first part, the quick list, is useful for when you're fishing for code you might want to recycle. If you give your programs descriptive names, a quick look at the top of any do-file is usually enough to tell you if you're going to find useful stuff there.</p>
+<p>The <em>Globals</em> section defines the macros such as file paths that will be used by more than one program. Since local macros are local to programs, anything that you mean to be shared across multiple programs must be a global. Having them all bundled here has another advantage. If you send your do-file to be run on another computer, all your file path changes are made in one place, once.</p>
+<p>The <em>Program definitions</em> section does just what you might expect. Programs here can be stand-alone things that you call explicitly in the last section, or can be components, called implicitly. Defining such components is useful when you need to use the same code more than once. If that code is broken, you only need to fix it in one place.</p>
+<p>You might want two types of comments with your program definitions. One is a header before the <code>program define</code> line (or, if you're cautious, before the <code>capture program drop</code> line) that tells you at least whether your program takes any arguments, lists them if yes, and tells you a little about each of them. You'd want to know, at a minimum, which ones are string and which are numeric. The other is a set of in-line comments, throughout the program definition, as needed. I find it useful to explain any local macros I declare with a couple of words at least.</p>
+<p>The <em>Program execution</em> section does the actual work. It has consequences on disk and on screen.</p>
+<p>I settled on this way of writing do-files after I took an online class on C++ at NC State. I treat Stata programs inside a do-file the way one would treat functions inside a .cpp file. My Program execution section is the equivalent of <code>main()</code>. In C++, function declarations (also known as prototypes) are mandatory and go at the top of the source file. My do-file equivalent for those is the Overview section. Except, of course, Overview is not mandatory at all. It consists solely of comments.</p>
+<p>Having to submit to this sort of discipline might strike you as negating the benefits of Stata's easygoing nature. After all, if you pined for structure, you'd be programming in SAS, where it's mandatory. </p>
+<p>Well, there are two good very good reasons for structure: one is that your code must be portable across your team; another is that it must be readable two weeks later, when you will have forgotten all about it. But I still wouldn't want it imposed upon me by the design of the programming environment. Neither of those very good reasons overrides the importance of on-the-job fun. When you program, you want flow. You need to be free to write up things as they come to you. The programming environment should accommodate that. Only in the tidying-up stage, when your thinking's done and your problem's solved, should you need to worry about structure.</p>
+<p>Programming environments that impose structure on you, as opposed to letting you volunteer it, result in beautiful code that takes a long time to write and robs you of most of the pleasure of solving the original problem. The latter might well cause you to do a mediocre job of it. When help like this also costs you more in licensing fees and specialized labor, that's just insult upon injury.</p>

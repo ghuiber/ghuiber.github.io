@@ -1,0 +1,110 @@
+---
+layout: post
+title: Structs
+date: 2008-12-14 14:59:00.000000000 -05:00
+categories:
+- C++
+tags:
+- C++
+- structs
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/c63HWB
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>School's out, and <code>structs</code> were the last thing I learned about in this C++ class I took at NC State. This semester was really about the C in C++. The object-oriented part comes in the spring. But by the time you get around to structs, you will have learned about file streaming, arrays, global constants, loops, all sorts of things. So, here's an example of reading mixed data -- strings of characters (like student names) and numbers (like student grades) -- from a text file:<br />
+<code><br />
+// An example of using structs: reading data from a list of student<br />
+// names and grades, saved as a .csv file, into an array. In this<br />
+// example the file is saved as .csv, but the delimiter between<br />
+// name and grade is the tab character, '\t'. Also, the first row<br />
+// of the .csv file has variable names -- "name" and "grade" --<br />
+// so it must be skipped.<br />
+//-------------------------------------------------------------------<br />
+</code><code><br />
+#include &lt;iostream&gt;<br />
+#include &lt;fstream&gt;<br />
+using namespace std;<br />
+</code><code><br />
+const int NAMELEN=120;     // longest name<br />
+const int LISTMAX=1000;    // maximum number of students<br />
+</code><code><br />
+struct Student {<br />
+  char name[NAMELEN];<br />
+  float grade;<br />
+};<br />
+</code><code><br />
+void readList(char infilename[]);<br />
+// Arguments:<br />
+//    file name, passed as an array of characters.<br />
+// Side effects:<br />
+//    open file stream, function call of fillUp.<br />
+</code><code><br />
+void fillUp(ifstream&amp; inList, Student wholeClass[],<br />
+                        int LISTMAX, int&amp; stCount);<br />
+// Preconditions: global constants LISTMAX and NAMELEN are the<br />
+//   dimensions of the wholeClass[] and name[] arrays respectively.<br />
+// Postconditions:<br />
+//   (1) grades[0] through grades[stCount-1]  filled with positive<br />
+//       real numbers read from input file stream open by readList.<br />
+//   (2) names[0] through names[stCount-1] filled with<br />
+//       array-based lists of characters up to NAMELEN long.<br />
+//-------------------------------------------------------------------<br />
+</code><code><br />
+int main()<br />
+{<br />
+  char infilename[]="example_list.csv";<br />
+  readList(infilename);<br />
+  return 0;<br />
+}<br />
+//-------------------------------------------------------------------<br />
+</code><code><br />
+// open input, file stream call fillStudent to fill array named<br />
+// wholeClass[LISTMAX] with Student structs<br />
+void readList(char infilename[])<br />
+{<br />
+  ifstream inList(infilename);   // input file stream<br />
+  if (inList.fail()) {<br />
+    cout &lt;&lt; "Input file opening failed.\n";<br />
+    exit(1);<br />
+  }<br />
+  else {<br />
+    Student wholeClass[LISTMAX]; // initialize array of structs<br />
+    int stCount=0;  // number of valid elements starts at zero<br />
+    fillUp(inList, wholeClass, LISTMAX, stCount);<br />
+    cout &lt;&lt; "\nGrade Roll Report" &lt;&lt; endl;<br />
+    cout &lt;&lt; "There were " &lt;&lt; stCount &lt;&lt; " students." &lt;&lt; endl;<br />
+  }<br />
+  inList.close();<br />
+}<br />
+</code><code><br />
+// fill wholeClass[LISTMAX] using data from INFILENAME.<br />
+void fillUp(ifstream&amp; inList, Student wholeClass[],<br />
+                        int LISTMAX, int&amp; stCount)<br />
+{<br />
+  char dummy[NAMELEN];                // container for garbage.<br />
+  inList.getline(dummy,NAMELEN,'\n'); // toss the entire first row.<br />
+  for(int i=0; i&lt;LISTMAX; i++) {<br />
+    while (stCount&lt;LISTMAX &amp;&amp;<br />
+           inList.getline(wholeClass[i].name,NAMELEN,'\t')) {<br />
+      if(inList &gt;&gt; wholeClass[i].grade) {<br />
+        inList.getline(dummy,NAMELEN,'\n');<br />
+        cout &lt;&lt; "Name: " &lt;&lt; wholeClass[i].name<br />
+             &lt;&lt; " Grade: "&lt;&lt; wholeClass[i].grade &lt;&lt; endl;<br />
+      }<br />
+      stCount++;<br />
+    }<br />
+  }<br />
+}<br />
+//-------------------------------------------------------------------<br />
+</code></p>
+<p>OK, so maybe the code above is a little over-commented for your taste, but they were very clear about how they wanted your programs in this course. There were points taken off for not commenting variables when you declared them, and the punishment for not commenting function prototypes was just a little short of a public flagellation.</p>
+<p>I like this way of doing business. I learned my programming in the haphazard way that all social scientists do -- you write code in your statistical programming environment of choice, see to it that it does the job, and that's that. This, of course, bit me back numerous times over the years, so I did eventually come to appreciate the true cost of sloppiness. In computer science you don't get a chance at that sort of revelation, because bad practice is nipped in the bud. The textbook quoted Oscar Wilde before the first chapter was over: "In matters of grave importance,  style, not sincerity, is the vital thing."</p>

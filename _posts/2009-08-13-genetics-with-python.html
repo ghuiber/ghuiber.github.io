@@ -1,0 +1,114 @@
+---
+layout: post
+title: Genetics with Python
+date: 2009-08-13 00:39:12.000000000 -04:00
+categories:
+- Python
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  has_been_twittered: 'yes'
+  _edit_last: '1'
+  yourls_shorturl: http://bit.ly/ko4mr
+author:
+  login: admin
+  email: ghuiber@gmail.com
+  display_name: Gabi Huiber
+  first_name: Gabi
+  last_name: Huiber
+---
+<p>The last problem in the <a href="http://software-carpentry.org/exercises/day-01.html">first set</a> of <a href="http://software-carpentry.org">Software Carpentry</a> goes like this:</p>
+<p>"9. In genetic cryptography, the four bases ACGT represent the digits 0123 in a base-4 numerical system, so CGA is (1*4^2)+(2*4)+0 = 20. Write a function <code>dna2num(str)</code> to convert a DNA string to a number, and another function <code>num2dna(int)</code> to convert an integer to a DNA string."</p>
+<p>There's a little typo there -- the base-4 result 20 should read 120 -- but never mind that. The bigger issue is that you can't convert every DNA string to an integer and back. If your string starts with an A base, as in ACGA, you need a zero-padded string representation of the equivalent integer -- i.e., the string "0120", not the number 120. So I decided that the function <code>num2dna(int)</code> would work better if it took a string argument instead -- <code>num2dna(str)</code>.</p>
+<p>Also, the desired behavior is left to your discretion. Do you want to be able to convert base-10 numbers to DNA strings, or do you want your function to return an error if, as it parses the input string, it encounters a digit that is larger than or equal to 4? Do you want to assume that an input string with such a digit is base-10, as opposed to some other base greater than 4?</p>
+<p>My solution assumed that any input string that was not a zero-padded base-4 integer would be a zero-padded base-10 integer. I wanted the <code>num2dna(str)</code> function to simply make a note of this, convert it to base-4, and take it from there. I also wanted the function <code>dna2num(str)</code> to output a base-10 string.</p>
+<p>Below is the set of functions I wrote for this conversion, after going through the first day's worth of lectures, a bit of Google help with base conversion, and a quick stop at <a href="http://stackoverflow.com/questions/339007/python-nicest-way-to-pad-zeroes-to-string">Stack Overflow</a>:</p>
+<pre><code>
+# problem 9 dna to number, number to dna
+# first, three helper functions: fromb4tob10, fromb10tob4, checkb4
+
+def fromb4tob10(numstr): # convert padded base-4 to padded base-10 string
+   j=0
+   for i in range(len(numstr)):
+      j=j+int(numstr[i])*4**(len(numstr)-i-1)
+   return "%0*d" % (len(numstr),j)
+
+def fromb10tob4(numstr): # convert padded base-10 to base-4 string
+   mystr=''
+   myint=int(numstr)
+   while (myint-myint%4)&gt;0:
+      mystr=str(myint%4)+mystr
+      myint=(myint-myint%4)/4
+   mystr=str(myint%4)+mystr
+   return "%0*d" % (len(numstr),int(mystr))
+
+def checkb4(dnanumstr): # if input string is base-10, convert to base-4
+   for i in range(len(dnanumstr)):
+      if int(dnanumstr[i])&gt;=4:
+         print "input string is base 10, will change to base 4"
+         return fromb10tob4(dnanumstr)
+   return dnanumstr
+
+def dna2num(str):
+   num=0
+   add=0
+   check=0
+   bases=['A','C','G','T']
+   for i in range(len(str)):
+      for base in bases:
+         if str[i]==base:
+            check=1
+      if check==0: # if this letter is not A,C,G, or T, then exit.
+         print "this is not a valid dna sequence"
+         return 0
+      else:
+         for base in bases:
+            if str[i]==base:
+               add=(bases.index(base))*(10**(len(str)-i-1))
+               num=num+add
+   return fromb4tob10("%0*d" % (len(str),num))
+
+def num2dna(dnanumstr):
+   num=0
+   dnastring=''
+   dnastart=''
+   dnanumstr=checkb4(dnanumstr)
+   n=int(dnanumstr)
+   print "input string translates to (padded) base-4 integer: ", "%0*d" % (len(dnanumstr),n)
+   s=str(n) # will need this to check if input string is padded with zeroes
+   if len(s)!=len(dnanumstr):              # in that case, we should
+      dnastart='A'*(len(dnanumstr)-len(s)) # intialize dnastring with
+   bases=['A','C','G','T']                 # the same number of A's
+   digits=[0,1,2,3]
+   while (n-n%10)&gt;=0:
+      num=n%10
+      for i in range(len(digits)):
+         if num==digits[i]:
+            dnastring=bases[i]+dnastring
+      n=(n-num)/10
+      if n==0:
+         return dnastart+dnastring
+</code></pre>
+<p>I saved the code above as functions.py and tested it in SciTE with a few tasks that I thought would reveal any unexpected behavior, as follows:</p>
+<pre><code>
+import functions as f
+print f.fromb10tob4('024')
+print f.fromb4tob10('120')
+print f.fromb4tob10(f.fromb10tob4('024'))
+print "must see same numbers on two rows above this"
+print f.dna2num(f.num2dna("024"))
+print f.dna2num("ACGA")
+print f.dna2num("FGA")
+print f.dna2num("ACGTTGCAAGCTCGA")
+print f.num2dna("4")
+print f.num2dna("123")
+print f.num2dna("00123")
+print f.num2dna("000000116984280")
+print f.num2dna(f.dna2num("ACGTTGCAAGCTCGA"))
+print f.num2dna(f.dna2num("CCC"))
+print f.num2dna(f.dna2num("AAAA"))
+print "homework problem 9"
+</code></pre>
+<p>It looks like it works OK. If you're into Python and you would have done any of this differently, I am curious. Meanwhile, I'll plod ahead with the rest of the lectures. I'm liking <a href="http://software-carpentry.org">Software Carpentry</a>.</p>
