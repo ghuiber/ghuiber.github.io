@@ -12,12 +12,11 @@ relative_permalinks: true
 title:               Gabi Huiber
 tagline:             'noodling in the data stream'
 description:         'My notes on things I tinker with, or do for a living; the two overlap in places.'
-themecredit:         'Built on <a href="http://lanyon.getpoole.com" target="_blank">Lanyon</a>, a reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
 url:                 http://ghuiber.github.io
 baseurl:             /
 paginate:            3
-github:                     
-  repo:              https://github.com/ghuiber/ghuiber.github.io
+# github:                     
+#   repo:              https://github.com/ghuiber/ghuiber.github.io
 
 # About/contact
 author:
