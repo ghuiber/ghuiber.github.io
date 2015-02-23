@@ -14,9 +14,9 @@ While I was at it, I also ran `pkg_add mosh`, because [MOSH](https://mosh.mit.ed
 
 My googling turned up a fix that applies to FreeNAS 9.3, which allows two kinds of jails: port and standard. Port jails can run `pkg install <ANYTHING>`. Standard ones by design do not, but they can be persuaded as described [here](https://forums.freenas.org/index.php?threads/problem-installing-mysql-jail-pkg-conf-is-no-longer-supported.24048/). I thought that the fix would apply to FreeNAS 9.2 jails as well, but the steps outlined in this discussion rely on some source files being present at `/usr/src/share/keys` so that you can run
 
-```
-cd /usr/src/share/keys && make && make install
-```
+{% highlight shell %}
+# cd /usr/src/share/keys && make && make install
+{% endhighlight %}
 
 There is no such directory path in a regular FreeNAS 9.2.0 jail, so this option, as far as I can tell, is out. But some pieces of the process did work, and may have been beneficial, as follows:
 
