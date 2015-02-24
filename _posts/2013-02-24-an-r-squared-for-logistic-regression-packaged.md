@@ -12,28 +12,42 @@ This morning I checked Paul Allison's Statistical Horizons blog and found [a pos
 // Reference: http://www.statisticalhorizons.com/r2logistic
 
 // program definition
+
 capture prog drop tjur2
+
 program tjur2, rclass
 
 if !inlist(e(cmd),"logit","logistic") {
+
    di as err "Tjur's R-squared only works after logit or logistic."
+
    exit 498 // Thank you, Nick Cox.
 
 }
 
 tempname yhat
+
 predict `yhat' if e(sample)
+
 local y `e(depvar)'
+
 quietly ttest `yhat', by(`y')
+
 local r2logistic r(mu_2)-r(mu_1)
+
 di "Tjur's R-squared " _col(20) %4.3f `r2logistic'
+
 return local r2logistic `r2logistic'
 
 end
 
+
 // use case
+
 use "http://www.uam.es/personal_pdi/economicas/rsmanga/docs/mroz.dta", clear
+
 logistic inlf kidslt6 age educ huswage city exper
+
 tjur2
 ```
 
