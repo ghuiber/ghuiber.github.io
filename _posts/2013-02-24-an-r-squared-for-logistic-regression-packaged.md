@@ -5,7 +5,7 @@ tags:
 - Stata
 - logistic regression
 ---
-This morning I checked Paul Allison's Statistical Horizons blog and found [a post on $R^2$ measures for logistic regression](http://www.statisticalhorizons.com/r2logistic). It introduced me to Tjur's $R^2$ by way of an example, which I repackaged below:
+This morning I checked Paul Allison's Statistical Horizons blog and found [a post on \\(R^2\\) measures for logistic regression](http://www.statisticalhorizons.com/r2logistic). It introduced me to Tjur's \\(R^2\\) by way of an example, which I repackaged below:
 
 
 ```
