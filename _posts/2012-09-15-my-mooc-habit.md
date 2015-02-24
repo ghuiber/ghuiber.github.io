@@ -6,7 +6,7 @@ I can't seem to stay away from all this great online education, and the problem 
 
 For some of us, it's a growing habit, as confessed in the last paragraph [here](http://americanradioworks.publicradio.org/features/tomorrows-college/keyboard-college/moocs.html). But scattered evidence so far suggests that a majority of [MOOC](http://en.wikipedia.org/wiki/Massive_open_online_course) consumers are dabblers -- a bit like president Obama, who [may have done a bit of blow](http://www.celebstoner.com/201205219593/news/celebstoner-news/penn-jillette-on-obama-and-marijuana.html) but didn't quite become a coke head. Below is a picture that supports this view.
 
-{% include image.html url="/assets/2012/09/youtube.png" %}
+{% include image.html url="/assets/2012/09/youtube-300x218.png" %}
 
 The Learning From Data class at Caltech consists of 18 lectures, offered both over [YouTube](http://www.youtube.com/watch?v=VeKeFIepJBU&feature=relmfu) and [iTunes U](http://www.apple.com/education/itunes-u/). I did both. If I knew I would be watching on a plane or in a hotel room, I downloaded them ahead of time to iTunes. Otherwise, I just watched them on YouTube. You can count the views for each video and of course they will change over time, but I think the general trend is right: a lot of people watch the first lecture, then peter out, with some peaks that may well be random, but my guess is that they are at specific topics visited by people who use this class as another reference.
 
