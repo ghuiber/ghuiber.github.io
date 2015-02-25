@@ -113,4 +113,4 @@ p <- p + scale_colour_discrete(name = "Catch limit") + opts(title=t)
 p
 {% endhighlight %}
 
-If you made it here, you might also want to see [one last thing]({% post_url 2012-03-05-human-right-stats-one-last-thing %) on the matter.
+If you made it here, you might also want to see [one last thing]({% post_url 2012-03-05-human-right-stats-one-last-thing %}) on the matter.
