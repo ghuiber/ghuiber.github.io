@@ -13,7 +13,7 @@ title:               Gabi Huiber
 tagline:             'noodling in the data stream'
 description:         'My notes on things I tinker with, or do for a living; the two overlap in places.'
 url:                 http://ghuiber.github.io
-baseurl:             http://ghuiber.github.io/
+baseurl:             /
 paginate:            3
 github:                     
   repo:              https://github.com/ghuiber/ghuiber.github.io
