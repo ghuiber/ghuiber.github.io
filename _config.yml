@@ -15,8 +15,8 @@ description:         'My notes on things I tinker with, or do for a living; the 
 url:                 http://ghuiber.github.io
 baseurl:             /
 paginate:            3
-# github:                     
-#   repo:              https://github.com/ghuiber/ghuiber.github.io
+github:                     
+  repo:              https://github.com/ghuiber/ghuiber.github.io
 
 # About/contact
 author:
