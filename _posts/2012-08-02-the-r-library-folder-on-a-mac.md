@@ -1,0 +1,11 @@
+---
+layout: post
+title: The R library folder on a Mac
+---
+How do you update your R? I mean the whole thing, not just the base packages.
+
+R comes with a library folder where packages go -- both the base packages and the user-written ones you install over time. I'm not entirely sure what would be the best place for this folder so updates to all packages are as easy as possible. 
+
+It gets worse. On a Mac you have not one, but n+2 library folders. One is `/Library/Frameworks/R.framework/Resources/library`. Let's call it (1). The other n+1 are as many as there are historic versions of R on your computer, plus one. All are in `/Library/Frameworks/R.framework/Versions/`. In my case, they are as follows: n of them are in `X/Resources/library`, where X is 2.13, 2.14, and 2.15; one is in `Current/Resources/library`. 
+
+I know that the three library folders in X=2.15, Current and (1) are identical and updated simultaneously, though only the first shows up when I call `.libPaths()`. But when you update say, from 2.15 to 2.16, your historic versions remain frozen and the new (1) and Current folders reflect only 2.16. You have to install non-base packages all over again, by hand. Or do you? Is there a way to script an update of everything in the library folder at version t-1 when you update your R to version t? If anybody knows, please drop a comment. Thank you.
