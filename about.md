@@ -12,9 +12,9 @@ Economist by training, data scientist by trade, living in Durham, NC and working
 
 ### Eno River
 
-The Eno flows through Durham and it's pretty. This blog has nothing to do with either the [park](http://www.ncparks.gov/Visit/parks/enri/main.php) or the [conservancy](http://www.enoriver.org/) though you should definitely hike in the former and give some money to the latter.
+The Eno flows through Durham and it's pretty. This blog has nothing to do with either the [park](http://www.ncparks.gov/Visit/parks/enri/main.php) or the [conservancy](http://www.enoriver.org) though you should definitely hike in the former and give some money to the latter.
 
-Back in 2007, freshly laid off, I started doing freelance statistical work. That paid the bills until 2010. I called my shop Eno River Analytics -- reasoning that if the Charles was good enough for [these guys](http://www.charlesriverassociates.com/), the Eno would suit me fine -- and I claimed this domain because it was available.
+Back in 2007, freshly laid off, I started doing freelance statistical work. That paid the bills until 2010. I called my shop Eno River Analytics -- reasoning that if the Charles was good enough for [these guys](http://www.charlesriverassociates.com), the Eno would suit me fine -- and I claimed this domain because it was available.
 
 I could have picked a better name. I speak with an accent. When I say "Eno River Analytics" people tend to hear "in a river analytics" and are rightly confused. 
 
