@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Human right stats, one last thing
+title: Human rights stats, one last thing
 ---
 The R code in my [previous post]({% post_url 2012-03-04-human-rights-stats-part-2 %}) could also produce the picture below. The implication is this:
 

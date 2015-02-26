@@ -5,7 +5,7 @@ tags:
 - FreeNAS
 - AWS
 ---
-On my [FreeNAS home server](http://enoriver.net/index.php/2014/01/11/freenas-works-as-advertised/) I added a new [jail](http://doc.freenas.org/9.3/freenas_jails.html), called it `awsboss`. I also [added a new ZFS dataset](http://doc.freenas.org/9.3/freenas_storage.html#create-dataset), called it `storage`. I added this data set to `awsboss` as `/mnt/storage` and I also made it into an [AFP share](http://doc.freenas.org/9.3/freenas_sharing.html?highlight=share#apple-afp-shares) so it could be mounted by my Mac clients.
+On my [FreeNAS home server]({% post_url 2014-01-11-freenas-works-as-advertised %}) I added a new [jail](http://doc.freenas.org/9.3/freenas_jails.html), called it `awsboss`. I also [added a new ZFS dataset](http://doc.freenas.org/9.3/freenas_storage.html#create-dataset), called it `storage`. I added this data set to `awsboss` as `/mnt/storage` and I also made it into an [AFP share](http://doc.freenas.org/9.3/freenas_sharing.html?highlight=share#apple-afp-shares) so it could be mounted by my Mac clients.
 
 The `storage` database will receive from Mac clients in my house various tarballs of files that I want to keep in deep storage on Glacier, such as old pictures. Then `awsboss` will upload them to Glacier from there.
 
