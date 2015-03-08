@@ -5,9 +5,9 @@ tags:
 - FreeNAS
 ---
 
-You have in-browser shell access to your FreeNAS jail: Jails tab, click on the jail of interest, then click the Shell button. 
+You have in-browser shell access to your FreeNAS jail: Jails tab, click on the jail of interest, then click the Shell button. That's OK, but maybe shell access from a Mac OS X Terminal would be more pleasant.
 
-These are my notes of how I got public key shell access from a Mac OS X Terminal. For our purposes the server is the FreeNAS jail where you want access; the client is your Mac. The server's command line is the prompt in the browser shell (and it's a root prompt by default). The client's is the Terminal prompt. Below are the things you need to do in each:
+These are my notes of how I got that working. For our purposes the server is the FreeNAS jail where you want access; the client is your Mac. The server's command line is the prompt in the browser shell (and it's a root prompt by default). The client's is the Terminal prompt. Below are the things you need to do in each:
 
 ### On the server
 
@@ -39,6 +39,6 @@ Now you should have public key access to the jail. If you type `ssh 192.168.1.x`
 
 I just like the Terminal better than the browser-based shell, and I expect that it will be a nicer workflow as I interact with this jail to have two terminal windows open rather than toggle between a terminal window and the browser.
 
-I started down this path when I tried to set up [`MOSH`](https://mosh.mit.edu/) access to the jail from Terminal, but I got nowhere. Then [this thread](https://forums.freenas.org/index.php?threads/install-mosh-on-freenas.25429/) convinced me that [`tmux`](http://tmux.sourceforge.net/) would be just as good for my needs.
+But I really started down this path when I tried to set up [`MOSH`](https://mosh.mit.edu/) access to the jail from Terminal, and I got nowhere. Then [this thread](https://forums.freenas.org/index.php?threads/install-mosh-on-freenas.25429/) convinced me that [`tmux`](http://tmux.sourceforge.net/) would be just as good for my needs.
 
 
