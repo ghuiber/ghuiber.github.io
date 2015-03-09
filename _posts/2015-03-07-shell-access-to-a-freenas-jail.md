@@ -41,11 +41,9 @@ I started down this path when I tried to set up [`mosh`](https://mosh.mit.edu/).
 
 ### Did it help me?
 
-As it turned out, mosh doesn't work with a FreeNAS jail because of a locale problem: it wants UTF-8; jails are C. So, now I have Terminal access to the jail, but it won't help mosh. Alternative: [this thread](https://forums.freenas.org/index.php?threads/install-mosh-on-freenas.25429/) convinced me that [`tmux`](http://tmux.sourceforge.net/) would be just as good for my needs.
+Not really. As it turned out after further googling, mosh doesn't work with a FreeNAS jail because of a locale problem: it wants UTF-8; jails are C. So, now I have Terminal access to the jail, but it won't help mosh. Alternative: [this thread](https://forums.freenas.org/index.php?threads/install-mosh-on-freenas.25429/) convinced me that [`tmux`](http://tmux.sourceforge.net/) would be just as good for my needs, and tmux works equally well whether run in the browser or from Terminal. 
 
-### Not really
-
-tmux works equally well whether run in the browser or from Terminal. But I got Terminal ssh going. I might as well document how, and keep the notes. I do like the Terminal better than the browser-based shell. It may yet prove to be a nicer workflow as I interact with this jail to have two terminal windows open rather than toggle between a terminal window and the browser. But just for that chance alone, no, going to all this trouble wasn't really worth it. Sometimes experience is all you'll gain.
+But I got Terminal ssh going. I might as well document how, and keep the notes. I do like the Terminal better than the browser-based shell. It may yet prove to be a nicer workflow as I interact with this jail to have two terminal windows open rather than toggle between a terminal window and the browser. But just for that chance alone, no, going to all this trouble wasn't really worth it. Sometimes experience is all you'll gain.
 
 
 
