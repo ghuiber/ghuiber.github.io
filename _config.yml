@@ -1,35 +1,25 @@
-# Dependencies
-markdown:            redcarpet
-highlighter:         pygments
+# Site settings
+title: Noodling in the data stream
+email: ghuiber@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  My notes on things I tinker with, or do for a living; the two overlap in places.
+
+url:     http://www.enoriver.net # the base hostname & protocol for your site
+baseurl: "" # the subpath of your site, e.g. /blog/
+
+twitter_username: ghuiber
+github_username:  ghuiber
+
+# Build settings
+markdown:    redcarpet
+highlighter: pygments
 
 # Permalinks
-#
-# Use of `relative_permalinks` ensures post links from the index work properly.
 permalink:           pretty
 relative_permalinks: true
-
-# Setup
-title:               Gabi Huiber
-tagline:             'noodling in the data stream'
-description:         'My notes on things I tinker with, or do for a living; the two overlap in places.'
-url:                 http://ghuiber.github.io
-baseurl:             /
-paginate:            3
-github:                     
-  repo:              https://github.com/ghuiber/ghuiber.github.io
-
-# About/contact
-author:
-  name:              Gabi Huiber
-  url:               https://twitter.com/ghuiber
-  email:             ghuiber@gmail.com
-
-# Custom vars
-version:             1.0.0
 
 # Tracking
 google_analytics: UA-2487306-2
 
 # Comments
 disqus: enorivernet
-
