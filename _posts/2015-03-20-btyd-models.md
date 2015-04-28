@@ -7,7 +7,7 @@ I had to do some customer churn modeling for work recently, and I used the [Pare
 
 Unfortunately, the Pareto-NBD log-likelihood function cannot be estimated as implemented in that package if you have customers with rich purchase histories -- in the hundreds of items -- which you do if you're a popular e-commerce platform that has been around for a while and it has saved its [RFM](http://en.wikipedia.org/wiki/RFM_%28customer_value%29) data diligently.
 
-The reason for this is explained [here](https://github.com/theofilos/BTYD) and there is a fix too, based on a computational trick explained [here](https://hips.seas.harvard.edu/blog/2013/01/09/computing-log-sum-exp/). I am not sure why the author never suggested it as a formal patch to the original package. Maybe it's in the works. Until then, my patched version of the library is [here](https://github.com/ghuiber/BTYD).
+The reason for this is explained [here](https://github.com/theofilos/BTYD) and there is a fix too, based on a computational trick explained [here](https://hips.seas.harvard.edu/blog/2013/01/09/computing-log-sum-exp/). I am not sure why the author never suggested it as a formal patch to the original package. Maybe it's in the works. Until then, my patched version of the library is [here](https://github.com/ghuiber/BTYD2).
 
 There's still a limitation. Though this fix allows you to estimate the four parameters of interest from a sample of customers that includes people with rich purchase histories, individual probabilities that such customers are still alive cannot be estimated: the `pnbd.PAlive()` function will return `NaN`.
 
