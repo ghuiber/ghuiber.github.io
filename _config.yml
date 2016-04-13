@@ -16,7 +16,6 @@ highlighter: pygments
 
 # Permalinks
 permalink:           pretty
-relative_permalinks: true
 
 # Tracking
 google_analytics: UA-2487306-2
