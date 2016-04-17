@@ -5,6 +5,8 @@ title: Durham chicken
 
 This is another low-and-slow recipe for the Akorn, closer to barbecuing than to smoking.
 
+{% include image.html url="/assets/2016/04/durham_chicken.jpeg" %}
+
 ## The ingredients
 
 * one medium-ish organic chicken from Costco (the kind that comes in packs of 2)
@@ -34,4 +36,4 @@ While the grill goes up to temperature, get the bird out of the fridge, drain th
 
 Put the bird on the Akorn, close the lid, and check back with it after two and a half hours. Check sooner if you overshot and made the grill run hotter. Akorns can get the temperature up and hold it there very well; getting it back down is hard, by design. But the beauty of indirect heat barbecuing is that you have broad leeway in trading heat for time. However hot you run your grill, the chicken is done when the juices run clear. That's my standard. Yours may well be the scientific one -- namely, that the internal temperature in the thickest part of the thigh not touching bone should be 165&deg; Fahrenheit (75&deg; Celsius). Go with what works for you.
 
-Putting the bird on a cast iron grill pan [like this]({{ site.baseurl }}/assets/2016/04/durham_chicken.jpg) is optional. I've done it both with and without it. These grill pans are easier to clean than the Akorn's grill grate.
+Putting the bird on a cast iron [grill pan](https://www.lodgemfg.com/griddles-and-grill-pans/pro-logic-12-inch-square-cast-iron-grill-pan.asp) as shown is optional. I've done it both with and without it. These grill pans are easier to clean than the Akorn's grill grate.
