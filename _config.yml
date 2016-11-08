@@ -11,8 +11,8 @@ twitter_username: ghuiber
 github_username:  ghuiber
 
 # Build settings
-markdown:    redcarpet
-highlighter: pygments
+markdown:    kramdown
+highlighter: rouge
 
 # Permalinks
 permalink:           pretty
