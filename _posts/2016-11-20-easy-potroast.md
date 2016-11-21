@@ -14,7 +14,7 @@ title: Easy pot roast
 
 First, sprinkle pot roast with kosher salt, fresh coarse-ground black pepper, and paprika. Set it aside on a plate. It's a good thing if it gets some time for the meat to get to room temperature and for the salt to start working its way in.
 
-Start the fire in the Akorn with about half a chimney's worth of charcoal (lump is best for less ash, but I found that additive-free 100% hardwood briquets from Harris Teeter burn pretty clean too; I like them). You want the heat at 350&deg. That will take longer than you need to wash, dry and quarter about 8 to 10 potatoes, cut two onions into 8 pieces each, add 1-2 cups of carrots. Put all that in a bowl and set it aside.
+Start the fire in the Akorn with about half a chimney's worth of charcoal (lump is best for less ash, but I found that additive-free 100% hardwood briquets from Harris Teeter burn pretty clean too; I like them). You want the heat at 350&deg;. That will take longer than you need to wash, dry and quarter about 8 to 10 potatoes, cut two onions into 8 pieces each, add 1-2 cups of carrots. Put all that in a bowl and set it aside.
 
 In the Dutch oven mix 12 oz beer, about half cup of the Worcestershire, about a cup of leftover olive brine, and a good sprinkling of garlic powder. Set it aside.
 
