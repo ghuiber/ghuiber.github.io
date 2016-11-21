@@ -28,4 +28,7 @@ By now the Akorn is at 400&deg; and holding it. Put the Dutch oven on and let it
 
 ## Serve
 
-Let the roast sit covered for at least 15 minutes before bringing it to the table. It will fill the house with fragrance and remind people that it's dinner time, so there won't be any pleading and arguing. 
+Let the roast sit covered for at least 15 minutes before bringing it to the table. It will fill the house with fragrance and remind people that it's dinner time, so there won't be any pleading and arguing. This is what the leftovers look like: 
+
+{% include image.html url="/assets/2016/11/pot_roast.jpg" %}
+ 
