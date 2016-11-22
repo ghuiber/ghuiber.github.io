@@ -2,12 +2,12 @@
 title: Noodling in the data stream
 email: ghuiber@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  My notes on things I tinker with, or do for a living; the two overlap in places.
+  My notes on things I tinker with, or do for a living.
 
 url:     http://www.enoriver.net # the base hostname & protocol for your site
 baseurl: "" # the subpath of your site, e.g. /blog/
 
-twitter_username: ghuiber
+so_username: Gabi
 github_username:  ghuiber
 
 # Build settings

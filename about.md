@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-Economist by training, data scientist by trade, living in Durham, NC. Like everyone else, I am on [LinkedIn](https://www.linkedin.com/in/ghuiber) too. 
+Economist by training, data scientist by trade, living in Durham, NC. 
 
 ### Eno River
 
