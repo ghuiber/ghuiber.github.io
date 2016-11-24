@@ -19,7 +19,7 @@ This turkey won't win any prizes, but it was perfectly edible and it was simple 
 ## The main bits of math
 
 * 14 lbs is the biggest turkey I would cook
-* 1/2 tbsp of kosher salt per pound of raw bird for the brine
+* 1/2 tsp of kosher salt per pound of raw bird for the brine
 * smoke at 300 degrees for 15 minutes per pound of raw bird
 
 ## Sourcing an appropriate turkey
