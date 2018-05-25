@@ -18,7 +18,6 @@ highlighter: rouge
 permalink:           pretty
 
 # Tracking
-google_analytics: UA-2487306-2
 
 # Comments
 disqus: enorivernet
